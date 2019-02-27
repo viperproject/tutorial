@@ -2,7 +2,7 @@
 
 Viper is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as [Boogie](http://research.microsoft.com/en-us/projects/boogie/) and [Why3](http://why3.lri.fr/), Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions.
 
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture_850x583.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
+<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
 
 The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
 [Z3](https://github.com/Z3Prover/z3) to discharge proof obligations. Various front-ends translate different source languages and verification
