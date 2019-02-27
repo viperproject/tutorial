@@ -1,4 +1,3 @@
 syntax: glob
-oes
-images
+*.DS_Store
 *.bak
