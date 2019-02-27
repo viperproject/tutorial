@@ -1,5 +1,5 @@
 # Structure of Viper Programs
-For a type safe Viper program to be correct, all methods and functions in it must be successfully verified against their specifications. The implementation of a Viper method consists of certain [imperative building blocks](#statements) (such as branch conditions, loops, etc.) whereas the specification consists of [assertions](#expressions-and-assertions) (contracts, loop invariants, etc.). Statements (or operations) may change the program state, whereas assertions cannot. In contrast, assertions can talk about properties of a particular state â€” so they can be used to specify the behavior of operations. What the implementation and the specification have in common is that they both make use of _expressions_. For all of these building blocks, Viper supports different means of abstraction. 
+For a type safe Viper program to be correct, all methods and functions in it must be successfully verified against their specifications. The implementation of a Viper method consists of certain [imperative building blocks](#statements) (such as branch conditions, loops, etc.) whereas the specification consists of [assertions](#expressions-and-assertions) (contracts, loop invariants, etc.). Statements (or operations) may change the program state, whereas assertions cannot. In contrast, assertions can talk about properties of a particular state — so they can be used to specify the behavior of operations. What the implementation and the specification have in common is that they both make use of _expressions_. For all of these building blocks, Viper supports different means of abstraction. 
 
 Methods can be viewed as a means of abstraction over operations. The caller of a method observes its behavior exclusively through the signature and the contracts. Viper methods are modular: For the caller, the method's implementation is invisible. Calling a method may result in modifications to the program state, therefore method calls cannot be used in specifications. On the one hand, the caller of a method must first satisfy the assertions in its precondition in order to obtain the assertions from its postcondition. On the other hand, in order to _verify_ the method, Viper must prove that the method's implementation adheres to the method's contracts. 
 
@@ -26,10 +26,10 @@ field next: Ref
 
 ```silver
 method QSort(xs: Seq[Ref]) returns (ys: Seq[Ref])
-  requires ... //precondition
-  ensures ... //postcondition
+  requires ... // precondition
+  ensures ... // postcondition
 {
-  //body (optional)
+  // body (optional)
 }
 ```
 
@@ -49,10 +49,10 @@ method QSort(xs: Seq[Ref]) returns (ys: Seq[Ref])
 
 ```silver
 function gte(x: Ref, a: Int): Int
-  requires ... //precondition
-  ensures ... //postcondition
+  requires ... // precondition
+  ensures ... // postcondition
 {
-  ...  //body (optional)
+  ...  // body (optional)
 }
 ```
 
@@ -70,7 +70,7 @@ function gte(x: Ref, a: Int): Int
 
 ```silver
 predicate list(head: Ref) {
-  ... //body (optional)
+  ... // body (optional)
 }
 ```
 
@@ -84,12 +84,12 @@ predicate list(head: Ref) {
 ```silver
 domain Pair[A, B] {
   function getFirst(p: Pair[A, B]): A
-  //other functions
+  // other functions
 
   axiom ax_1 {
-    ... //axiom body
+    ... // axiom body
   }
-  //other axioms
+  // other axioms
 }
 ```
 
