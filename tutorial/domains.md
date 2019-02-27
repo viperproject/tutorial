@@ -198,7 +198,7 @@ Viper is able to verify this program, because the axiom ```Unsound``` influences
 
 ```silver {.runnable}
 domain MyInteger { 
-  //copied from above without modification
+  // copied from above without modification
 
   function create_int(x: Int): MyInteger
   function get_value(a: MyInteger): Int
