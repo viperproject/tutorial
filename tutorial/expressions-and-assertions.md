@@ -46,15 +46,15 @@ In the following, we list the different kinds of expressions, remark on their we
 
 *   quantifiers `forall` and `exists`. See the [section on quantifiers](#quantifiers) for more details.
 
-*   `forperm [f] x :: e`: This expression serves as a quantifier over all objects for which a permission to the specified field is held by the current method. Inside the expression `e` in the body, the variable `x` has type `Ref` and points to an object for which a positive amount of permission to `x.f` is held. The entire expression is true if `e` is true for every such object, and false otherwise. As an example, `forperm [g] r :: r.g > 0` is true if and only if, for all objects to whose `g`-fields the current method holds a permission, the value of the `g`-field is positive.
+*   `forperm x: Ref [x.f] :: e`: This expression serves as a quantifier over all objects for which a permission to the specified field is held by the current method. Inside the expression `e` in the body, the variable `x` points to an object for which a positive amount of permission to `x.f` is held. The entire expression is true if `e` is true for every such object, and false otherwise. As an example, `forperm r: Ref [r.g] :: r.g > 0` is true if and only if, for all objects to whose `g`-fields the current method holds a permission, the value of the `g`-field is positive.
 
-    `forperm` expressions are useful for implementing leak checks. For example, by asserting `forperm [f] x :: false` we can check that in the current context we do not hold any permission to the field `f`. Note that `forperm` expressions are evaluated in the currently evaluated heap as illustrated by the following example:
+    `forperm` expressions are useful for implementing leak checks. For example, by asserting `forperm x: Ref [x.f] :: false` we can check that in the current context we do not hold any permission to the field `f`. Note that `forperm` expressions are evaluated in the currently evaluated heap as illustrated by the following example:
 
     ```silver
     inhale acc(x.f)
-    exahle forperm [f] x :: false && // Would fail because we have acc(x.f)
+    exahle forperm x: Ref [x.f] :: false && // Would fail because we have acc(x.f)
            acc(x.f) &&
-           forperm [f] x :: false    // Would succeed because we do not have acc(x.f) anymore.
+           forperm x: Ref [x.f] :: false    // Would succeed because we do not have acc(x.f) anymore.
     ```
 
     This is useful, for example, for checking that after the method postcondition is exhaled, the method body does not have any permission left which would be leaked.
