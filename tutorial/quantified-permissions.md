@@ -1,10 +1,10 @@
 # Quantified Permissions #
 
-Viper provides two main mechanisms for specifying permission to a (potentially unbounded) number of heap locations: recursive predicates and *quantified permissions*. While predicates can be a natural choice for modelling entire data structures which are traversed in an orderly top-down fashion, quantified permissions enable point-wise specifications, suitable for modelling heap structures which can be traversed in multiple directions, random-access data structures such as arrays, and unordered data structures such a general graphs.
+Viper provides two main mechanisms for specifying permission to a (potentially unbounded) number of heap locations: recursive [predicates](#predicates) and *quantified permissions*. While predicates can be a natural choice for modelling entire data structures which are traversed in an orderly top-down fashion, quantified permissions enable point-wise specifications, suitable for modelling heap structures which can be traversed in multiple directions, random-access data structures such as arrays, and unordered data structures such a general graphs.
 
-The basic idea is to allow `acc(e.f)` assertions to occur within a `forall` quantifier. In particular, the `e` receiver expression can be parameterised by the quantified variable, specifying permission to a *set* of different heap locations, one for each instantiation of the quantifier.
+The basic idea is to allow resource assertions such as `acc(e.f)` to occur within the body of a `forall` quantifier. In particular, the `e` receiver expression can be parameterised by the quantified variable, specifying permission to a *set* of different heap locations: one for each instantiation of the quantifier.
 
-As a simple example, we can model a "binary graph" (in which each node has at most two outgoing edges) in the heap, in terms of a set of `nodes`, using the following quantified permission assertion: `forall n:Ref :: { n.first }{ n.second } n in nodes ==> acc(n.first) && acc(n.second)`. Such an assertion provides permission to access the `first` and `second` fields of all nodes `n`. To usefully model a graph, one would typically also require the `nodes` set to be closed under the graph edges, so that a traversal is known to stay within these permissions.
+As a simple example, we can model a "binary graph" (in which each node has at most two outgoing edges) in the heap, in terms of a set of `nodes`, using the following quantified permission assertion: `forall n:Ref :: { n.first }{ n.second } n in nodes ==> acc(n.first) && acc(n.second)`. Such an assertion provides permission to access the `first` and `second` fields of all nodes `n` (as explained in the [previous section on quantifiers](#quantifiers), the `{ n.first }{ n.second }` syntax denotes triggers). To usefully model a graph, one would typically also require the `nodes` set to be closed under the graph edges, so that a traversal is known to stay within these permissions; this is illustrated in the following example:
 
 ```silver {.runnable }
 field first : Ref
@@ -25,10 +25,11 @@ method inc(nodes: Set[Ref], x: Ref)
   }
 }
 ```
+
 //exercise//
 
 * Remove the second conjunct from the first precondition. The example should still verify. Now change the field access in the method body to be `x.first.first`. The example will no longer verify, unless you restore the original precondition.
-* Try instead making the first precondition `requires forall n:Ref :: n in nodes ==> acc(n.first) && n.first in nodes`. The example should verify. Try adding an assert statement immediately after the assignment: `assert y != null`. This should verify - the modified precondition implicitly guarantees that `n.first` is always non-null (for any `n` in `nodes`), since it provides us with permission to a field of `n.first`. 
+* Try instead making the first precondition `requires forall n:Ref :: n in nodes ==> acc(n.first) && n.first in nodes`. The example should verify. Try adding an assert statement immediately after the assignment: `assert y != null`. This should verify - the modified precondition implicitly guarantees that `n.first` is always non-null (for any `n` in `nodes`), since it provides us with permission to a field of `n.first`.
 * Try restoring the original precondition: `requires forall n:Ref :: n in nodes ==> acc(n.first) && (n.first != null ==> n.first in nodes)`. The `assert` statement that you added in the previous point should no-longer verify, since there is no-longer any reason that `n.first` is guaranteed to be non-null.
 
 ///
@@ -52,7 +53,7 @@ method test()
 }
 ```
 
-The expression `address(i)` implicitly defines a mapping between instances `i` of the quantifier and receiver references `address(i)`. Such receiver expressions cannot be fully-general: Viper imposes the restriction that this mapping must be provably <i>injective</i>: for any two instances of such a quantifier, the verifier must be able to prove that the corresponding receiver expressions are different. As usual, this condition can be proven using any information available at the particular program point. In addition, injectivity is only required for instances of the quantifier for which permission is actually required; in the above example, the restriction amounts to showing that the references `address(1)`, `address(2)` and `address(3)` are pairwise unequal. In the following exercises, this is illustrated more thoroughly.
+The expression `address(i)` implicitly defines a mapping between instances `i` of the quantifier and receiver references `address(i)`. Such receiver expressions cannot be fully-general: Viper imposes the restriction that this mapping must be provably *injective*: for any two instances of such a quantifier, the verifier must be able to prove that the corresponding receiver expressions are different. As usual, this condition can be proven using any information available at the particular program point. In addition, injectivity is only required for instances of the quantifier for which permission is actually required; in the above example, the restriction amounts to showing that the references `address(1)`, `address(2)` and `address(3)` are pairwise unequal. In the following exercises, this is illustrated more thoroughly.
 
 //exercise//
 
@@ -63,95 +64,3 @@ The expression `address(i)` implicitly defines a mapping between instances `i` o
 ///
 
 The injectivity restriction imposed by Viper has the consequence that, when considering permissions required via quantified permissions, one can equivalently think about these per instantiation of the quantified variable, or per corresponding instance of the receiver expression.
-
-## Restrictions ##
-<ul>
-<li>At present, accessibility predicates are only supported under single quantifiers. Work is ongoing to lift this restriction.</li>
-<li>Viper does not currently support Magic Wands under quantifiers.</li>
-</ul>
-
-
-
-
-<!--
-The precondition of `copyAndInc` requires read permission (`1/2`) to `x1.f` and
-*additionally* `write` permission to `x2.f`: the two corresponding
-accessibility predicates are combined with the *separating conjunction* `&&`
-(denoted by &lowast; in separation logic).
-The symbol `&&` is overloaded in Viper: when conjoining accessibility
-predicates, it denotes the separating conjunction, otherwise it denotes regular
-boolean conjunction.
-Multiple pre-/postcondition clauses are implicitly combined with conjunctions:
-the first postcondition returns all permissions, the second one states that the
-value of `x2.f` after the call will be the old (pre-call) value of `x1.f` plus
-one.
-In general, nesting an expression `e` in an `old`-expression means that all
-heap-dependent subexpressions of `e` are evaluated in the state in which a
-method was called.
-Note that local variables are not heap-dependent and thus not affected by
-`old`.
-
-//exercise//
-
-* Try assigning `x2.f + 1` to `x1.f`. This should fail because the precondition
-  only allows reading `x1.f`, not writing to it.
-* Change the precondition such that no permissions (`none`) to `x1.f` are
-  inhaled. The verification should fail because reading from `x1.f` is only
-  permitted if at least some permissions are being held.
-* Add an `exhale` statement, as the last line of the body, that exhales half of
-  the permissions to `x2.f`. This should cause a verification failure since the
-  `write` permission required by the postcondition is no longer available.
-* Change the previously added `exhale` statement such that it exhales no
-  permissions (`none)`. Afterwards, the verification should succeed again.
-* Try implementing a client of `copyAndInc` that inhales `write` permission to
-  `x.f` and attempts to call `copyAndInc(x, x)` --- it should fail.
-  Why is this not possible with the current specification of `copyAndInc`?
-  Can you use an if-then-else assertion of the shape `b ? a1 : a2` (where `b`
-  is a `Bool`-typed expression, and `a1` and `a2` are assertions) to change the
-  specification of `copyAndInc` such that the client verifies?
-
-///
-
-## Framing ##
-
-Permissions enable the framing of values of heap-dependent expressions across
-orthogonal heap changes: since write permission to a heap location `x.f` is
-exclusive, a method that holds a non-zero permission fraction to `x.f` can
-safely (and modularly) deduce that the value of `x.f` is guaranteed not to
-change.
-
-Consider, for example, the previously shown `copyAndInc` method and a client
-that invokes it:
-
-```silver {.runnable }
-field f: Int
-
-method copyAndInc(x1: Ref, x2:Ref)
-  requires acc(x1.f, 1/2) && acc(x2.f)
-  ensures  acc(x1.f, 1/2) && acc(x2.f)
-  ensures  x2.f == old(x1.f) + 1
-{ x2.f := x1.f + 1 }
-
-method client(x1: Ref, x2: Ref)
-  requires acc(x1.f) && acc(x2.f)
-{
-  copyAndInc(x1, x2)
-  assert x1.f == old(x1.f) // Succeeds because of framing
-}
-```
-
-The client's assertion verifies because it holds on to half of the permissions
-to `x1.f`; hence, it can modularly conclude that `copyAndInc` does not modify
-`x1.f`.
-
-//exercise//
-
-* Change the precondition of the client such that the client inhales only `1/2`
-  permission to `x1.f`. The assertion should fail now: since the client
-  temporarily lost *all* permission to `x1.f`, it would in general not be sound
-  to (modularly) conclude that `copyAndInc` does not modify `x1.f`.
-* Try strengthening the postcondition of `copyAndInc` to remidy the situation
-  such that the assertion verifies again.
-
-///
--->
