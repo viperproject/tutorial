@@ -23,8 +23,8 @@ function factorial(n:Int) : Int
 { n == 0 ? 1 : n * factorial(n-1) }
 ```
 
-Viper verifies successfully that the termination measure `n` decreases for each recursive invocation of `factorial` and always is positive. The well-founded order over positive numbers is defined in the file `decreases/int.vpr`, which is provided by Viper and can be imported with `import <decreases/int.vpr>`.
-Viper further provides the following definitions of well-founded orders for all the build-in types (`<_` represents the fictive well-founded decreasing operator):
+Viper verifies successfully that the termination measure `n` decreases and always is positive for each possible recursive invocation of `factorial`. The well-founded order over positive numbers is defined in the file `decreases/int.vpr`, which is provided by Viper and can be imported with `import <decreases/int.vpr>`.
+Viper further provides further files with definitions of well-founded orders for all the build-in types in the sub-folder `decreases` (`<_` represents the fictive well-founded decreasing operator).
 
 | Build-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
