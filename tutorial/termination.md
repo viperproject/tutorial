@@ -12,7 +12,7 @@ Here, `[exp]` is a tuple of comma-separated expressions which is the termination
 
 For a function or a method the decreases tuple can be defined at the position of the preconditions, for a loop at the position of the invariants.
 
-A simple example is the standard factorial function, which is terminating because the parameter n decreases with respect to the usual well-founded order over positive numbers.
+A simple example is the standard `factorial` function, which is terminating because the parameter n decreases with respect to the usual well-founded order over positive numbers.
 
 ```silver {.runnable}
 import <decreases/int.vpr>
@@ -26,7 +26,7 @@ function factorial(n:Int) : Int
 Viper verifies successfully that the termination measure `n` decreases for each recursive invocation of `factorial` and always is positive. The well-founded order over positive numbers is defined in the file `decreases/int.vpr`, which is provided by Viper and can be imported with `import <decreases/int.vpr>`.
 Viper further provides the following definitions of well-founded orders for all the build-in types (`<_` represents the fictive well-founded decreasing operator):
 
-| Build-In Type | Provided Well-Founded Order |
+| Build-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
 |`Ref`<br>(`ref.vpr`)| `r1 <_ r2 <==> r1 == null && r2 != null`
 |`Bool`<br>(`bool.vpr`)| `b1 <_ b2 <==> b1 == false && b2 == true`
@@ -39,7 +39,7 @@ Viper further provides the following definitions of well-founded orders for all 
 
 Another well-founded order can be defined on predicate instances. Due to the least fixpoint interpretation of predicates, any predicate instance has a finite depth of predicates (the number of nested folded predicate instances). This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller but still a non-negative depth of predicates than `p2`. Viper provides therefore also the following definition of a well-founded order over predicate instances:
 
-| Type | Provided Well-Founded Order |
+| Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
 |`PredicateInstance`<br>(`predicate_instance.vpr`)| `p1 <_ p2 <==> nested(p1, p2)`
 
@@ -109,11 +109,70 @@ decreases _
 So far in the presented examples, only build-in types (and predicate instances) were used in the termination measures. For each of these types a file provided by Viper had to be imported, which defined a well-founded order for it.
 To be able to use some additionally defined type as a termination measure either a function mapping to a build-in type has to be used or well-founded order on the additional type has to be defined. Using one example we will show the first approach and then present the second approach.
 
-As 
+For brevity, the already presented `MyInteger` type is used as the additionally defined type and the standard `factorial` function, which in this case requires a `MyInteger` as argument.
+Since the standard `factorial` function invokes itself recursively with a by 1 subtracted integer, the function `dec` was defined, which expects a `MyInteger` as argument and returns a by 1 decreased `MyInteger`. The function `get_value` is used in the termination measure to map `MyInteger` values to the build-in type `Int`, such that the well-founded order over `Int` can be used to check termination.
+
+```silver {.runnable}
+import <decreases/int.vpr>
+
+domain MyInteger {
+  function create_int(x: Int): MyInteger
+  function get_value(a: MyInteger): Int
+  function dec(a: MyInteger): MyInteger
+
+  axiom axDec {
+    forall a: MyInteger ::
+      dec(a) == create_int( get_value(a) - 1 )
+  }
+}
+
+function factorial(n:MyInteger) : Int
+  requires 0 <= n
+  decreases get_value(n)
+{ n == 0 ? 1 : n * factorial(dec(n)) }
+```
+
+The well-founded orders over Viper types are defined using the following two functions, which are declared in the provided file `decreases/declaration.vpr`:
+
+```silver
+domain WellFoundedOrder[T]{
+  // arg1 is smaller then arg2
+  function decreasing(arg1:T, arg2:T):Bool
+
+  // arg is bounded
+  function bounded(arg:T):Bool
+}
+```
+While the `decreasing` function is used to define an order between elements, the `bounded` function is used to define a lower bound on the elements. Combining both a well-founded order is defined. For two expressions `e1` and `e2` of some type `T` a well-founded order is defined as follows (using the previously introduced fictive well-founded decreasing operator `<_`):
+
+`e1 <_ e2 <==> decreasing(e1, e2) && bounded(e2)`
+
+To define properties to the function `decreasing` and `bounded` axioms have to be used. For the example from above the following axioms define a well-founded order over `MyInteger`.
+
+```silver
+domain MyIntegerWellFoundedOrder{
+  axiom MyInteger_ax_dec{
+    forall int1: MyInteger, int2: MyInteger :: {decreasing(int1, int2)}
+      get_value(int1) < get_value(int2) <==> decreasing(int1, int2)
+  }
+  axiom integer_ax_bound{
+    forall int: MyInteger :: {bounded(int)}
+      get_value(int) >= 0 <==> bounded(int)
+  }
+}
+```
+
+It is important to note that the functions `decreasing` and `bounded` have to be declared in the Viper program, which is easiest done by importing `decreases/declaration.vpr`.
+
+//exercise//
+
+* In the above example, use the parameter `n` as the termination measure for the `factorial` function. The termination check should then fail because no well-founded order for `MyInteger` has been defined.
+* Add the axioms which provide a definition of a well-founded order for `MyInteger` to the example. The termination error should then be removed.
+///
 
 ## Conditions
 
-_Note: this section introduces an extension to the decreases clauses presented above, which users who are just starting-out with Viper may wish to skip over for the moment._
+_Note: this section introduces an extension to the decreases clauses presented above, which some users may wish to skip over for the moment._
 
 In many cases termination should be proven (or assumed) in any possible execution. However, this might not always be the case and termination should only be proven (or assumed) under certain conditions.
 Such condition can be provided after decreases clauses.
