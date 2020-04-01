@@ -334,3 +334,10 @@ The effective termination measure used by Viper actually is the user's provided 
 ///
 
 
+## Other Interesting Facts
+(This should definitely not be a section in the final tutorial)
+A function is not allowed to recurs via its decreases clause (like preconditions).
+
+Decreases clauses are actually not part of the Viper core language.
+A plugin, the termination plugin, which is activated by default, removes all the decreases clauses and adds the additional termination checks to the Viper program. To see the transformed Viper program, only containing core language features, the flag `prettyPrint` can be used.
+To deactivate the termination checks the flag `disableTerminationPlugin` can be used. This only deactivates the the creation of the termination checks. Decreases clauses in the program will still be removed.
