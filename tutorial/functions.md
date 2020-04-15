@@ -1,6 +1,6 @@
 # Functions
 
-Just as predicates can be used to define parameterised (and potentially-recursive) assertions, Viper *functions* define parameterised and potentially-recursive *expressions*. A function can have any number of parameters, and always returns a single value; evaluation of a Viper function (just as any other Viper expression) is side-effect free. Functions applicaitons may occur both in code and in specifications: anywhere that Viper expressions may occur.
+Just as predicates can be used to define parameterised (and potentially-recursive) assertions, Viper *functions* define parameterised and potentially-recursive *expressions*. A function can have any number of parameters, and always returns a single value; evaluation of a Viper function (just as any other Viper expression) is side-effect free. Function applications may occur both in code and in specifications: anywhere that Viper expressions may occur.
 
 Functions are introduced in top-level declarations of the form:
 
