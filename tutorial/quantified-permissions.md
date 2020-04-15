@@ -1,6 +1,6 @@
 # Quantified Permissions #
 
-Viper provides two main mechanisms for specifying permission to a (potentially unbounded) number of heap locations: recursive [predicates](#predicates) and *quantified permissions*. While predicates can be a natural choice for modelling entire data structures which are traversed in an orderly top-down fashion, quantified permissions enable point-wise specifications, suitable for modelling heap structures which can be traversed in multiple directions, random-access data structures such as arrays, and unordered data structures such a general graphs.
+Viper provides two main mechanisms for specifying permission to a (potentially unbounded) number of heap locations: recursive [predicates](#predicates) and *quantified permissions*. While predicates can be a natural choice for modelling entire data structures which are traversed in an orderly top-down fashion, quantified permissions enable point-wise specifications, suitable for modelling heap structures which can be traversed in multiple directions, random-access data structures such as arrays, and unordered data structures such as general graphs.
 
 The basic idea is to allow resource assertions such as `acc(e.f)` to occur within the body of a `forall` quantifier. In particular, the `e` receiver expression can be parameterised by the quantified variable, specifying permission to a *set* of different heap locations: one for each instantiation of the quantifier.
 
