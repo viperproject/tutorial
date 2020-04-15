@@ -20,7 +20,7 @@ locations requires the full permission to the heap location (here,
 `e1.f`). Methods may have any number of result parameters; method call
 statements use the appropriate number (and types) of variables on the left-hand side (using the same variable twice on the left-hand side is disallowed).
 A
-method call can be understood as an exhale of the method precondition, a reassignment of the variables used to store result parameters, and and inhale of the method postcondition.
+method call can be understood as an exhale of the method precondition, a reassignment of the variables used to store result parameters, and inhale of the method postcondition.
 Finally, a `new` statement creates a new object and inhales exclusive permission
 to all (possibly none) fields listed comma-separated within the parantheses. As a special case, `x := new(*)` inhales permission to
 *all* fields declared in the Viper program. Note that neither method calls nor
