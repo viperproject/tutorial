@@ -84,7 +84,7 @@ There are a number of restrictions on what can be used as a set of trigger expre
 
 Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. `x.f`) and Viper's built-in sequence and set operators. Note that the *types* of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.
 
-If no triggers are specified, Viper will infer then automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.
+If no triggers are specified, Viper will infer them automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.
 
 The underlying tools currently have limited support for existential quantifications: the syntax for `exists` does not allow the specification of triggers (which play a dual role for existential quantifiers, in controlling the potential witnesses/instantiations considered when *proving* an existentially-quantified formula), so existential quantifications should be used sparingly due to the risk of matching loops. This limitation is planned to be lifted in the near future.
 
