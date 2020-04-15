@@ -5,7 +5,7 @@ Domains enable the definition of additional types, mathematical functions, and a
 ```silver {.runnable }
 domain MyDomain {
   function foo(): Int
-  function bar(x: Bool): Int
+  function bar(x: Bool): Bool
 
   axiom axFoo { foo() > 0 }
   axiom axBar { bar(true) }
