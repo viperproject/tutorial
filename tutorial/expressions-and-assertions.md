@@ -50,16 +50,15 @@ In the following, we list the different kinds of expressions, remark on their we
 
 `forperm` expressions are useful for implementing leak checks. For example, by asserting `forperm x: Ref [x.f] :: false` we can check that in the current context we do not hold any permission to the field `f`. Note that `forperm` expressions are evaluated in the current heap, including side-effects caused during `exhale` operations, as illustrated by the following example:
 
-    ```silver
-    inhale acc(x.f)
-    exhale forperm x: Ref [x.f] :: false // Would fail because we have acc(x.f)
-           acc(x.f) &&
-           forperm x: Ref [x.f] :: false // Would succeed because we do not have acc(x.f) anymore.
-    ```
+```silver
+inhale acc(x.f)
+exhale forperm x: Ref [x.f] :: false // Would fail because we have acc(x.f)
+acc(x.f) && forperm x: Ref [x.f] :: false // Would succeed because we do not have acc(x.f) anymore.
+```
 
-    This is useful, for example, for checking that after the method postcondition is exhaled, the method body does not have any permission left which would be leaked.
+This is useful, for example, for checking that after the method postcondition is exhaled, the method body does not have any permission left which would be leaked.
 
-    Forperm expressions may not be used in functions or predicates.
+Forperm expressions may not be used in functions or predicates.
 
 * equivalence or bi-implication `e1 <==> e2`, where both expressions are of type `Bool`, is equivalent to writing `e1 == e2`.
 
