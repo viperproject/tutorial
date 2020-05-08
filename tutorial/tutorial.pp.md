@@ -20,6 +20,6 @@
 
 !INCLUDE "domains.md"
 
-!INCLUDE "termination.md"
+<!-- !INCLUDE "termination.md" -->
 
 !INCLUDE "further-info.md"
