@@ -88,6 +88,8 @@ Similar to sets, Viper supports multisets:
 
 * As for sets, the operations `union`, `intersection`, `setminus`, `subset` and cardinality `|s|` are supported.
 
+* `e1 in e2`, where `e1` has type `T` and `e2` has type `Multiset[T]`, denotes the multiplicity of `e1` in `e2`. 
+
 ### Sequence expressions {#sequences}
 
 Viper's built-in sequence type `Seq[T]` represents immutable finite sequences of elements of type `T`.
