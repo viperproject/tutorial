@@ -17,6 +17,7 @@ To prove termination of a recursive function, users must specify a termination m
 ```silver
 decreases M
 ```
+
 Here, `M` denotes the termination measure: a tuple of comma-separated expressions. In this tutorial, we interchangeably refer to `M` as *termination measure* and *decreases tuple*.
 For functions and methods, a decreases tuple can be defined in the position of a precondition, for a loop, in the position of an invariant.
 
@@ -33,9 +34,9 @@ function factorial(n:Int) : Int
 
 Viper successfully verifies that `factorial` terminates: at each recursive invocation, it checks that 1. the termination measure `n` decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file `decreases/int.vpr`, which is part of Viper's standard library.
 
-### Standard Well-Founded Orders {#term_prov_wfo}
+### Predefined Well-Founded Orders {#term_prov_wfo}
 
-Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is after `s2` with respect to the order.
+Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is after `s2` with respect to the order.
 
 | Build-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
@@ -66,74 +67,121 @@ predicate list(this: Ref) {
 function length(this: Ref): Int
   decreases list(this)
   requires list(this)
-{ 
-  unfolding list(this) in this.next == null ? 1 : 1 + length(this.next) 
+{
+  unfolding list(this) in this.next == null ? 1 : 1 + length(this.next)
 }
 ```
 
+//exercise//
+Change the body of `length` to just the recursive call `length(this)`. Which error message do you expect?
+///
+
 Final remarks:
+
 * Note that `PredicateInstance` is an internal Viper type, and currently only supported in decreases tuples. The `nested` function is also internal and cannot be used by users.
 * For simplicity, all standard well-founded orders can be imported via `decreases/all.vpr`.
 * Users can define custom well-founded orders, as explained in **[TODO: forward link]**.
 
 ## General Syntax of Decreases Tuples
 
-In the examples given above, the termination measures were always single expressions. This approach works easily for many cases, but sometimes it can be difficult to find a single expression which decreases well-founded in each iteration. Viper, therefore, allows a tuple of expressions to be defined as termination measure. The expressions of the tuple are then considered in lexicographical order.
+In the previous examples, the termination measures were always single expressions. It is often difficult, however, to find a single expression whose value decreases at each all, and Viper therefore also supports tuples of expressions as termination measures. The well-founded order for tuples is the lexicographical order over the tuple elements.
 
-More precisely, Viper defines the well-founded order over tuples as follows:
-Let `[a1, a2, ...]` and `[b1, b2, ...]` be two non-empty tuples of finite size.
+More precisely, let `[a1, a2, ...]` and `[b1, b2, ...]` be two non-empty tuples of finite (and for now, equal) length, then the well-founded order `<_` that is used to compare the two tuples is defined as follows:
 
-`[a1, a2, ...] <_ [b1, b2, ...] <==> a1 <_ b1 || (a1 == b1 && [a2, ...] <_ [b2, ...])`
+```plain
+[a1, a2, ...] <_ [b1, b2, ...]
+  <==>
+a1 <_ b1 || (a1 == b1 && [a2, ...] <_ [b2, ...])
+```
 
-All other cases, i.e. in cases in which at least one of the tuples is empty, are equivalent to false.
+Special cases, such as empty tuples, tuples of different length and tuples of different types will be discussed later.
 
-`[...] <_ [...] <==> false`
-
-
-A function for which normally a tuple as termination measure is used to prove termination is the Ackermann function.
+A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:
 
 ```silver {.runnable}
 import <decreases/int.vpr>
 
 function ack(m:Int, n:Int):Int
-decreases m,n
-requires m >= 0
-requires n >= 0
-ensures result >= 0
+  decreases m, n
+  requires m >= 0
+  requires n >= 0
+  ensures result >= 0
 {
-  m==0 ? n+1 :
-    n==0 ?
-      ack(m-1,1) :
-      ack(m-1, ack(m, n-1))
+  m == 0 ? n + 1 :
+  n == 0 ? ack(m - 1, 1) :
+           ack(m - 1, ack(m, n - 1))
 }
 ```
 
-For the first recursive call `ack(m-1,1)` and the second recursive call `ack(m-1, ack(m, n-1))` the first expression of the tuple (i.e. `m`) decreases, hence, the other part of the tuple is not required to decrease. In the third and nested recursive call `ack(m, n-1)` the first expression of the tuple stays unchanged while the second expression (i.e. `n`) decreases.
+For the first recursive call `ack(m - 1, 1)`, and the second (outer) recursive call `ack(m - 1, ack(m, n - 1))`, the first expression of the tuple (i.e. `m`) decreases. Hence, the other part of the tuple is not required to decrease in this situation. In the third (inner) recursive call `ack(m, n - 1)` the first expression of the tuple is unchanged, while the second tuple expression (i.e. `n`) decreases.
 
-The well-founded order over tuples must not be imported. However, the well-founded orders of the types appearing in the tuple still must be.
+//exercise//
+Swap the tuple elements, i.e. change the decreases clause to `n, m`. For which of the recursive calls do you expect error messages?
+///
 
-## Decreases Wildcard
+The well-founded order over tuples must not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.
 
-In a function for which Viper checks termination, i.e. for which a termination measure is defined, any function call must also terminate. Functions without a termination measure are considered as possibly non-terminating functions. Because of that any function directly or indirectly invoked by another function for which a termination measure is defined also a termination measure must be provided. This can become cumbersome if termination of some functions can be assumed or really difficult in other cases.
+## Special Decreases Tuples
 
-Therefore, Viper allows to define functions for which termination can be assumed but is not checked by Viper. This is accomplished by providing a *decreases wildcard* instead of a decreases tuple.
+Viper supports three decreases tuples whose semantics require further explanation.
 
-```silver
-decreases _
-```
+### Empty
 
-## Decreases *
-
-As previously mentioned, if no decreases tuple or decreases wildcard is provided possible non-termination is assumed by Viper. A user can also make this explicit by providing a *decreases star* as decreases clause.
+Consider the following pair of functions, where `compute` performs the actual computation and `facade` merely provides a default argument to `compute`:
 
 ```silver
-decreases *
+function facade(i: Int): Int { compute(i, 0) }
+
+function compute(i: Int, j: Int): Int { i + j }
 ```
 
-However, using a decreases star has no affect on the verification done by Viper and is equivalent to providing no decreases clause at all.
+Both functions have no decreases clause, and Viper thus won't generate termination checks. This may be fine now, since the functions obviously terminate, but if `compute` were changed to be recursive, potential non-termination might go unnoticed. To account for future code changes, users could use "artificial" constants as termination measures, but Viper offers a better solution: to ensure termination checks, users can specify empty tuples, and Viper's call-graph analysis (performed to detect mutual recursion **[TODO: forward link]**) effectively infers suitable constants.
 
+```silver {.runnable}
+function facade(i: Int): Int
+  decreases
+{ compute(i, 0) }
 
-## Define Well-Founded Order
+function compute(i: Int, j: Int): Int
+  decreases
+{ i + j }
+```
+
+//exercise//
+
+* Make the body of `compute` recursive, e.g. by changing it to `i <= 0 ? j : compute(i - 1, j + i)`, and verify the program
+* Provide a termination measure, so that the changed program verifies again
+
+///
+
+### Wildcard
+
+Specifying a termination measure might not always be an option: It could be too cumbersome to express it in Viper; it could be considered a problem to deal with later; or it could be that the function does not terminate in an operational sense, but is nevertheless well-defined. Simply omitting the decreases clause, however, might not be an option, e.g. because the function is called from another function, for which termination checks are generated.
+
+For such cases, Viper offers the *wildcard* measure `_`, which expresses that a function is to be considered terminating, although no termination checks are generated. I.e. it is effectively a free assumption.
+
+```silver {.runnable}
+function collatz(n: Int): Int
+  requires 1 <= n
+  decreases _ // I can't be bothered right now
+{
+  n == 1     ? n :
+  n % 2 == 0 ? collatz(n / 2) :
+               collatz(3 * n + 1)
+}
+```
+
+### Star
+
+To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure has no affect on the verification performed by Viper, and is equivalent to providing no decreases clause at all.
+
+```silver {.runnable}
+function nonterm(): Int
+  decreases * // Whole clause could as well have been omitted
+{ 1 + nonterm() }
+```
+
+## Custom Well-Founded Orders
 
 So far in the presented examples, only build-in types (and predicate instances) were used in the termination measures. For each of these types a file provided by Viper had to be imported, which defined a well-founded order for it.
 To be able to use some additionally defined type as a termination measure either a function mapping to a build-in type has to be used or a well-founded order on the additional type has to be defined. Using one example we will show the first approach and then present the second approach.
