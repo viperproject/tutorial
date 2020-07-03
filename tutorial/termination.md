@@ -1,20 +1,26 @@
-# Termination
+# Termination {#termination}
 
-Viper provides the possibility to prove termination of recursive functions and methods as well as termination of while loops. Because most of the following presented concepts work the same for recursive function as for recursive methods or loops, the case of recursive functions is used to describe them. Differences are described in the sections on [methods](#term_methods) and on [loops](#term_loops).
+In the context of Viper, reasoning about termination serves (at least) two purposes: the first is to prove that code terminates, i.e. total correctness, the second is to indirectly prove that Viper functions are *well-defined*. The second aspect is crucial even for front-ends that are not concerned with total correctness, because specifications, often expressed via Viper's pure functions, would be meaningless if the involved functions were not well-defined.
 
-To prove termination of a recursive function a user must define a termination measure. This termination measure is then checked to decrease in each iteration (with respect to a well-founded order).
-If no termination measure is defined, Viper won't check termination.
+Front-ends can encode their own termination proofs, but since proving termination is a crucial verification task with subtle pitfalls, Viper has support for termination proofs built-in, based on the well-known approach of *termination measures* (ranking functions).
 
-Termination measures can be defined in the *decreases clause*.
+//note//
+By default, i.e. if no termination measure is specified, then Viper won't check termination. This can be useful, e.g. if a front-end already performs or encodes its own termination checks.
+///
+
+In this section, we will introduce Viper's support for termination proofs: first, we describe how to specify termination measures, then we explain termination proofs for (mutually) recursive functions. Lastly, we discuss our *experimental* support for termination of methods and loops. **[TODO: Add forward links]**
+
+## Termination Measures and Decreases Clauses
+
+To prove termination of a recursive function, users must specify a termination measure: a Viper expression whose value is checked to decrease at each recursive call, with respect to a well-founded order. Termination measures are provided via *decreases clauses*:
 
 ```silver
-decreases [exp]
+decreases M
 ```
-Here, `[exp]` is a tuple of comma-separated expressions which is the termination measure. Henceforth, we refer to such a decreases clause also as *decreases tuple*.
+Here, `M` denotes the termination measure: a tuple of comma-separated expressions. In this tutorial, we interchangeably refer to `M` as *termination measure* and *decreases tuple*.
+For functions and methods, a decreases tuple can be defined in the position of a precondition, for a loop, in the position of an invariant.
 
-For a function or a method the decreases tuple can be defined at the position of the preconditions, for a loop at the position of the invariants.
-
-A simple example is the standard `factorial` function, which is terminating because the parameter n decreases with respect to the usual well-founded order over positive numbers.
+A common example for termination is the standard `factorial` function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.
 
 ```silver {.runnable}
 import <decreases/int.vpr>
@@ -25,11 +31,11 @@ function factorial(n:Int) : Int
 { n == 0 ? 1 : n * factorial(n-1) }
 ```
 
-Viper verifies successfully that the termination measure `n` decreases in each recursive invocation of itself and always is positive when the function recursively invokes itself. The well-founded order over positive numbers is defined in the file `decreases/int.vpr`, which is provided by Viper and can be imported with `import <decreases/int.vpr>` (more information in [section on provided well-founded orders](#prov_wfo)).
+Viper successfully verifies that `factorial` terminates: at each recursive invocation, it checks that 1. the termination measure `n` decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file `decreases/int.vpr`, which is part of Viper's standard library.
 
-### Provided Well-Founded Orders {#term_prov_wfo}
+### Standard Well-Founded Orders {#term_prov_wfo}
 
-Viper provides files with definitions of well-founded orders for build-in types in the folder `decreases` (we write `s1 <_ s2` if `s1` is after `s2` with respect to a well founded order).
+Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is after `s2` with respect to the order.
 
 | Build-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
@@ -38,44 +44,39 @@ Viper provides files with definitions of well-founded orders for build-in types 
 |`Int`<br>(`int.vpr`)| `i1 <_ i2 <==> i1 < i2 && 0 <= i2`
 |`Rational`<br>(`rational.vpr`):| `r1 <_ r2 <==> r1 <= r2 - 1/1 && 0/1 <= r2`
 |`Perm`<br>(`perm.vpr`)| `p1 <_ p2 <==> p1 <= p2 - write && none <= p2`
-|`Seq[T]`<br>(`seq.vpr`)| `s1 <_ s2 <==> |s1| < |s2|`
-|`Set[T]`<br>(`set.vpr`)| `s1 <_ s2 <==> |s1| < |s2|`
-|`Multiset[T]`<br>(`multiset.vpr`)| `s1 <_ s2 <==> |s1| < |s2|`
-
-Another well-founded order can be defined on predicate instances. Due to the least fixpoint interpretation of predicates, any predicate instance has a finite depth of predicates (the number of nested folded predicate instances). This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller but still a non-negative depth of predicates than `p2`. Viper provides therefore also the following definition of a well-founded order over predicate instances:
-
-| Type<br>(file name) | Provided Well-Founded Order |
-| ---- | ---- |
+|`Seq[T]`<br>(`seq.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
+|`Set[T]`<br>(`set.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
+|`Multiset[T]`<br>(`multiset.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
 |`PredicateInstance`<br>(`predicate_instance.vpr`)| `p1 <_ p2 <==> nested(p1, p2)`
 
-It is important to note, that `PredicateInstance` is not a build-in type and is currently only supported in decreases tuples as termination measure. Also the `nested` function is not a build-in function and cannot be used by the user.
-Usually for recursive function, a predicate instance can be used as a termination measure if the recursive call is inside an unfolding expression. The `listLength` function, which recursively calls itself inside an unfolding expression, is such a function.
+All definitions are straight-forward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e. can be unfolded only a finite number of times. This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller (and non-negative) depth than `p2`.
+
+Viper uses this to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
 ```silver {.runnable}
 import <decreases/predicate_instance.vpr>
 
-field elem: Int
 field next: Ref
 
 predicate list(this: Ref) {
-  acc(this.elem) && acc(this.next) &&
+  acc(this.next) &&
   (this.next != null ==> list(this.next))
 }
 
-function listLength(l:Ref) : Int
-  decreases list(l)
-  requires list(l)
-  ensures  result > 0
+function length(this: Ref): Int
+  decreases list(this)
+  requires list(this)
 { 
-  unfolding list(l) in l.next == null ? 1 : 1 + listLength(l.next) 
+  unfolding list(this) in this.next == null ? 1 : 1 + length(this.next) 
 }
 ```
 
-If all provided well-founded orders are required, the file `decreases/all.vpr` can be imported.
+Final remarks:
+* Note that `PredicateInstance` is an internal Viper type, and currently only supported in decreases tuples. The `nested` function is also internal and cannot be used by users.
+* For simplicity, all standard well-founded orders can be imported via `decreases/all.vpr`.
+* Users can define custom well-founded orders, as explained in **[TODO: forward link]**.
 
-How well-founded orders can be defined is explained later in this chapter.
-
-## Tuple
+## General Syntax of Decreases Tuples
 
 In the examples given above, the termination measures were always single expressions. This approach works easily for many cases, but sometimes it can be difficult to find a single expression which decreases well-founded in each iteration. Viper, therefore, allows a tuple of expressions to be defined as termination measure. The expressions of the tuple are then considered in lexicographical order.
 
