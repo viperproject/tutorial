@@ -156,7 +156,7 @@ function compute(i: Int, j: Int): Int
 
 ### Wildcard
 
-Specifying a termination measure might not always be an option: It could be too cumbersome to express it in Viper; it could be considered a problem to deal with later; or it could be that the function does not terminate in an operational sense, but is nevertheless well-defined. Simply omitting the decreases clause, however, might not be an option, e.g. because the function is called from another function, for which termination checks are generated.
+Specifying a termination measure might not always be an option: it could be too cumbersome to express; it could be considered a problem to deal with later; or it could be that the function does not terminate in an operational sense, but is nevertheless well-defined. Simply omitting the decreases clause, however, might not be an option, e.g. because the function is called from another function, for which termination checks are generated.
 
 For such cases, Viper offers the *wildcard* measure `_`, which expresses that a function is to be considered terminating, although no termination checks are generated. I.e. it is effectively a free assumption.
 
@@ -183,67 +183,70 @@ function nonterm(): Int
 
 ## Custom Well-Founded Orders
 
-So far in the presented examples, only build-in types (and predicate instances) were used in the termination measures. For each of these types a file provided by Viper had to be imported, which defined a well-founded order for it.
-To be able to use some additionally defined type as a termination measure either a function mapping to a build-in type has to be used or a well-founded order on the additional type has to be defined. Using one example we will show the first approach and then present the second approach.
+As previously mentioned, Viper offers [predefined orders](#term_prov_wfo) for its built-in types, plus predicates. However, via [domains](#domains), Viper also enables users to define their own types. In order to use values of custom types as termination measures, users can either define a mapping from custom to some built-in type, or they can directly define a well-founded order over the custom type.
 
-For brevity, the already presented `MyInteger` type is used as the additionally defined type and the standard `factorial` function, which in this case requires a `MyInteger` as argument instead of the build-in type `Int`.
-Since the standard `factorial` function invokes itself recursively with a by 1 decreased integer, the function `dec` was defined, which expects a `MyInteger` as argument and returns a by 1 decreased `MyInteger`. The function `get_value` is used in the termination measure to map `MyInteger` values to the build-in type `Int`, such that the well-founded order over `Int` can be used to check termination.
+In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`s. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt`s in the function's decreases clause.
 
 ```silver {.runnable}
 import <decreases/int.vpr>
 
-domain MyInteger {
-  function create_int(x: Int): MyInteger
-  function get_value(a: MyInteger): Int
-  function dec(a: MyInteger): MyInteger
+domain MyInt {
+  function put(i: Int): MyInt   // Constructor
+  function get(m: MyInt): Int   // Destructor
+  function dec(m: MyInt): MyInt // Decrement by one
 
-  axiom axDec {
-    forall a: MyInteger ::
-      dec(a) == create_int( get_value(a) - 1 )
-  }
+  axiom { forall i: Int   :: {put(i)} get(put(i)) == i }
+  axiom { forall m: MyInt :: {dec(m)} dec(m) == put(get(m) - 1) }
 }
 
-function factorial(n:MyInteger) : Int
-  requires 0 <= n
-  decreases get_value(n)
-{ n == 0 ? 1 : n * factorial(dec(n)) }
+function factorial(m: MyInt): Int
+  requires 0 <= get(m)
+  decreases get(m)
+{ get(m) == 0 ? 1 : get(m) * factorial(dec(m)) }
 ```
 
-A well-founded orders over Viper types are defined using the two functions `decreasing` and `bounded`. These are declared in the provided file `decreases/declaration.vpr`:
-```silver
-domain WellFoundedOrder[T]{
-  // arg1 is smaller then arg2
-  function decreasing(arg1:T, arg2:T):Bool
-
-  // arg is bounded
-  function bounded(arg:T):Bool
-}
-```
-While the `decreasing` function is used to define an order between elements, the `bounded` function is used to define a lower bound on the elements. Combining both a well-founded order is defined. For two expressions `e1` and `e2` of some type `T` a well-founded order is defined as follows (using the previously introduced fictive well-founded decreasing operator `<_`):
-
-`e1 <_ e2 <==> decreasing(e1, e2) && bounded(e2)`
-
-To define properties to the function `decreasing` and `bounded` axioms have to be used. For the example from above the following axioms define a well-founded order over `MyInteger`.
+Alternatively, a well-founded order for `MyInt` itself can be defined, by instantiating the two special functions `decreasing` and `bounded` for `MyInt`. The necessary function declarations are provided by the standard library file `decreases/declaration.vpr`, and look as follows:
 
 ```silver
-domain MyIntegerWellFoundedOrder{
-  axiom MyInteger_ax_dec{
-    forall int1: MyInteger, int2: MyInteger :: {decreasing(int1, int2)}
-      get_value(int1) < get_value(int2) <==> decreasing(int1, int2)
+domain WellFoundedOrder[T] {
+  // v1 is smaller then v2
+  function decreasing(v1: T, v2: T): Bool
+
+  // v is bounded
+  function bounded(v: T): Bool
+}
+```
+
+Function `decreasing` is used to define an order between two values `v1` and `v2` of a custom type `T`, whereas function `bounded` is used to define a lower bound on such values. Defining both suffices to establish a well-founded order (where, as before, `<_` denotes well-founded less-than over type `T`):
+
+```plain
+v1 <_ v2 <==> decreasing(v1, v2) && bounded(v2)
+```
+
+The necessary properties of `decreasing` and `bounded` for values of type `T` can be defined via axioms. For the `MyInt` type from before, suitable axioms would be:
+
+```silver
+domain MyIntWellFoundedOrder {
+  axiom {
+    forall i1: MyInt, i2: MyInt :: {decreasing(i1, i2)}
+      get(i1) < get(i2) <==> decreasing(i1, i2)
   }
-  axiom integer_ax_bound{
-    forall int: MyInteger :: {bounded(int)}
-      get_value(int) >= 0 <==> bounded(int)
+  axiom {
+    forall m: MyInt :: {bounded(m)}
+      0 <= get(m) <==> bounded(m)
   }
 }
 ```
 
-It is important to note that the functions `decreasing` and `bounded` have to be declared in the Viper program, which is easiest done by importing `decreases/declaration.vpr`.
-All of the provided well-founded orders also import the file `decreases/declaration.vpr`.
+//note//
+The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`. This is also what the predefined orders, e.g. `decreases/int.vpr`, do.
+///
 
 //exercise//
-* In the above example, use the parameter `n` as the termination measure for the `factorial` function. The termination check should then fail because no well-founded order for `MyInteger` has been defined.
-* Add the axioms which provide a definition of a well-founded order for `MyInteger` to the example. The termination error should then be removed.
+
+* Change the `factorial` function in the program above s.t. parameter `m` is used as its termination measure. The termination check should then fail because no well-founded order for `MyInt` has been defined.
+* Add the axioms for `decreasing` and `bounded`, to define a well-founded order for `MyInt` values. The program should verify again.
+
 ///
 
 ## Methods {#term_methods}
