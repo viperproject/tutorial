@@ -116,8 +116,7 @@ follows:
 
 3. Exhale the loop invariant.
 
-Note that Viper does not enforce termination; if desired, termination checks should be encoded through
-suitable assertions (see the *labelled old expressions* described in the [section on expressions](#expressions))
+Analogous to functions, Viper does also *not* check loop (or method) termination per default, see the [chapter on termination](#termination) for more details. Alternatively, custom termination checks can be encoded through suitable assertions (see the *labelled old expressions* described in the [section on expressions](#expressions)).
 
 ## Assertion Checking
 

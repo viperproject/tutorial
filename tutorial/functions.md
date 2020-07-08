@@ -50,7 +50,9 @@ function capacity(l:Ref): Int
 
 Note that functions declared in [Viper domains (i.e. *domain functions*)](#domains) are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the [domains section](#domains) for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.
 
-Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function. At present, Viper does *not* check that function definitions necessarily terminate (though this feature is planned to be added soon); Viper users should take care that their function definitions guarantee termination (at least in states in which the function precondition holds). As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can readily lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:
+Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function.
+In order to enable function termination checks, which are *not* performed by default, users can specify termination measures, as discussed in [the chapter on termination](#termination).
+As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:
 
 ```silver {.runnable}
 function bad() : Int
@@ -58,15 +60,7 @@ function bad() : Int
 { bad() }
 ```
 
-Due to the least fixpoint interpretation of [predicates](#predicates), any recursive function whose recursive calls occur inside an `unfolding` expression are guaranteed to be terminating, as in the case of the `listLength` function above. Another standard termination checking technique is to ensure that some well-founded measure on the function parameter values decreases for each recursive function application. This idea can in fact be seen to subsume the `unfolding` case above, if one considers the depth of predicates (the number of nested folded predicate instances) as the termination measure.
-
-An example of a terminating function not based on predicates is the standard `factorial` function, which is terminating because the parameter `n` decreases with respect to the usual well-founded order over positive numbers.
-
-```silver {.runnable}
-function factorial(n:Int) : Int
-  requires 0 <= n
-{ n == 0 ? 1 : n * factorial(n-1) }
-```
+Due to the least fixpoint interpretation of [predicates](#predicates), any recursive function whose recursive calls occur inside an `unfolding` expression are guaranteed to be terminating, as in the case of the `listLength` function above. Consequently, predicates, and other common well-founded orders, are [standard termination measures](#term_prov_wfo) provided by Viper.
 
 For non-abstract functions, Viper reasons about function applications in terms of the function bodies. That is, in contrast to methods, it is not always necessary to provide a postcondition in order to convey
 information to the caller of a function. Nevertheless, postconditions are useful for abstract functions and in situations where the property expressed in the postcondition does not directly follow from unfolding the function body once but, for instance, requires induction. In the case of the `listLength` function, the non-negativity of the result is indeed an inductive property, and is not exploitable by Viper unless stated in the postcondition. 
