@@ -334,8 +334,8 @@ function sign(x: Int): Int
   decreases * // can also simply be omitted
 {
   x == 0 ? sign(x) :
-  1 <= x  ? sign(x - 1) :
-  x <= -1 ? sign(x + 1) :
+  1 < x  ? sign(x - 1) :
+  x < -1 ? sign(x + 1) :
            x
 }
 
@@ -358,8 +358,8 @@ We refer to the condition `1 <= x` of the clause `decreases x if 1 <= x` as the 
 When verifying termination of function `sign`, the following happens for the recursive invocations:
 
 * `sign(x)`: the termination check is vacuous because the invocation happens under the condition `x == 0`, for which `sign` does not promise to terminate.
-* `sign(x - 1)`: termination measure `x` is checked to decrease, since the call happens under the condition `1 <= x` (which implies that the tuple condition held in the prestate).
-* `sign(x + 1)`: the termination check is again vacuous because the call happens under the condition `x <= -1`, which is the wildcard condition and termination is therefore assumed.
+* `sign(x - 1)`: termination measure `x` is checked to decrease, since the call happens under the condition `1 < x` (which implies that the tuple condition held in the prestate).
+* `sign(x + 1)`: the termination check is again vacuous because the call happens under the condition `x < -1`, which is the wildcard condition and termination is therefore assumed.
 
 When verifying termination of function `caller`, the termination condition (`1 <= x || x <= -1`) of function `sign` is checked. Since it might not hold, a verification error is reported.
 
