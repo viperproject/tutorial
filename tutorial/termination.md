@@ -1,8 +1,8 @@
 # Termination {#termination}
 
-In the context of Viper, reasoning about termination serves (at least) two purposes: the first is to prove that code terminates, i.e. total correctness, the second is to indirectly prove that Viper functions are *well-defined*. The second aspect is crucial even for front-ends that are not concerned with total correctness, because specifications, often expressed via Viper's pure functions, would be meaningless if the involved functions were not well-defined.
+In the context of Viper, reasoning about termination serves (at least) two purposes: the first is to prove that methods and loops terminate, the second is to ensure that Viper functions are *well-defined*. The second aspect is crucial even for front-ends that are not concerned with total correctness, because specifications, often expressed via Viper's pure functions, would be meaningless if the involved functions were not well-defined.
 
-Front-ends can encode their own termination proofs, but since proving termination is a crucial verification task with subtle pitfalls, Viper has support for termination proofs built-in, based on the well-known approach of *termination measures* (ranking functions).
+Front-ends can encode their own termination proofs, but since proving termination is a crucial verification task with subtle pitfalls, Viper has support for termination proofs built in, based on the well-known approach of *termination measures* (ranking functions).
 
 //note//
 By default, i.e. if no termination measure is specified, then Viper won't check termination. This can be useful, e.g. if a front-end already performs or encodes its own termination checks.
@@ -33,11 +33,11 @@ function factorial(n:Int) : Int
 
 Viper successfully verifies that `factorial` terminates: at each recursive invocation, it checks that 1. the termination measure `n` decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file `decreases/int.vpr`, which is part of Viper's standard library.
 
-*Hint*: If you run the Viper verifier Silicon (symbolic-execution-based) with `--printTranslatedProgram`, then you can inspect the verification conditions generated for termination checks.
+*Hint*: If you run the Viper verifier Silicon (symbolic-execution-based) with `--printTranslatedProgram` then you can inspect the verification conditions generated for termination checks.
 
 ### Predefined Well-Founded Orders {#term_prov_wfo}
 
-Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is after `s2` with respect to the order.
+Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
 
 | Build-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
@@ -51,9 +51,9 @@ Viper's standard library provides definitions of well-founded orders for most ty
 |`Multiset[T]`<br>(`multiset.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
 |`PredicateInstance`<br>(`predicate_instance.vpr`)| `p1 <_ p2 <==> nested(p1, p2)`
 
-All definitions are straight-forward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e. can be unfolded only a finite number of times. This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller (and non-negative) depth than `p2`.
+All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e., can be unfolded only a finite number of times. This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller (and non-negative) depth than `p2`.
 
-Viper uses this to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
+Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
 ```silver {.runnable}
 import <decreases/predicate_instance.vpr>
@@ -79,23 +79,23 @@ Change the body of `length` to just the recursive call `length(this)`. Which err
 
 Final remarks:
 
-* Note that `PredicateInstance` is an internal Viper type, and currently only supported in decreases tuples. The `nested` function is also internal and cannot be used by users.
+* Note that `PredicateInstance` is an internal Viper type, and currently supported only in decreases tuples. The `nested` function is also internal and cannot be used by users.
 * For simplicity, all standard well-founded orders can be imported via `decreases/all.vpr`.
 * Users can also define [custom well-founded orders](#term_custom_orders).
 
 ## General Syntax of Decreases Tuples
 
-In the previous examples, the termination measures were always single expressions. It is often difficult, however, to find a single expression whose value decreases at each all, and Viper therefore also supports tuples of expressions as termination measures. The well-founded order for tuples is the lexicographical order over the tuple elements.
+In the previous examples, the termination measures were always single expressions. However, it is not always possible to find a single expression whose value decreases at each call, and Viper therefore also supports tuples of expressions as termination measures. The well-founded order for tuples is the lexicographical order over the tuple elements.
 
-More precisely, let `(a1, a2, ...)` and `(b1, b2, ...)` be two non-empty tuples of finite (and for now, equal) length, then the well-founded order `<_` that is used to compare the two tuples is defined as follows:
+More precisely, let `(a1, a2, ...)` and `(b1, b2, ...)` be two non-empty tuples of finite (and for now, equal) length. The well-founded order `<_` that is used to compare the two tuples is defined as follows:
 
 ```plain
 (a1, a2, ...) <_ (b1, b2, ...)
     <==>
-a1 <_ b1  ||  a1 == b1 && (a2, ...) <_ (b2, ...)
+a1 <_ b1  ||  a1 == b1 && (a2, ...) <_ (b2, ...) 
 ```
 
-Special cases, such as empty tuples, tuples of different length and tuples of different types will be discussed later.
+Special cases, such as empty tuples, tuples of different length, and tuples of different types will be discussed later.
 
 A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:
 
@@ -114,13 +114,13 @@ function ack(m:Int, n:Int):Int
 }
 ```
 
-For the first recursive call `ack(m - 1, 1)`, and the second (outer) recursive call `ack(m - 1, ack(m, n - 1))`, the first expression of the tuple (i.e. `m`) decreases. Hence, the other part of the tuple is not required to decrease in this situation. In the third (inner) recursive call `ack(m, n - 1)` the first expression of the tuple is unchanged, while the second tuple expression (i.e. `n`) decreases.
+For the first recursive call `ack(m - 1, 1)`, and the second (outer) recursive call `ack(m - 1, ack(m, n - 1))`, the first expression of the tuple (i.e. `m`) decreases. Hence, the other part of the tuple is not required to decrease in this situation. In the third (inner) recursive call `ack(m, n - 1)` the first expression of the tuple is unchanged, while the second tuple expression (i.e., `n`) decreases.
 
 //exercise//
-Swap the tuple elements, i.e. change the decreases clause to `n, m`. For which of the recursive calls do you expect error messages?
+Swap the tuple elements, i.e., change the decreases clause to `n, m`. For which of the recursive calls do you expect error messages?
 ///
 
-The well-founded order over tuples must not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.
+The well-founded order over tuples need not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.
 
 ## Special Decreases Tuples
 
@@ -150,7 +150,7 @@ function compute(i: Int, j: Int): Int
 
 //exercise//
 
-* Make the body of `compute` recursive, e.g. by changing it to `i <= 0 ? j : compute(i - 1, j + i)`, and verify the program
+* Make the body of `compute` recursive, e.g., by changing it to `i <= 0 ? j : compute(i - 1, j + i)`, and verify the program
 * Provide a termination measure, so that the changed program verifies again
 
 ///
@@ -159,7 +159,7 @@ function compute(i: Int, j: Int): Int
 
 Specifying a termination measure might not always be an option: it could be too cumbersome to express; it could be considered a problem to deal with later; or it could be that the function does not terminate in an operational sense, but is nevertheless well-defined. Simply omitting the decreases clause, however, might not be an option, e.g. because the function is called from another function, for which termination checks are generated.
 
-For such cases, Viper offers the *wildcard* measure `_`, which expresses that a function is to be considered terminating, although no termination checks are generated. I.e. it is effectively a free assumption.
+For such cases, Viper offers the *wildcard* measure `_`, which expresses that a function is to be considered terminating, although no termination checks are generated. I.e., a wildcard measure is effectively an unchecked assumption.
 
 ```silver {.runnable}
 function collatz(n: Int): Int
@@ -174,7 +174,7 @@ function collatz(n: Int): Int
 
 ### Star
 
-To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure has no affect on the verification performed by Viper, and is equivalent to providing no decreases clause at all.
+To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure is equivalent to providing no decreases clause at all, but may be useful for documenation purposes.
 
 ```silver {.runnable}
 function nonterm(): Int
@@ -186,7 +186,7 @@ function nonterm(): Int
 
 As previously mentioned, Viper offers [predefined orders](#term_prov_wfo) for its built-in types, plus predicates. However, via [domains](#domains), Viper also enables users to define their own types. In order to use values of custom types as termination measures, users can either define a mapping from custom to some built-in type, or they can directly define a well-founded order over the custom type.
 
-In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`s. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt`s in the function's decreases clause.
+In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt` in the function's decreases clause.
 
 ```silver {.runnable}
 import <decreases/int.vpr>
@@ -210,7 +210,7 @@ Alternatively, a well-founded order for `MyInt` itself can be defined, by instan
 
 ```silver
 domain WellFoundedOrder[T] {
-  // v1 is smaller then v2
+  // v1 is less than v2
   function decreasing(v1: T, v2: T): Bool
 
   // v is bounded
@@ -218,7 +218,7 @@ domain WellFoundedOrder[T] {
 }
 ```
 
-Function `decreasing` is used to define an order between two values `v1` and `v2` of a custom type `T`, whereas function `bounded` is used to define a lower bound on such values. Defining both suffices to establish a well-founded order (where, as before, `<_` denotes well-founded less-than over type `T`):
+Function `decreasing` is used to define an order between two values `v1` and `v2` of a custom type `T`, whereas function `bounded` is used to define a lower bound on such values. Suitable definitions for both suffices to establish a well-founded order (where, as before, `<_` denotes well-founded less-than over type `T`):
 
 ```plain
 v1 <_ v2 <==> decreasing(v1, v2) && bounded(v2)
@@ -240,19 +240,19 @@ domain MyIntWellFoundedOrder {
 ```
 
 //note//
-The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`. This is also what the predefined orders, e.g. `decreases/int.vpr`, do.
+The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`. This is also what the predefined orders, e.g., `decreases/int.vpr`, do.
 ///
 
 //exercise//
 
-* Change the `factorial` function in the program above s.t. parameter `m` is used as its termination measure. The termination check should then fail because no well-founded order for `MyInt` has been defined.
+* Change the `factorial` function in the program above such that parameter `m` is used as its termination measure. The termination check should then fail because no well-founded order for `MyInt` has been defined.
 * Add the axioms for `decreasing` and `bounded`, to define a well-founded order for `MyInt` values. The program should verify again.
 
 ///
 
 ## Mutual Recursion {#term_mut_rec}
 
-For mutually recursive functions, Viper implements the following approach (as, e.g. [Dafny](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf) does as well): given a mutually recursive function `fun`, Viper verifies that `fun` function's termination measure decreases at each *indirectly* recursive call. By transitivity, this implies that the measure decreased by the time a recursive invocation of `fun` takes place.
+For mutually recursive functions, Viper implements the following approach (as, e.g., [Dafny](https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf) does as well): given a mutually recursive function `fun`, Viper verifies that `fun` function's termination measure decreases at each *indirectly* recursive call. By transitivity, this implies that the measure decreased by the time a recursive invocation of `fun` takes place.
 
 A simple case of mutual recursion is illustrated next, by functions `is_even` and `is_odd`:
 
@@ -296,19 +296,19 @@ function fun2(x: Int): Int
 }
 ```
 
-At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g. Dafny). E.g. for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)` (boundedness checks omitted for brevity).
+At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g., Dafny). E.g., for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)` (boundedness checks omitted for brevity).
 
 //exercise//
 
 * Comment the import of `bool.vpr`, and reverify the program. Can you explain the resulting verification error?
 
-* In the above example, change the call `fun1(x-1, true)` to `fun1(x, true)` -- the program still verifies. That's because Viper appends a `Top` element (an interval value of any type, larger than any other value) to each tuple, a neat trick also implemented by, e.g. Dafny and F*. Can you explain to yourself how this helps with checking termination of the call `fun1(x, true)`?
+* In the above example, change the call `fun1(x-1, true)` to `fun1(x, true)` -- the program still verifies. That's because Viper appends a `Top` element (an internal value of any type, larger than any other value) to each tuple, a neat trick also implemented by, e.g., Dafny and F*. Can you explain how this helps with checking termination of the call `fun1(x, true)`?
 
 ///
 
 ## Conditional Termination
 
-We previously presented three different kinds of termination measures: a tuple `e1, e2, ...`, wildcard (`_`) for "just assume that something is decreased", and star (`*`) for "no termination guarantees". It may sometimes be desirable to combine different measures, e.g. in order to reduce proof efforts by providing a concrete decreases tuple for certain invocations only, complemented with wildcard for the remaining invocations.
+We previously presented three different kinds of termination measures: a tuple `e1, e2, ...`, wildcard (`_`) for "just assume that something is decreased", and star (`*`) for "no termination guarantees". It may sometimes be desirable to combine different measures, e.g., in order to reduce proof efforts by providing a concrete decreases tuple for certain invocations only, complemented with wildcard for the remaining invocations.
 
 To account for this, Viper supports *conditional termination* clauses for the first two  kinds of measures (tuple, wildcard):
 
@@ -334,8 +334,8 @@ function sign(x: Int): Int
   decreases * // can also simply be omitted
 {
   x == 0 ? sign(x) :
-  1 < x  ? sign(x - 1) :
-  x < -1 ? sign(x + 1) :
+  1 <= x  ? sign(x - 1) :
+  x <= -1 ? sign(x + 1) :
            x
 }
 
@@ -353,19 +353,19 @@ function caller(x: Int): Int
 
 ///
 
-We refer to the condition `1 <= x` of the clause `decreases x if 1 <= x` as the *tuple condition*, and to the condition `x <= -1` of the clause `decreases _ if x <= -1` as the *wildcard condition*. The disjunction of the two, i.e. `1 <= x || x <= -1`, is the *termination condition*: the effective condition under which the function (claims to) terminate.
+We refer to the condition `1 <= x` of the clause `decreases x if 1 <= x` as the *tuple condition*, and to the condition `x <= -1` of the clause `decreases _ if x <= -1` as the *wildcard condition*. The disjunction of the two, i.e. `1 <= x || x <= -1`, is the *termination condition*: the effective condition under which the function (promises to) terminate.
 
 When verifying termination of function `sign`, the following happens for the recursive invocations:
 
 * `sign(x)`: the termination check is vacuous because the invocation happens under the condition `x == 0`, for which `sign` does not promise to terminate.
-* `sign(x - 1)`: termination measure `x` is checked to decrease, since the call happens under the condition `1 < x` (which implies that the tuple condition held in the prestate).
-* `sign(x + 1)`: the termination check is again vacuous because the call happens under the condition `x < -1`, which is the wildcard condition and termination is therefore assumed.
+* `sign(x - 1)`: termination measure `x` is checked to decrease, since the call happens under the condition `1 <= x` (which implies that the tuple condition held in the prestate).
+* `sign(x + 1)`: the termination check is again vacuous because the call happens under the condition `x <= -1`, which is the wildcard condition and termination is therefore assumed.
 
 When verifying termination of function `caller`, the termination condition (`1 <= x || x <= -1`) of function `sign` is checked. Since it might not hold, a verification error is reported.
 
 ## Abstract Functions
 
-Termination specifications can be provided for abstract functions, i.e. those without a body, as well, but Viper won't (and can't) check that they are actually valid. However, when an abstract function is invoked, the previously described call-site checks are made.
+Termination specifications may also be provided for abstract functions, i.e., those without a body, but Viper won't (and can't) check that they are actually valid. However, when an abstract function is invoked, the previously described call-site checks are made.
 
 When Viper performs a call-graph analysis to determine mutually recursive functions, abstract functions are assumed to not be mutually recursive.
 
@@ -375,18 +375,18 @@ When Viper performs a call-graph analysis to determine mutually recursive functi
 
 Termination checks outside of functions -- for methods and loops, and method and function calls -- are considered experimental: their semantics could change in the future, or they might be removed from Viper completely.
 
-We encourage you to experiment with the current implementation, and to let us know if it suits your needs, if changes or additional features would benefit your verification efforts, etc.
+We encourage you to experiment with the current implementation, and to let us know if it suits your needs and whether changes or additional features would benefit your verification efforts, etc.
 ///
 
-### Function Calls in Methods {#term_fct_calls}
+### Function Calls inside Methods {#term_fct_calls}
 
 The development of the *experimental* termination checks for statements was (partly) guided by Viper's intended use as an intermediate verification language. This shaped, among other things, how function calls are currently handled.
 
 Front-ends may use Viper functions to encode (pure) program procedures, but front-ends may also use functions to encode proof-relevant properties. Similarly, Viper methods may be used to encode (impure) program procedures, or to encode proof lemmas. Moreover, encoded program procedures could contain Viper statements corresponding to actual statements from the source program, interspersed with Viper statements that encode additional proof steps.
 
-Consider, e.g. a Viper function `elems(ll)` that denotes the set of all elements in a potentially cyclic linked-list `ll`. A statement such as `inhale es == elems(ll)` could be part of a sequence of program statements -- in which case `elems(ll)` should probably terminate -- or it could be an additional proof step, in which case it would suffice if `elems(ll)` were well-defined.
+Consider, e.g., a Viper function `elems(ll)` that denotes the set of all elements in a potentially cyclic linked-list `ll`. A statement such as `inhale es == elems(ll)` could be part of a sequence of program statements -- in which case `elems(ll)` should probably terminate -- or it could be an additional proof step, in which case it would suffice if `elems(ll)` were well-defined.
 
-**Function calls in Viper methods are therefore (currently) not checked for termination**, and front-ends would have to generate appropriate checks where necessary. Potential alternatives include (1) to always check termination -- probably too restrictive; (2) to enable users to specify termination requirements at call-site, e.g. via attributes/annotations -- but the latter are currently not available in Viper.
+**Function calls inside Viper methods (as opposed to calls inside functions) are therefore (currently) not checked for termination**, and front-ends would have to generate appropriate checks where necessary. Potential alternatives include (1) to always check termination -- probably too restrictive; (2) to enable users to specify termination requirements at call-site, e.g. via attributes/annotations -- but the latter are currently not available in Viper.
 
 ### Checking Loop Termination {#term_loops}
 
@@ -420,15 +420,15 @@ We have chosen this approach for the following reasons (but are happy to receive
 
 * Uniformity: When proving method termination (discussed next), the current approach directly exhibits the same behaviour for both syntactic `while` loops and loops encoded via `goto`s and `label`s (but see the note below). If loop bodies had to terminate as well, it would pose the question of which statements belonged to a goto-loop, which in general cannot be answered unambiguously (e.g. when inferring a while-loop from a goto-loop). This uniformity also extends to manually unrolled loops, as some front-ends might do.
 
-* Expressiveness: If loop body termination checks are required, it can be achieved by checking the surrounding for termination (potentially via a synthetic method that only hosts the former loop body). However, the argument of expressiveness would also apply if the stronger requirements had been implemented, and a similar program transformation could be performed to suppress loop body termination checks, if desired.
+* Expressiveness: If loop body termination checks are required, they can be encoded easily (potentially via a synthetic method that only hosts the loop body). 
 
-* Familiarity: Same approach as used in Dafny (but then again, Dafny was not designed as an intermediate verification language)
+* Familiarity: The same approach is used in Dafny (but then again, Dafny was not designed as an intermediate verification language)
 
 ### Checking Method Termination {#term_methods}
 
-The currently implemented approach to checking termination of methods is similar to the previously described approach for functions: decreases clauses can be specified at the position of preconditions; if provided, **Viper checks that the termination measure decreases in each directly or indirectly recursive method invocation, and that other method calls, as well as loops, terminate**. As [previous described](#term_fct_calls), *function* applications are *not* checked for termination.
+The currently implemented approach to checking termination of methods is similar to the previously described approach for functions: decreases clauses can be specified at the position of preconditions; if provided, **Viper checks that the termination measure decreases in each directly or indirectly recursive method invocation, and that other method calls, as well as loops, terminate**. As [previous described](#term_fct_calls), *function* applications inside methods are *not* checked for termination.
 
-A straight-forward example is method `sum`, shown next:
+A straightforward example is method `sum`, shown next:
 
 ```silver {.runnable}
 import <decreases/int.vpr>
@@ -454,9 +454,9 @@ method sum(n: Int) returns (res: Int)
 
 //exercise//
 
-* Remove the decreases-clause from the loop and observe that the method no longer verifies
+* Remove the decreases-clause from the loop and observe that the method no longer verifies.
 * Revert to the initial program, add declaration `method m()` to the program, and call `m` inside the loop. Observe that it is (again) the method that fails to verify now.
-* Avoid the error by removing the decreases-clause from method `sum` (or by adding a wildcard decreases-clause to method `m`)
+* Avoid the error by removing the decreases-clause from method `sum` (or by adding a wildcard decreases-clause to method `m`).
 * Revert to the initial program, add a nested loop, e.g. `var j: Int := n; while(0 < j) { j := j - 1 }`, and observe the resulting verification failure. Experiment a bit with adding new and removing existing decreases clauses.
 
 ///
