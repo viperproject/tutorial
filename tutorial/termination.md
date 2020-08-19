@@ -296,7 +296,7 @@ function fun2(x: Int): Int
 }
 ```
 
-At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g., Dafny). E.g., for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)` (boundedness checks omitted for brevity).
+At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g., Dafny). E.g., for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)`.
 
 //exercise//
 
@@ -365,9 +365,9 @@ When verifying termination of function `caller`, the termination condition (`1 <
 
 ## Abstract Functions
 
-Termination specifications may also be provided for abstract functions, i.e., those without a body, but Viper won't (and can't) check that they are actually valid. However, when an abstract function is invoked, the previously described call-site checks are made.
+Termination specifications may also be provided for abstract functions, i.e., those without a body. For such functions, Viper still checks that the specifications are well-defined, which includes that pre- and postconditions terminate. Moreover, when an abstract function is invoked, the previously described call-site checks are made.
 
-When Viper performs a call-graph analysis to determine mutually recursive functions, abstract functions are assumed to not be mutually recursive.
+When Viper performs a call-graph analysis to determine (mutually) recursive functions, abstract functions are assumed to not (mutually) recurse through their omitted bodies.
 
 ## Statement Termination (Experimental) {#term_statements}
 
