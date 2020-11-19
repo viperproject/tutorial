@@ -122,7 +122,7 @@ Expressions of type `Perm` are rational numbers and are usually used to represen
 
 * `perm(e.f)`: Evaluates to the amount of permission the current method has to the specified location. Similarly, `perm(P(e1, ..., en))` returns the amount of permission held for the specified predicate instance. Similarly to `forperm`, the values of `perm` expressions take into account the side-effects of e.g. ongoing `exhale` operations. For example `exhale acc(x.f) && perm(x.f) > none` should always fail, while `exhale perm(x.f) > none && acc(x.f)` will succeed (if the full permission to `x.f` was held before the `exhale`).
 
-* Permissions can be added (`e1 + e2`), subtracted (`e1 - e2`), or multiplied (`e1 * e2`). In the first two cases, `e1` and `e2` must both be `Perm`-typed. In the case of multiplication, either two `Perm`-typed expressions or one `Perm`-typed and one `Int`-typed are possible; the results in all cases will be `Perm`-typed expressions.
+* Permissions can be added (`e1 + e2`), subtracted (`e1 - e2`), multiplied (`e1 * e2`) or divided (`e1 / e2`). In the first two cases, `e1` and `e2` must both be `Perm`-typed. In the case of multiplication, either two `Perm`-typed expressions or one `Perm`-typed and one `Int`-typed are possible. For divisions, the first expression must be `Perm`-typed and the second of type `Int` (though of course ordinary fractions, where both expressions are `Int`-typed, also exist). The results in all cases will be `Perm`-typed expressions.
 
 ### Reference expressions
 
