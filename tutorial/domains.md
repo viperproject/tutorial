@@ -2,7 +2,7 @@
 
 Domains enable the definition of additional types, mathematical functions, and axioms that provide their properties. Syntactically, domains consist of a name (for the newly-introduced type), and a block in which a number of function declarations and axioms can be introduced. The following example shows a simple domain declaration:
 
-```silver {.runnable }
+```silver-runnable
 domain MyDomain {
   function foo(): Int
   function bar(x: Bool): Bool
@@ -19,7 +19,7 @@ Domain axioms are also global: they define properties of the program which are a
 
 //exercise//
 
-```silver {.runnable}
+```silver-runnable
 domain Neg {
   function not(cond: Bool): Bool
 }
@@ -48,7 +48,7 @@ In the remainder of this section, we will illustrate some use-cases of domains f
 
 The following domain defines a new type ```MyType``` with two type parameters: 
 
-```silver {.runnable }
+```silver-runnable
 domain MyType[A,B] {
   function constructor_a(x: A): MyType[A,B]
   function constructor_b(y: B): MyType[A,B]
@@ -82,7 +82,7 @@ By default, Viper provides only two built-in operations for domain types: ```==`
 
 For a more realistic demo, we can encode an algebraic list datatype. We start with the function declarations.
 
-```silver {.runnable }
+```silver-runnable
 domain List[T] {
   /* Constructors */
 
@@ -118,7 +118,7 @@ The full axiomatisation of these functions and some use cases are available in t
 
 Custom axioms can specify the semantics of mathematical functions. Functions typically have parameters, hence the corresponding axioms usually have a universal quantification over a range of possible values as arguments.
 
-```silver {.runnable }
+```silver-runnable
 domain MyInteger {
   function create_int(x: Int): MyInteger
   function get_value(a: MyInteger): Int
@@ -137,7 +137,7 @@ The axiom ```axSum``` uses a universal quantifier (```forall```) to express the 
 
 In the example above, one would intuitively expect the axiom ```axSum``` to be applied whenever the function ```sum``` is applied to some pair of arguments. Therefore, it makes sense to specify ```{ sum(a,b) }``` as the trigger, as in the example below:
 
-```silver {.runnable }
+```silver-runnable
 domain MyInteger {
   function create_int(x: Int): MyInteger
   function get_value(a: MyInteger): Int
@@ -167,7 +167,7 @@ Sometimes it is beneficial to choose expressions as triggers which are _not_ pre
 
 Just as with any other kind of assumption in a Viper program, one can introduce unsoundness by adding domain axioms. For the simplest case, consider the following example: 
 
-```silver {.runnable }
+```silver-runnable
 domain Foo {
   axiom Unsound {
     false
@@ -184,7 +184,7 @@ Viper is able to verify this program, because the axiom ```Unsound``` is assumed
 
 //exercise//
 
-```silver {.runnable}
+```silver-runnable
 domain MyInteger {
   // copied from above without modification
 
@@ -231,7 +231,7 @@ method test2(i: Int, j:Int)
 
 We proceed next with an example encoding of integer arrays. Note that arrays are not built-in in Viper, so we have to model an array type. Since array locations should be on the heap, we do this with a combination of a domain, a [field](#top-level-declarations), and [quantified permissions](#quantified-permissions). Let's first consider a suitable domain:
 
-```silver {.runnable }
+```silver-runnable
 domain IArray {
   function slot(a: IArray, i: Int): Ref
   function len(a: IArray): Int

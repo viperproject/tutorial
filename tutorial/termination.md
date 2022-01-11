@@ -22,7 +22,7 @@ Here, `<tuple>` denotes the termination measure: a tuple of comma-separated expr
 
 A common example for termination is the standard `factorial` function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 function factorial(n:Int) : Int
@@ -55,7 +55,7 @@ All definitions are straightforward, except the last one, which is concerned wit
 
 Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/predicate_instance.vpr>
 
 field next: Ref
@@ -99,7 +99,7 @@ Special cases, such as empty tuples, tuples of different length, and tuples of d
 
 A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 function ack(m:Int, n:Int):Int
@@ -138,7 +138,7 @@ function compute(i: Int, j: Int): Int { i + j }
 
 Both functions have no decreases clause, and Viper thus won't generate termination checks. This may be fine now, since the functions obviously terminate, but if `compute` were changed to be recursive, potential non-termination might go unnoticed. To account for future code changes, users could use "artificial" constants as termination measures, but Viper offers a better solution: to ensure termination checks, users can specify empty tuples, and Viper's call-graph analysis (performed to detect [mutual recursion](#term_mut_rec)) effectively infers suitable constants.
 
-```silver {.runnable}
+```silver-runnable
 function facade(i: Int): Int
   decreases
 { compute(i, 0) }
@@ -161,7 +161,7 @@ Specifying a termination measure might not always be an option: it could be too 
 
 For such cases, Viper offers the *wildcard* measure `_`, which expresses that a function is to be considered terminating, although no termination checks are generated. I.e., a wildcard measure is effectively an unchecked assumption.
 
-```silver {.runnable}
+```silver-runnable
 function collatz(n: Int): Int
   requires 1 <= n
   decreases _ // I can't be bothered right now
@@ -176,7 +176,7 @@ function collatz(n: Int): Int
 
 To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure is equivalent to providing no decreases clause at all, but may be useful for documenation purposes.
 
-```silver {.runnable}
+```silver-runnable
 function nonterm(): Int
   decreases * // Whole clause could as well have been omitted
 { 1 + nonterm() }
@@ -188,7 +188,7 @@ As previously mentioned, Viper offers [predefined orders](#term_prov_wfo) for it
 
 In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt` in the function's decreases clause.
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 domain MyInt {
@@ -256,7 +256,7 @@ For mutually recursive functions, Viper implements the following approach (as, e
 
 A simple case of mutual recursion is illustrated next, by functions `is_even` and `is_odd`:
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 function is_even(x: Int): Bool
@@ -278,7 +278,7 @@ Consider function `is_even`: its termination measure `x` decreases at the indire
 
 In the example above, the two termination measures are tuples of equal length and type. However, this is not required of mutually recursive functions in order to prove their termination. Consider the next example (which verifies successfully):
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 import <decreases/bool.vpr>
 
@@ -325,7 +325,7 @@ To ensure soundness, only a *single* clause per kind of measure is allowed. More
 
 The following example illustrates combined conditional termination clauses: function `sign` promises to decrease `x` if positive, and something (wildcard) if `x` is negative. In case `x` is zero, function `sign` does not (promise to) terminate.
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 function sign(x: Int): Int
@@ -430,7 +430,7 @@ The currently implemented approach to checking termination of methods is similar
 
 A straightforward example is method `sum`, shown next:
 
-```silver {.runnable}
+```silver-runnable
 import <decreases/int.vpr>
 
 method sum(n: Int) returns (res: Int)

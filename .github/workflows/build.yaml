@@ -1,0 +1,51 @@
+name: Generate tutorial
+
+on: [push, pull_request]
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout tutorial
+      uses: actions/checkout@v2
+      with:
+        path: "tutorial"
+
+    - name: Checkout generator
+      uses: actions/checkout@v2
+      with:
+        repository: "viperproject/viperonline-tutorial-generator"
+        ref: "cleanup-2022"
+        token: ${{ secrets.GH_PAT }}
+        path: "generator"
+
+    - name: Create directory structure
+      run: |
+        cd generator
+        mkdir -p build
+        cp -r assets/css build/css
+        cp -r assets/images build/images
+        cp -r assets/js build/js
+
+    - name: Install node packages
+      run: |
+        cd generator
+        npm install
+
+    - name: Generate tutorial
+      run: |
+        cd generator
+        node index.js \
+          ../tutorial/tutorial/introduction.md \
+          ../tutorial/tutorial/structure.md \
+          ../tutorial/tutorial/permissions.md \
+          ../tutorial/tutorial/predicates.md \
+          ../tutorial/tutorial/functions.md \
+          ../tutorial/tutorial/quantifiers.md \
+          ../tutorial/tutorial/quantified-permissions.md \
+          ../tutorial/tutorial/magic-wands.md \
+          ../tutorial/tutorial/statements.md \
+          ../tutorial/tutorial/expressions-and-assertions.md \
+          ../tutorial/tutorial/domains.md \
+          ../tutorial/tutorial/termination.md \
+          ../tutorial/tutorial/further-info.md

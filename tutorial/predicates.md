@@ -24,7 +24,7 @@ In Viper, a predicate instance is *not* directly equivalent to the corresponding
 
 In the following example, the predicate `tuple` represents permission to the `left` and `right` fields of some tuple (note that `this` is *not* a keyword in Viper). The method requires permission to the fields `this.left` and `this.right`. Intuitively speaking, the `tuple` predicate required by the precondition contains permissions to the fields `this.left` and `this.right`. Holding the predicate is not enough to be allowed to access these fields; the corresponding permissions, however, can be obtained by unfolding the predicate. On the last line of the method's body, these permission are folded back into the `tuple` predicate that is given back to the caller.
 
-```silver {.runnable }
+```silver-runnable
 field left: Int
 field right: Int
 
@@ -75,7 +75,7 @@ The next example is an extract from an encoding of a singly-linked list implemen
 
 The statement `n := new(elem, next)` models object creation: it assigns a fresh reference to `n` and inhales write permission to `n.elem` and `n.next`. Notice that `unfold list(this)` will exchange the predicate instance for its body, which includes the predicate instance `list(this.next)` if `this.next != null`. This is important to understand why (when the first branch of the if-condition is taken)  *two* fold statements are needed: one for `list(n)` and another for `list(this)`: since `this.next` (or `n`) is no longer `null`, folding `list(this)` depends on first folding `list(n)`.
 
-```silver {.runnable }
+```silver-runnable
 field elem: Int
 field next: Ref
 
@@ -117,7 +117,7 @@ method append(this: Ref, e: Int)
 It is often useful to declare predicates with several arguments, such as the following list segment predicate, which is commonly used in separation logic. The predicate's first argument denotes the start of the list segment, the second argument its end (i.e., the node directly after the segment) and the third
 argument, a value-typed mathematical sequence, represents the values stored in the segment.
 
-```silver {.runnable }
+```silver-runnable
 field elem : Int
 field next : Ref
 
