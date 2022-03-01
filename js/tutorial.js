@@ -1,6 +1,5 @@
-//serverUrl = "http://boogiebox2.inf.ethz.ch:1001/viperonline/";
-serverUrl = "http://viper.ethz.ch/viperonline/";
-assetsUrl = "http://viper.ethz.ch/tutorial/";
+serverUrl = "https://viper.ethz.ch/viperonline/";
+assetsUrl = "https://viper.ethz.ch/tutorial/";
 tool = "silver";
 language = "silver";
 
