@@ -19,10 +19,16 @@ jobs:
         token: ${{ secrets.GH_PAT }}
         path: "generator"
 
+    - name: Checkout build branch
+      uses: actions/checkout@v2
+      with:
+        ref: "build"
+        path: "generator/build"
+
     - name: Create directory structure
       run: |
         cd generator
-        mkdir -p build
+        rm -rf build/css build/images build/js
         cp -r assets/css build/css
         cp -r assets/images build/images
         cp -r assets/js build/js
@@ -49,3 +55,18 @@ jobs:
           ../tutorial/tutorial/domains.md \
           ../tutorial/tutorial/termination.md \
           ../tutorial/tutorial/further-info.md
+
+    - name: Create build commit
+      run: |
+        cd generator/build
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add css images js index.html
+        git commit -m "Deploy $(date +'%Y-%m-%d %H:%M:%S')"
+
+    - name: Push tutorial to build branch
+      uses: ad-m/github-push-action@master
+      with:
+        branch: build
+        force: true
+        directory: generator/build
