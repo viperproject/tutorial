@@ -15,7 +15,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: "viperproject/viperonline-tutorial-generator"
-        ref: "cleanup-2022"
         token: ${{ secrets.GH_PAT }}
         path: "generator"
 
