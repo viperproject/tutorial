@@ -23,7 +23,7 @@ where `f` is a globally-unique function name, followed by a possibly-empty list 
 
 The following example defines a function `listLength` that takes a null-terminated simply-linked list and computes its length. As shown in the body of `listLength`, function applications are written simply as the function name followed by appropriately-typed arguments in parentheses. The precondition of `listLength` expresses the fact that the function application can only be evaluated when the corresponding `list` predicate instance is held, while the post-condition expresses the fact that the length of a list is always a non-negative integer.
 
-```silver {.runnable}
+```silver-runnable
 field elem: Int
 field next: Ref
 
@@ -54,7 +54,7 @@ Viper checks that the function body and any postconditions are framed by the pre
 In order to enable function termination checks, which are *not* performed by default, users can specify termination measures, as discussed in [the chapter on termination](#termination).
 As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:
 
-```silver {.runnable}
+```silver-runnable
 function bad() : Int
   ensures 0 == 1
 { bad() }
@@ -83,7 +83,7 @@ list segment example from the [predicates section](#predicates): instead of usin
 abstract representation of the list segment (as a mathematical
 sequence), a function is introduced that computes the abstraction. This usage of functions to eliminate  predicate parameters which are redundant (in the sense that their values can instead be computed given any predicate instance and its other parameters) is common in Viper.
 
-```silver {.runnable }
+```silver-runnable
 field elem: Int
 field next: Ref
 

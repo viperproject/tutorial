@@ -68,7 +68,7 @@ be unchanged. Consequently, it is not necessary to write explicit loop
 invariants to preserve information about these variables and locations, as is
 illustrated by the following example:
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 field g: Int
 

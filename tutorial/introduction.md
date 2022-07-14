@@ -14,7 +14,7 @@ The following simple example shows a method that computes the sum of the first `
 
  Viper verifies *partial correctness* of program statements; that is, verification guarantees that *if* a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of `sum` is guaranteed to hold whenever a call to `sum` terminates. Verification of loops also requires specification: the loop in `sum`'s body needs a *loop invariant* (if omitted, the default loop invariant is `true`, which is typically not strong enough to prove interesting properties of the program). The loop invariant in `sum` could also be written in one line with the boolean operator `&&` placed between the two assertions.
 
-```silver {.runnable }
+```silver-runnable
 method sum(n: Int) returns (res: Int)
   requires 0 <= n
   ensures  res == n * (n + 1) / 2
@@ -30,7 +30,6 @@ method sum(n: Int) returns (res: Int)
   }
 }
 ```
-
 
 //exercise//
 

@@ -44,7 +44,7 @@ method append_iterative(l1 : Ref, l2: Ref)
 
 Using a standard linked-list predicate `list`, and a function `elems` to fetch the sequence of elements stored in a linked-list, we can specify the intended behaviour of our method, and add a first-attempt at a loop invariant, as follows:
 
-```silver {.runnable }
+```silver-runnable
 field next : Ref
 field val : Int
 
@@ -104,7 +104,7 @@ In this version of the code, we've added the extra variables `index` (representi
 
 We can now employ magic wands to retain the lost permissions. In order to retain (during execution of the loop) the permissions to the previously-visited nodes in the list, we use a magic wand `list(tmp) --* list(l1)`. This magic wand represents sufficient resources to guarantee that *if* we give up a `list(tmp)` predicate along with this wand, we can obtain a `list(l1)` predicate; conceptually, it represents the permissions to the earlier segment of the list between `l1` and `tmp`.
 
-```silver {.runnable }
+```silver-runnable
 field next : Ref
 field val : Int
 
@@ -196,7 +196,7 @@ So far, we have used magic wands with only resource assertions on their left- an
 
 Recall that the magic wand used so far is `list(tmp) --* list(l1)`. One way to finish our example is to express that the elements that `list(l1)` _will have_ after applying the magic wand are guaranteed to be a prefix of the elements from the original list, plus whichever elements `list(tmp)` has at the point of applying the magic wand. Informally, we might consider writing something like `elems(l1) == old(elems(l1)[..index]) ++ elems(tmp)`. However, this expression is not quite well-defined; we never hold _both_ the predicate `list(l1)` and the predicate `list(tmp)` at the same time; `list(tmp)` is given up as part of applying the magic wand itself. In order to evaluate heap-dependent expressions in the state corresponding to the wand's left-hand-side, Viper supports the construct: `old[lhs](e)`, which may only be used in the right-hand-side of a magic wand, and causes the expression `e` to be evaluated in the corresponding left-hand state. Thus, we can express our desired magic wand as: `list(tmp) --* list(l1) && elems(l1) == old(elems(l1)[..index]) ++ old[lhs](elems(tmp))`. The corresponding full version of the example above is presented below:
 
-```silver {.runnable }
+```silver-runnable
 field next : Ref
 field val : Int
 
@@ -257,7 +257,7 @@ method appendit_wand(l1 : Ref, l2: Ref)
 
 <!---
 
-```silver {.runnable }
+```silver-runnable
 
 field next : Ref
 field val : Int

@@ -29,7 +29,7 @@ You can check how triggers affect the verification in the following examples:
 - in `dangerous_triggers` the bad choice of the triggers leads to an infinite loop of instantiations (in this case, each instantiation results in a new expression which matches the trigger): a problem known as [*matching loop*](http://www.hpl.hp.com/techreports/2003/HPL-2003-148.pdf). In this case, the SMT solver times out without providing an answer.
 - in `good_triggers` the choice of the triggers allows the SMT solver to quickly provide the right answer, preventing the problematic matching loop of the previous example.
 
-```silver {.runnable}
+```silver-runnable
 function magic(i:Int) : Int
 
 method restrictive_triggers()

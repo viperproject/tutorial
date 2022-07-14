@@ -6,7 +6,7 @@ The basic idea is to allow resource assertions such as `acc(e.f)` to occur withi
 
 As a simple example, we can model a "binary graph" (in which each node has at most two outgoing edges) in the heap, in terms of a set of `nodes`, using the following quantified permission assertion: `forall n:Ref :: { n.first }{ n.second } n in nodes ==> acc(n.first) && acc(n.second)`. Such an assertion provides permission to access the `first` and `second` fields of all nodes `n` (as explained in the [previous section on quantifiers](#quantifiers), the `{ n.first }{ n.second }` syntax denotes triggers). To usefully model a graph, one would typically also require the `nodes` set to be closed under the graph edges, so that a traversal is known to stay within these permissions; this is illustrated in the following example:
 
-```silver {.runnable }
+```silver-runnable
 field first : Ref
 field second : Ref
 
@@ -38,7 +38,7 @@ method inc(nodes: Set[Ref], x: Ref)
 
 In the above examples, the receiver expressions used to specify permissions (the `e` expression in `acc(e.f)`) were always the quantified variable itself. This is not a requirement; for example, in the following code, quantified permissions are used along with a function `address` in the `exhale` statement, to exhale permission to multiple field locations:
 
-```silver {.runnable }
+```silver-runnable
 field val : Int
 
 function address(i:Int) : Ref

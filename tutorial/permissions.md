@@ -13,7 +13,7 @@ In pre- and postconditions, and generally in assertions, permission to a field i
 
 A simple example is given next: a method `inc` that increments the field `x.f` by an arbitrary value `i`.
 
-```silver {.runnable }
+```silver-runnable
 field f : Int
 
 method inc(x: Ref, i: Int)
@@ -63,7 +63,7 @@ In addition to specifying which permissions to transfer, Viper assertions may al
 Consider now the call in the first line of method `client` in the example below: `set`'s precondition specifies that the permission to `a.f` is transferred from the caller to the callee, and that `i` must be greater than `a.f`. Thus, method `client` has to exhale the permission to `a.f` (which is inhaled by `set`) and the caller has to prove that `a.f < i` (which it currently cannot). Conversely, the postcondition causes the permission to be transferred back to the caller when `set` terminates, i.e., it is inhaled by method `client`, and the caller gains the knowledge that `a.f == 5`.
 When verifying method `set` itself, the opposite happens: permission to `x.f` is inhaled before the method body is verified, alongside the fact that `x.f < i`. After the body has been verified, permission to `x.f` are exhaled and it is checked that `x.f`'s value is indeed `i`.
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method client(a: Ref)
@@ -108,7 +108,7 @@ The informal semantics of `inhale A` is as follows:
 
 As an example, consider the following Viper program (ignoring, for the moment, the commented-out lines):
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method set_inex(x: Ref, i: Int) {
@@ -151,7 +151,7 @@ The assertions in explicit `inhale` and `exhale` statements need not be self-fra
 
 Permissions to field locations as described so far are exclusive; it is not possible to hold permission to a location more than once. This built-in principle can indirectly guarantee non-aliasing between references: inhaling the assertions `acc(x.f)` and `acc(y.f)` implies `x != y` because otherwise, the *exclusive* permission to `acc(x.f)` would be held twice. This is demonstrated by the following program:
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method exclusivity(x: Ref, y: Ref) {
@@ -177,7 +177,7 @@ Intuitively, the statement `inhale acc(x.f) && acc(y.f)` can be understood as in
 
 We can now see how exclusive permissions enable framing and modular verification, as illustrated by the next example below. Here, method `client` is able to frame the property `b.f == 3` across the call to `inc(a, 3)` because holding permission to both `a.f` and `b.f` implies that `a` and `b` cannot be aliases, and because method `inc`'s specification states that `inc` only requires the permission to `a.f`. Since permission to `b.f` is _retained_, the value of `b.f` can be framed across the method call. Informally, and thinking more operationally, the method would not be able to modify this field location, since it lacks the necessary permission to do so.
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method inc(x: Ref, i: Int)
@@ -221,7 +221,7 @@ The general form of an accessibility predicate for field permissions is `acc(e.f
 
 The next example illustrates the usage of fractional permissions to distinguish between read and write access: there, method `copyAndInc` requires write permission to `x.f`, but only read permission (we arbitrarily chose `1/2`, but any non-zero fraction would suffice) to `y.f`.
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method copyAndInc(x: Ref, y: Ref)
@@ -244,7 +244,7 @@ Fractional permissions to the same location are *summed up*: inhaling `acc(x.f, 
 
 To illustrate this, consider the next example (and its exercises): there, the `assert` statement fails because holding one third permission to each `x.f` and `y.f` does not imply that `x` and `y` cannot be aliases, since the sum of the individual permission amounts does not exceed 1.
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method test(x: Ref, y: Ref) {
@@ -266,7 +266,7 @@ While fractional permissions no longer always guarantee non-aliasing between ref
 
 The next example illustrates the use of fractional permissions for framing: there, method `client` can frame the property `b.f == 3` across the call to `copyAndInc` because `client` retains half the permission to `b.f` across the call. Note that the postcondition of `copyAndInc` does not explicitly state that the value of `y.f` remains unchanged.
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 
 method copyAndInc(x: Ref, y: Ref)
