@@ -1362,13 +1362,13 @@ follows:</p>
 <li>Note that <code>unfolding</code> is an <a href="#expressions">expression</a>, not a statement</li>
 </ul>
 <h1 id="expressions-and-assertions">Expressions and Assertions</h1><h2 id="expressions">Expressions</h2><p>Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.</p>
-<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting rational numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>) and sequence (<code>Seq[T]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
+<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting rational numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>), sequence (<code>Seq[T]</code>), and map (<code>Map[T, U]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
 <p>Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression <code>x % y</code> is not well-defined if <code>y</code> is equal to zero, and the expression <code>o.f</code> is only well-defined if the current method has the permission to read <code>o.f</code> (which also implies that <code>o</code> is not null).</p>
 <p>In the following, we list the different kinds of expressions, remark on their well-definedness conditions (if any) and the value that they evaluate to.</p>
 <h3 id="expressions-of-multiple-types">Expressions of multiple types</h3><ul>
 <li><p>field access <code>e.f</code>: to be well-defined, this requires at least some permission to read the field location; returns a value of the type of the field.</p>
 </li>
-<li><p>function application <code>f(...)</code>: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function’s precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the type of the function. See the respective sections for more information on top-level <a href="#functions">functions</a> and <a href="#domains">domains</a>.</p>
+<li><p>function application <code>f(...)</code>: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function’s precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the return type of the function. See the respective sections for more information on top-level <a href="#functions">functions</a> and <a href="#domains">domains</a>.</p>
 </li>
 <li><p>local variable and parameter evaluation <code>x</code>: read the current value of the named variable or parameter. Note that it is possible to read local variables which have not been assigned to; in this case, the expression will evaluate to an arbitrary value of its type.</p>
 </li>
@@ -1383,7 +1383,7 @@ follows:</p>
 <li><p>let expressions <code>let v == (e1) in e2</code>: Evaluates <code>e1</code>, and subsequently evaluates <code>e2</code> in a context where the variable <code>v</code> is bound to the value of <code>e1</code> (currently, the <em>parentheses are necessary</em>). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the <em>argument</em> of a function call <code>f(x.f)</code> in the current state and the function application itself in the current method’s old state, this can be expressed by using a let expression as follows: <code>let y == (x.f) in old(f(y))</code>.</p>
 </li>
 </ul>
-<h3 id="integer-expressions">Integer expressions:</h3><ul>
+<h3 id="integer-expressions">Integer expressions</h3><ul>
 <li><p>constants, e.g. <code>-2</code>, <code>1023123909</code>. Integers in Viper are signed and unbounded.</p>
 </li>
 <li><p>unary minus <code>-e</code>: Negates the value of <code>e</code> if <code>e</code> is itself an integer.</p>
@@ -1448,17 +1448,38 @@ follows:</p>
 </li>
 <li><p>sequence literal: <code>Seq(e1, e2, ..., en)</code>, where <code>e1</code>-<code>en</code> are expressions that all have a common type <code>T</code>, represents a sequence of type <code>Seq[T]</code> of <code>n</code> elements, whose elements are the argument expressions (i.e., the first element is <code>e1</code>, the second <code>e2</code> etc., and the last is <code>en</code>.</p>
 </li>
-<li><p>integer sequence literals <code>[e1..e2]</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
+<li><p>integer sequence literals: <code>[e1..e2]</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
 </li>
-<li><p>sequence lookup <code>s[e]</code>, where <code>s</code> is an expression of type <code>Seq[T]</code> for some <code>T</code> and <code>e</code> is an integer, returns the element at index <code>e</code> in the sequence. As a well-definedness condition, <code>e</code> must be known to be non-negative and less than the length of <code>s</code>, otherwise this expression will result in a verification error.</p>
+<li><p>sequence lookup: <code>s[e]</code>, where <code>s</code> is an expression of type <code>Seq[T]</code> for some <code>T</code> and <code>e</code> is an integer, returns the element at index <code>e</code> in the sequence. As a well-definedness condition, <code>e</code> must be known to be non-negative and less than the length of <code>s</code>, otherwise this expression will result in a verification error.</p>
 </li>
-<li><p>sequence concatenation <code>e1 ++ e2</code> results in a new sequence whose elements are the elements of <code>e1</code>, followed by those of <code>e2</code>.</p>
+<li><p>sequence concatenation: <code>e1 ++ e2</code> results in a new sequence whose elements are the elements of <code>e1</code>, followed by those of <code>e2</code>.</p>
 </li>
-<li><p>A sequence update <code>s[e1 := e2]</code>, where <code>e1</code> has type <code>Int</code>, <code>s</code> has type <code>Seq[T]</code> for some <code>T</code> and <code>e2</code> is of type <code>T</code>, denotes the sequence that is identical to <code>s</code>, except that the element at index <code>e1</code> is <code>e2</code> (the operation does not change the original sequence’s value, but rather defines a new sequence).</p>
+<li><p>sequence update: <code>s[e1 := e2]</code>, where <code>e1</code> has type <code>Int</code>, <code>s</code> has type <code>Seq[T]</code> for some <code>T</code> and <code>e2</code> is of type <code>T</code>, denotes the sequence that is identical to <code>s</code>, except that the element at index <code>e1</code> is <code>e2</code> (the operation does not change the original sequence’s value, but rather defines a new sequence).</p>
 </li>
 <li><p>sub-sequence operations: <code>s[e1..e2]</code>, where <code>s</code> is a sequence and <code>e1</code> and <code>e2</code> are integers, returns a new sequence that contains the elements of <code>s</code> starting from index <code>e1</code> until (but not including) index <code>e2</code>. The values of <code>e1</code> and <code>e2</code> need <em>not</em> be valid indices for the sequence; for negative <code>e1</code> the operator behaves as if <code>e1</code> were equal to <code>0</code>, for <code>e1</code> larger than <code>|s|</code> the empty sequence will result (and vice versa for <code>e2</code>). Optionally, either the first or the second index can be left out (leading to expressions of the form <code>s[..e]</code> and <code>s[e..]</code>), in which case only elements at the end or at the beginning of <code>s</code> are dropped, respectively.</p>
 </li>
-<li><p>sequence length (<code>|s|</code>) returns the length of a sequence as an integer.</p>
+<li><p>sequence length: <code>|s|</code> returns the length of a sequence as an integer.</p>
+</li>
+<li><p>sequence member check: <code>e in s</code> evaluates to true if <code>e</code> is in the sequence <code>s</code>.</p>
+</li>
+</ul>
+<h3 id="maps">Map expressions</h3><p>Viper’s built-in map type <code>Map[T, U]</code> represents immutable partial maps from elements of type <code>T</code> to elements of type <code>U</code>.</p>
+<ul>
+<li><p>empty map: <code>Map[T, U]()</code> evaluates to an empty map of type <code>Map[T, U]</code>. As with empty set literals, the type arguments only have to be stated explicitly if they are not clear from the surrounding context.</p>
+</li>
+<li><p>map literal: <code>Map(k1 := v1, k2 := v2, ..., kn := vn)</code> evaluates to a map mapping the keys <code>k1</code> to <code>kn</code> to the values <code>v1</code> to <code>vn</code>, respectively. It has type <code>Map[T, U]</code>, where <code>T</code> is the common type of the expressions <code>k1</code> to <code>kn</code> and <code>U</code> is the common type of the expressions <code>v1</code> to <code>vn</code>.</p>
+</li>
+<li><p>map lookup: <code>m[e]</code> looks up the value corresponding to the key <code>e</code> in the map <code>m</code>. This expression is well-defined if <code>e</code> is contained in the domain of <code>m</code>.</p>
+</li>
+<li><p>map update: <code>m[k := v]</code> denotes the map that is identical to <code>m</code>, except that the key <code>k</code> maps to <code>v</code>. The key may or may not exist in the original map.</p>
+</li>
+<li><p>map member check: <code>k in m</code> evaluates to true if <code>k</code> is part of the domain of map <code>m</code>.</p>
+</li>
+<li><p>map domain: <code>domain(m)</code> evaluates to the set of all keys contained in the map.</p>
+</li>
+<li><p>map range: <code>range(m)</code> evalutes to the set of all values contained in the map.</p>
+</li>
+<li><p>map cardinality: <code>|m|</code> evaluates to the number of keys contained in the map.</p>
 </li>
 </ul>
 <h3 id="perm-expressions">Perm expressions</h3><p>Expressions of type <code>Perm</code> are rational numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
