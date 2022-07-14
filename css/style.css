@@ -44,138 +44,141 @@ table {
 }
 
 /* viper tutorial */
+html {
+  font-size: calc(1px + 1.2vw);
+  /* calc(13px + 0.391vw); */
+}
+
 body {
-    color: #888;
-    font-family: "Arial", "Helvetica", sans-serif;
-    font-size: 11pt;
-    line-height: 1.4em;
+  color: #222;
+  font-family: "Arial", "Helvetica", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.55rem;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    color: #777;
-    font-weight: 700;
-    line-height: 1em;
-    margin: 0 0 0.5625em 0;
+  color: #555;
+  font-weight: 700;
+  line-height: 1rem;
+  margin: 2rem 0 0.5rem 0;
 }
 
 h1 {
-    font-size: 2.25em;
-    line-height: 1.75em;
+  font-size: 2.25rem;
+  line-height: 1.75rem;
 }
 h2 {
-    font-size: 1.75em;
-    line-height: 1.5em;
+  font-size: 1.75rem;
+  line-height: 1.5rem;
 }
 h3 {
-    font-size: 1.5em;
-    line-height: 1.5em;
+  font-size: 1.5rem;
+  line-height: 1.5rem;
 }
 
-#header {
-    background: #0069B4;
-    height: 100vh;
-    position: fixed;
-    overflow-y: auto;
-    right: 0;
-    top: 0;
-    width: 20em;
+#sidebar {
+  background: #0069B4;
+  height: 100vh;
+  position: fixed;
+  overflow-y: auto;
+  right: 0;
+  top: 0;
+  width: 25vw;
 }
 
-#header .logoWrapper {
-    margin: 20px auto 0;
-    width: 190px;
+#sidebar .logoWrapper {
+  margin: 20px auto 0;
+  padding: 0 0 0 1rem;
 }
 
-#header .linkWrapper {
-    margin: -7px auto 10px;
-    width: 190px;
+#sidebar .linkWrapper {
+  margin: -7px auto 10px;
+  padding: 0 0 0 1rem;
 }
 
-#header .linkWrapper a {
-    color: #fff;
-    font-size: 11px;
+#sidebar .linkWrapper a {
+  color: #fff;
+  font-size: 11px;
 }
 
 #nav {
-    padding: 0 0 20px;
+  padding: 0 0 2rem;
 }
 
 #nav li a {
-    color: #fff;
+  color: #fff;
 }
 
 #nav li.H1 {
-    line-height: 190%;
-    margin: 0 0 0 15px;
+  font-size: 1.05rem;
+  line-height: 190%;
+  margin: 0 0 0 1rem;
 }
 #nav li.H2 {
-    font-size: .9em;
-    line-height: 160%;
-    margin: 0 0 0 40px;
+  font-size: .9rem;
+  line-height: 160%;
+  margin: 0 0 0 2rem;
 }
 #nav li.H2 a::before {
-    content: "\00BB \0020";
+  content: "\00BB \0020";
 }
 
 #main, #footer {
-    padding-right: 20em;
+  padding-right: 25vw;
 }
 
 #main .container, #footer .container {
-    margin-left: auto;
-    margin-right: auto;
-    padding: 4em 0 2em;
-    width: 43em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 4rem 0 2rem;
+  width: 50vw;
 }
 
 /* custom elements */
 .load-code {
-    bottom: 1.25em;
-    position: absolute;
-    right: 1.25em;
-    height: 50px;
-    width: 50px;
-    background-image: url("../images/pen.png");
-    background-size: 50px 50px;
-    cursor: pointer;
+  bottom: 1.25em;
+  position: absolute;
+  right: 1.25em;
+  height: 50px;
+  width: 50px;
+  background-image: url("../images/pen.png");
+  background-size: 50px 50px;
+  cursor: pointer;
 }
 
 .further_study:before {
-	content: url("../images/magnifier.png") " Further study";
-	width: 100%;
-	color: #0069B4;
-	font-size: 24pt;
+  content: url("../images/magnifier.png") " Further study";
+  width: 100%;
+  color: #0069B4;
+  font-size: 24pt;
 }
 
 .important:before {
-	content: url("../images/important.png") " Important";
-	font-size: 24pt;
-	width: 100%;
-	color: #0069B4;
-
+  content: url("../images/important.png") " Important";
+  font-size: 24pt;
+  width: 100%;
+  color: #0069B4;
 }
 
 .exercise:before {
-	content: url("../images/exercise.png") " Exercise";
-	width: 100%;
-	color: #0069B4;
-	font-size: 24pt;
+  content: url("../images/exercise.png") " Exercise";
+  width: 100%;
+  color: #0069B4;
+  font-size: 24pt;
 }
 
 .warning:before {
-	content: url("../images/warning.png") " Warning";
-	width: 100%;
-	color: #F34A3E;
-	font-size: 24pt;
+  content: url("../images/warning.png") " Warning";
+  width: 100%;
+  color: #F34A3E;
+  font-size: 24pt;
 }
 
-
 .note:before {
-	content: " Note: ";
-	width: 100%;
-	color: #D67400;
-	/* font-size: 24pt; */
-	font-weight: bold;
+  content: " Note: ";
+  width: 100%;
+  color: #D67400;
+  font-weight: bold;
 }
 
 .alert-note {
@@ -193,63 +196,63 @@ h3 {
 #tutorial pre,
 #tutorial > ul,
 #tutorial > ol {
-    margin: 1.25em 0 1.25em 0;
+  margin: 1.25rem 0 1.25rem 0;
 }
 
 #tutorial pre {
-    position: relative;
+  position: relative;
 }
 
 #tutorial pre, #tutorial code {
-    font-family: "Source Code Pro", monospace;
+  font-family: "Source Code Pro", monospace;
 }
 
 #tutorial li {
-    margin-left: 0;
-    padding-left: 1em;
-    position: relative;
+  margin-left: 0;
+  padding-left: 1rem;
+  position: relative;
 }
 
 #tutorial ul li::before {
-    content: "▪";
-    font-size: 1.5em;
-    left: 0;
-    position: absolute;
-    top: 0;
+  content: "▪";
+  font-size: 1.5rem;
+  left: 0;
+  position: absolute;
+  top: 0;
 }
 
 #tutorial ol li {
-    counter-increment: order;
+  counter-increment: order;
 }
 
 #tutorial ol li::before {
-    content: counter(order) ". ";
-    left: 0;
-    position: absolute;
-    top: 0;
+  content: counter(order) ". ";
+  left: 0;
+  position: absolute;
+  top: 0;
 }
 
 #tutorial ol {
-    list-style: none;
-    counter-reset: muffins;
+  list-style: none;
+  counter-reset: muffins;
 }
 
 #footer .copyright {
-    line-height: 1em;
-    list-style: none;
-    padding: 0;
+  line-height: 1em;
+  list-style: none;
+  padding: 0;
 }
 
 #footer .copyright li {
-    border-left: solid 1px #d4d4d4;
-    display: inline-block;
-    font-size: 0.8em;
-    margin-left: 1em;
-    padding-left: 1em;
+  border-left: solid 1px #d4d4d4;
+  display: inline-block;
+  font-size: 0.8em;
+  margin-left: 1em;
+  padding-left: 1em;
 }
 
 #footer .copyright li:first-child {
-    border-left: 0;
-    margin-left: 0;
-    padding-left: 0;
+  border-left: 0;
+  margin-left: 0;
+  padding-left: 0;
 }
