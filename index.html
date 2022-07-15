@@ -1318,11 +1318,16 @@ follows:</p>
 <td><code>assume E</code></td>
 <td>Assume value properties</td>
 </tr>
+<tr>
+<td><code>refute E</code></td>
+<td>Refute permissions and value properties</td>
+</tr>
 </tbody></table>
 <ul>
 <li><code>exhale A</code> and <code>inhale A</code> are explained in the <a href="#inhale-and-exhale">section on permissions</a></li>
 <li><code>assert A</code> is similar to <code>exhale A</code>, but does not remove any permissions</li>
 <li><code>assume E</code> is equivalent to <code>inhale E</code>; note that it takes an expression rather than an assertion, which must not contain resource assertions such as accessibility predicates; this restriction may be lifted in future versions of Viper.</li>
+<li><code>refute E</code> tries to show that <code>E</code> holds for all executions that reach the statement, and causes a verification error if this is the case. In other words, if <code>E</code> is provable in some, but not all, execution paths, then the statement still passes.</li>
 </ul>
 <h2 id="verifier-directives">Verifier Directives</h2><table class="table table-striped">
 <thead>
