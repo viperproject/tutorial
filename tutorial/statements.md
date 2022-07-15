@@ -126,10 +126,12 @@ Analogous to functions, Viper does also *not* check loop (or method) termination
 | `inhale A`  | Add permissions and assume value properties |
 | `assert A` | Check permissions and value properties |
 | `assume E` | Assume value properties |
+| `refute E` | Refute permissions and value properties |
 
 * `exhale A` and `inhale A` are explained in the [section on permissions](#inhale-and-exhale)
 * `assert A` is similar to `exhale A`, but does not remove any permissions
 * `assume E` is equivalent to `inhale E`; note that it takes an expression rather than an assertion, which must not contain resource assertions such as accessibility predicates; this restriction may be lifted in future versions of Viper.
+* `refute E` tries to show that `E` holds for all executions that reach the statement, and causes a verification error if this is the case. In other words, if `E` is provable in some, but not all, execution paths, then the statement still passes.
 
 ## Verifier Directives
 
