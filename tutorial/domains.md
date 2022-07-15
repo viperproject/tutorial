@@ -298,3 +298,45 @@ Therefore, we need to add the permissions to the array to the loop invariant:
 ```
 
 For a complete example, see the Viper encoding of [Array Max, by elimination](http://viper.ethz.ch/examples/max-array-elimination.html).
+
+## ADT plugin
+
+```silver-runnable
+adt List[T] {
+    Nil()
+    Cons(value: T, tail: List[T])
+}
+```
+
+The ADT plugin is an extension to Viper that enables declarations of algebraic datatypes. These consist of one or more constructors, each of which has zero or more arguments. Any instance of such a datatype then corresponds to exactly one of these constructors. There is syntax to identify which constructor an instance corresponds to, as well as syntax to extract the arguments given to that constructor. As in the example above, ADTs can have type parameters and can be recursive.
+
+Iternally, the ADT syntax is translated into domains and domain function applications.
+
+The plugin is enabled by default, and can be disabled with the command-line option `--disableAdtPlugin`.
+
+### Discriminators
+
+For every constructor of the ADT, a *discriminator* is generated. Syntactically, this is a field with the name `is<Constructor>` with a `Bool` type.
+
+```silver
+assert Cons(1, Cons(2, Nil())).isCons
+assert Nil().isNil
+```
+
+### Destructors
+
+For every argument of every constructor of the ADT, a *destructor* is generated. This is a field that extracts the given argument out of the constructor, and is only well-defined if the ADT instance is known to correspond to the given constructor.
+
+```silver
+assert Cons(1, Nil()).value == 1
+assert Cons(1, Nil()).tail == Nil()
+
+// this expression is not well-defined:
+// assert Nil().value == 0
+```
+
+### Derived methods
+
+TODO: `derive` syntax, in general
+TODO: `contains`
+TODO: `contains without ...`
