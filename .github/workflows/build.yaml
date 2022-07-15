@@ -64,6 +64,7 @@ jobs:
         git commit -m "Deploy $(date +'%Y-%m-%d %H:%M:%S')"
 
     - name: Push tutorial to build branch
+      if: github.ref == "refs/heads/master" && github.event_name != "pull_request"
       uses: ad-m/github-push-action@master
       with:
         branch: build
