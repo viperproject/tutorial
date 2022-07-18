@@ -337,6 +337,66 @@ assert Cons(1, Nil()).tail == Nil()
 
 ### Derived methods
 
-TODO: `derive` syntax, in general
-TODO: `contains`
-TODO: `contains without ...`
+Smilarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.
+
+```silver
+import <adt/derives.vpr>
+
+adt Name[...] {
+    ...
+} derives {
+    ...
+}
+```
+
+The block after the `derives` keyword is a list of functions that should be derived for the declared ADT. At the moment, the only supported operation is `contains`, but this may change in future Viper versions.
+
+Note that the `import <adt/derives.vpr>` is required for derived methods to work.
+
+### `contains`
+
+When the `contains` operation is derived, the function `contains` becomes available for the given ADT. Given a value and an ADT instance, it evaluates to `true` if the former value is found inside the ADT instance, as one of its constructor arguments. This evaluation works recursively.
+
+```silver-runnable
+import <adt/derives.vpr>
+
+adt List[T] {
+    Nil()
+    Cons(value: T, tail: List[T])
+} derives {
+    contains
+}
+
+method client() {
+    var x: List[Int] := Cons(42, Cons(33, Nil()))
+
+    // test for the "value" argument of type Int in x
+    assert contains(42, x)
+    assert contains(33, x)
+
+    // test for the "tail" argument of type List[Int] in x
+    assert contains((Nil() : List[Int]), x)
+    assert contains(Cons(33, Nil()), x)
+}
+```
+
+By default, all arguments of every constructor of an ADT are considered for the `contains` operation. An optional comma-separated blocklist of arguments can be declared, which will cause the `contains` operation to ignore the named arguments:
+
+```silver-runnable
+import <adt/derives.vpr>
+
+adt Tree[T] {
+    Leaf()
+    Node(left: Tree[T], val: T, right: Tree[T])
+} derives {
+    contains without left, right
+}
+
+method client() {
+    var x: Tree[Int] := Node(Leaf(), 42, Node(Leaf(), 33, Leaf()))
+    assert contains(42, x)
+
+    // will fail to prove, because "right" is in the blocklist
+    assert contains(Node(Leaf(), 33, Leaf()), x)
+}
+````
