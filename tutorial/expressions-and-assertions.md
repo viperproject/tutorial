@@ -16,6 +16,8 @@ In the following, we list the different kinds of expressions, remark on their we
 
 * function application `f(...)`: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function's precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the return type of the function. See the respective sections for more information on top-level [functions](#functions) and [domains](#domains).
 
+* typed function application `(f(...) : Type)`: a variant of the above that additionally enforces that the return type of the function application to be the one given in the expression. This is particularly useful with [domains](#domains) with type parameters, for example `(Nil() : List[Bool])`. The parentheses are mandatory.
+
 * local variable and parameter evaluation `x`: read the current value of the named variable or parameter. Note that it is possible to read local variables which have not been assigned to; in this case, the expression will evaluate to an arbitrary value of its type.
 
 * conditional expressions `e1 ? e2 : e3`, where `e1` has type `Bool` and `e2` and `e3` must have the same type; evaluates to `e2` if `e1` is `true`, and otherwise to `e3`. Short-circuiting evaluation is taken into account when checking well-definedness conditions; e.g. `e2` need only be well-defined when `e1` evaluates to true.
