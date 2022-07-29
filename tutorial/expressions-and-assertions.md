@@ -4,7 +4,7 @@
 
 Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.
 
-The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting rational numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`) and sequence (`Seq[T]`) types, and users can define custom types using [domains](#domains).
+The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting rational numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`), sequence (`Seq[T]`), and map (`Map[T, U]`) types, and users can define custom types using [domains](#domains).
 
 Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression `x % y` is not well-defined if `y` is equal to zero, and the expression `o.f` is only well-defined if the current method has the permission to read `o.f` (which also implies that `o` is not null).
 
@@ -14,7 +14,9 @@ In the following, we list the different kinds of expressions, remark on their we
 
 * field access `e.f`: to be well-defined, this requires at least some permission to read the field location; returns a value of the type of the field.
 
-* function application `f(...)`: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function's precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the type of the function. See the respective sections for more information on top-level [functions](#functions) and [domains](#domains).
+* function application `f(...)`: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function's precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the return type of the function. See the respective sections for more information on top-level [functions](#functions) and [domains](#domains).
+
+* typed function application `(f(...) : Type)`: a variant of the above that additionally enforces that the return type of the function application to be the one given in the expression. This is particularly useful with [domains](#domains) with type parameters, for example `(Nil() : List[Bool])`. The parentheses are mandatory.
 
 * local variable and parameter evaluation `x`: read the current value of the named variable or parameter. Note that it is possible to read local variables which have not been assigned to; in this case, the expression will evaluate to an arbitrary value of its type.
 
@@ -28,7 +30,7 @@ In the following, we list the different kinds of expressions, remark on their we
 
 * let expressions `let v == (e1) in e2`: Evaluates `e1`, and subsequently evaluates `e2` in a context where the variable `v` is bound to the value of `e1` (currently, the *parentheses are necessary*). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the *argument* of a function call `f(x.f)` in the current state and the function application itself in the current method's old state, this can be expressed by using a let expression as follows: `let y == (x.f) in old(f(y))`.
 
-### Integer expressions:
+### Integer expressions
 
 * constants, e.g. `-2`, `1023123909`. Integers in Viper are signed and unbounded.
 
@@ -116,17 +118,39 @@ Viper's built-in sequence type `Seq[T]` represents immutable finite sequences of
 
 * sequence literal: `Seq(e1, e2, ..., en)`, where `e1`-`en` are expressions that all have a common type `T`, represents a sequence of type `Seq[T]` of `n` elements, whose elements are the argument expressions (i.e., the first element is `e1`, the second `e2` etc., and the last is `en`.
 
-* integer sequence literals `[e1..e2]`, where `e1` and `e2` are `Int`-typed, represent the sequence of integers ranging from `e1` until, but excluding, `e2` (or the empty sequence, if `e2` is less than or equal to `e1`).
+* integer sequence literals: `[e1..e2]`, where `e1` and `e2` are `Int`-typed, represent the sequence of integers ranging from `e1` until, but excluding, `e2` (or the empty sequence, if `e2` is less than or equal to `e1`).
 
-* sequence lookup `s[e]`, where `s` is an expression of type `Seq[T]` for some `T` and `e` is an integer, returns the element at index `e` in the sequence. As a well-definedness condition, `e` must be known to be non-negative and less than the length of `s`, otherwise this expression will result in a verification error.
+* sequence lookup: `s[e]`, where `s` is an expression of type `Seq[T]` for some `T` and `e` is an integer, returns the element at index `e` in the sequence. As a well-definedness condition, `e` must be known to be non-negative and less than the length of `s`, otherwise this expression will result in a verification error.
 
-* sequence concatenation `e1 ++ e2` results in a new sequence whose elements are the elements of `e1`, followed by those of `e2`.
+* sequence concatenation: `e1 ++ e2` results in a new sequence whose elements are the elements of `e1`, followed by those of `e2`.
 
-* A sequence update `s[e1 := e2]`, where `e1` has type `Int`, `s` has type `Seq[T]` for some `T` and `e2` is of type `T`, denotes the sequence that is identical to `s`, except that the element at index `e1` is `e2` (the operation does not change the original sequence's value, but rather defines a new sequence).
+* sequence update: `s[e1 := e2]`, where `e1` has type `Int`, `s` has type `Seq[T]` for some `T` and `e2` is of type `T`, denotes the sequence that is identical to `s`, except that the element at index `e1` is `e2` (the operation does not change the original sequence's value, but rather defines a new sequence).
 
 * sub-sequence operations: `s[e1..e2]`, where `s` is a sequence and `e1` and `e2` are integers, returns a new sequence that contains the elements of `s` starting from index `e1` until (but not including) index `e2`. The values of `e1` and `e2` need *not* be valid indices for the sequence; for negative `e1` the operator behaves as if `e1` were equal to `0`, for `e1` larger than `|s|` the empty sequence will result (and vice versa for `e2`). Optionally, either the first or the second index can be left out (leading to expressions of the form `s[..e]` and `s[e..]`), in which case only elements at the end or at the beginning of `s` are dropped, respectively.
 
-* sequence length (`|s|`) returns the length of a sequence as an integer.
+* sequence length: `|s|` returns the length of a sequence as an integer.
+
+* sequence member check: `e in s` evaluates to true if `e` is in the sequence `s`.
+
+### Map expressions {#maps}
+
+Viper's built-in map type `Map[T, U]` represents immutable partial maps from elements of type `T` to elements of type `U`.
+
+* empty map: `Map[T, U]()` evaluates to an empty map of type `Map[T, U]`. As with empty set literals, the type arguments only have to be stated explicitly if they are not clear from the surrounding context.
+
+* map literal: `Map(k1 := v1, k2 := v2, ..., kn := vn)` evaluates to a map mapping the keys `k1` to `kn` to the values `v1` to `vn`, respectively. It has type `Map[T, U]`, where `T` is the common type of the expressions `k1` to `kn` and `U` is the common type of the expressions `v1` to `vn`.
+
+* map lookup: `m[e]` looks up the value corresponding to the key `e` in the map `m`. This expression is well-defined if `e` is contained in the domain of `m`.
+
+* map update: `m[k := v]` denotes the map that is identical to `m`, except that the key `k` maps to `v`. The key may or may not exist in the original map.
+
+* map member check: `k in m` evaluates to true if `k` is part of the domain of map `m`.
+
+* map domain: `domain(m)` evaluates to the set of all keys contained in the map.
+
+* map range: `range(m)` evalutes to the set of all values contained in the map.
+
+* map cardinality: `|m|` evaluates to the number of keys contained in the map.
 
 ### Perm expressions
 

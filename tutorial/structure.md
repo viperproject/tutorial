@@ -81,7 +81,7 @@ predicate list(this: Ref) {
 * Predicate instances (e.g. `list(x)`) are _resource assertions_ in Viper
 * See the [section on predicates](#predicates) for details
 
-### Domains
+### Domains {#intro-domains}
 
 ```silver
 domain Pair[A, B] {
