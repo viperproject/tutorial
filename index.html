@@ -62,6 +62,7 @@
 <li class="H2"><a href="#declaring-new-types">Declaring New Types</a></li>
 <li class="H2"><a href="#axiomatising-custom-theories">Axiomatising Custom Theories</a></li>
 <li class="H2"><a href="#array-domain">Encoding an Array Datatype</a></li>
+<li class="H2"><a href="#adt-plugin">ADT plugin</a></li>
 <li class="H1"><a href="#termination">Termination</a></li>
 <li class="H2"><a href="#termination-measures-and-decreases-clauses">Termination Measures and Decreases Clauses</a></li>
 <li class="H2"><a href="#general-syntax-of-decreases-tuples">General Syntax of Decreases Tuples</a></li>
@@ -184,7 +185,7 @@ should result in a verification error. Viper supports both <code>//</code> and <
 <li>Predicate instances (e.g. <code>list(x)</code>) are <em>resource assertions</em> in Viper</li>
 <li>See the <a href="#predicates">section on predicates</a> for details</li>
 </ul>
-<h3 id="domains">Domains</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">domain</span> Pair[A, B] {
+<h3 id="intro-domains">Domains</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">domain</span> Pair[A, B] {
   <span class="hljs-keyword">function</span> getFirst(p: Pair[A, B]): A
   <span class="hljs-comment">// other functions</span>
 
@@ -1315,15 +1316,21 @@ follows:</p>
 <td>Check permissions and value properties</td>
 </tr>
 <tr>
-<td><code>assume E</code></td>
-<td>Assume value properties</td>
+<td><code>assume A</code></td>
+<td>Assume permissions and value properties</td>
+</tr>
+<tr>
+<td><code>refute A</code></td>
+<td>Refute permissions and value properties</td>
 </tr>
 </tbody></table>
 <ul>
-<li><code>exhale A</code> and <code>inhale A</code> are explained in the <a href="#inhale-and-exhale">section on permissions</a></li>
-<li><code>assert A</code> is similar to <code>exhale A</code>, but does not remove any permissions</li>
-<li><code>assume E</code> is equivalent to <code>inhale E</code>; note that it takes an expression rather than an assertion, which must not contain resource assertions such as accessibility predicates; this restriction may be lifted in future versions of Viper.</li>
+<li><code>exhale A</code> and <code>inhale A</code> are explained in the <a href="#inhale-and-exhale">section on permissions</a>.</li>
+<li><code>assert A</code> is similar to <code>exhale A</code>, but it does not remove any permissions.</li>
+<li><code>assume A</code> is similar to <code>inhale A</code>, but it does not add any permissions.</li>
+<li><code>refute A</code> tries to show that <code>A</code> holds for all executions that reach the statement, and causes a verification error if this is the case. In other words, if <code>A</code> is provable in some, but not all, execution paths, then the statement still passes.</li>
 </ul>
+<p>Note that <code>inhale acc(...)</code> adds the given permission to the current state, whereas <code>assume acc(...)</code> only keeps executing if the given permission was already in the current state.</p>
 <h2 id="verifier-directives">Verifier Directives</h2><table class="table table-striped">
 <thead>
 <tr>
@@ -1362,13 +1369,15 @@ follows:</p>
 <li>Note that <code>unfolding</code> is an <a href="#expressions">expression</a>, not a statement</li>
 </ul>
 <h1 id="expressions-and-assertions">Expressions and Assertions</h1><h2 id="expressions">Expressions</h2><p>Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.</p>
-<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting rational numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>) and sequence (<code>Seq[T]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
+<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting rational numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>), sequence (<code>Seq[T]</code>), and map (<code>Map[T, U]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
 <p>Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression <code>x % y</code> is not well-defined if <code>y</code> is equal to zero, and the expression <code>o.f</code> is only well-defined if the current method has the permission to read <code>o.f</code> (which also implies that <code>o</code> is not null).</p>
 <p>In the following, we list the different kinds of expressions, remark on their well-definedness conditions (if any) and the value that they evaluate to.</p>
 <h3 id="expressions-of-multiple-types">Expressions of multiple types</h3><ul>
 <li><p>field access <code>e.f</code>: to be well-defined, this requires at least some permission to read the field location; returns a value of the type of the field.</p>
 </li>
-<li><p>function application <code>f(...)</code>: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function’s precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the type of the function. See the respective sections for more information on top-level <a href="#functions">functions</a> and <a href="#domains">domains</a>.</p>
+<li><p>function application <code>f(...)</code>: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function’s precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the return type of the function. See the respective sections for more information on top-level <a href="#functions">functions</a> and <a href="#domains">domains</a>.</p>
+</li>
+<li><p>typed function application <code>(f(...) : Type)</code>: a variant of the above that additionally enforces that the return type of the function application to be the one given in the expression. This is particularly useful with <a href="#domains">domains</a> with type parameters, for example <code>(Nil() : List[Bool])</code>. The parentheses are mandatory.</p>
 </li>
 <li><p>local variable and parameter evaluation <code>x</code>: read the current value of the named variable or parameter. Note that it is possible to read local variables which have not been assigned to; in this case, the expression will evaluate to an arbitrary value of its type.</p>
 </li>
@@ -1383,7 +1392,7 @@ follows:</p>
 <li><p>let expressions <code>let v == (e1) in e2</code>: Evaluates <code>e1</code>, and subsequently evaluates <code>e2</code> in a context where the variable <code>v</code> is bound to the value of <code>e1</code> (currently, the <em>parentheses are necessary</em>). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the <em>argument</em> of a function call <code>f(x.f)</code> in the current state and the function application itself in the current method’s old state, this can be expressed by using a let expression as follows: <code>let y == (x.f) in old(f(y))</code>.</p>
 </li>
 </ul>
-<h3 id="integer-expressions">Integer expressions:</h3><ul>
+<h3 id="integer-expressions">Integer expressions</h3><ul>
 <li><p>constants, e.g. <code>-2</code>, <code>1023123909</code>. Integers in Viper are signed and unbounded.</p>
 </li>
 <li><p>unary minus <code>-e</code>: Negates the value of <code>e</code> if <code>e</code> is itself an integer.</p>
@@ -1465,17 +1474,38 @@ follows:</p>
 </li>
 <li><p>sequence literal: <code>Seq(e1, e2, ..., en)</code>, where <code>e1</code>-<code>en</code> are expressions that all have a common type <code>T</code>, represents a sequence of type <code>Seq[T]</code> of <code>n</code> elements, whose elements are the argument expressions (i.e., the first element is <code>e1</code>, the second <code>e2</code> etc., and the last is <code>en</code>.</p>
 </li>
-<li><p>integer sequence literals <code>[e1..e2]</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
+<li><p>integer sequence literals: <code>[e1..e2]</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
 </li>
-<li><p>sequence lookup <code>s[e]</code>, where <code>s</code> is an expression of type <code>Seq[T]</code> for some <code>T</code> and <code>e</code> is an integer, returns the element at index <code>e</code> in the sequence. As a well-definedness condition, <code>e</code> must be known to be non-negative and less than the length of <code>s</code>, otherwise this expression will result in a verification error.</p>
+<li><p>sequence lookup: <code>s[e]</code>, where <code>s</code> is an expression of type <code>Seq[T]</code> for some <code>T</code> and <code>e</code> is an integer, returns the element at index <code>e</code> in the sequence. As a well-definedness condition, <code>e</code> must be known to be non-negative and less than the length of <code>s</code>, otherwise this expression will result in a verification error.</p>
 </li>
-<li><p>sequence concatenation <code>e1 ++ e2</code> results in a new sequence whose elements are the elements of <code>e1</code>, followed by those of <code>e2</code>.</p>
+<li><p>sequence concatenation: <code>e1 ++ e2</code> results in a new sequence whose elements are the elements of <code>e1</code>, followed by those of <code>e2</code>.</p>
 </li>
-<li><p>A sequence update <code>s[e1 := e2]</code>, where <code>e1</code> has type <code>Int</code>, <code>s</code> has type <code>Seq[T]</code> for some <code>T</code> and <code>e2</code> is of type <code>T</code>, denotes the sequence that is identical to <code>s</code>, except that the element at index <code>e1</code> is <code>e2</code> (the operation does not change the original sequence’s value, but rather defines a new sequence).</p>
+<li><p>sequence update: <code>s[e1 := e2]</code>, where <code>e1</code> has type <code>Int</code>, <code>s</code> has type <code>Seq[T]</code> for some <code>T</code> and <code>e2</code> is of type <code>T</code>, denotes the sequence that is identical to <code>s</code>, except that the element at index <code>e1</code> is <code>e2</code> (the operation does not change the original sequence’s value, but rather defines a new sequence).</p>
 </li>
 <li><p>sub-sequence operations: <code>s[e1..e2]</code>, where <code>s</code> is a sequence and <code>e1</code> and <code>e2</code> are integers, returns a new sequence that contains the elements of <code>s</code> starting from index <code>e1</code> until (but not including) index <code>e2</code>. The values of <code>e1</code> and <code>e2</code> need <em>not</em> be valid indices for the sequence; for negative <code>e1</code> the operator behaves as if <code>e1</code> were equal to <code>0</code>, for <code>e1</code> larger than <code>|s|</code> the empty sequence will result (and vice versa for <code>e2</code>). Optionally, either the first or the second index can be left out (leading to expressions of the form <code>s[..e]</code> and <code>s[e..]</code>), in which case only elements at the end or at the beginning of <code>s</code> are dropped, respectively.</p>
 </li>
-<li><p>sequence length (<code>|s|</code>) returns the length of a sequence as an integer.</p>
+<li><p>sequence length: <code>|s|</code> returns the length of a sequence as an integer.</p>
+</li>
+<li><p>sequence member check: <code>e in s</code> evaluates to true if <code>e</code> is in the sequence <code>s</code>.</p>
+</li>
+</ul>
+<h3 id="maps">Map expressions</h3><p>Viper’s built-in map type <code>Map[T, U]</code> represents immutable partial maps from elements of type <code>T</code> to elements of type <code>U</code>.</p>
+<ul>
+<li><p>empty map: <code>Map[T, U]()</code> evaluates to an empty map of type <code>Map[T, U]</code>. As with empty set literals, the type arguments only have to be stated explicitly if they are not clear from the surrounding context.</p>
+</li>
+<li><p>map literal: <code>Map(k1 := v1, k2 := v2, ..., kn := vn)</code> evaluates to a map mapping the keys <code>k1</code> to <code>kn</code> to the values <code>v1</code> to <code>vn</code>, respectively. It has type <code>Map[T, U]</code>, where <code>T</code> is the common type of the expressions <code>k1</code> to <code>kn</code> and <code>U</code> is the common type of the expressions <code>v1</code> to <code>vn</code>.</p>
+</li>
+<li><p>map lookup: <code>m[e]</code> looks up the value corresponding to the key <code>e</code> in the map <code>m</code>. This expression is well-defined if <code>e</code> is contained in the domain of <code>m</code>.</p>
+</li>
+<li><p>map update: <code>m[k := v]</code> denotes the map that is identical to <code>m</code>, except that the key <code>k</code> maps to <code>v</code>. The key may or may not exist in the original map.</p>
+</li>
+<li><p>map member check: <code>k in m</code> evaluates to true if <code>k</code> is part of the domain of map <code>m</code>.</p>
+</li>
+<li><p>map domain: <code>domain(m)</code> evaluates to the set of all keys contained in the map.</p>
+</li>
+<li><p>map range: <code>range(m)</code> evalutes to the set of all values contained in the map.</p>
+</li>
+<li><p>map cardinality: <code>|m|</code> evaluates to the number of keys contained in the map.</p>
 </li>
 </ul>
 <h3 id="perm-expressions">Perm expressions</h3><p>Expressions of type <code>Perm</code> are rational numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
@@ -1737,6 +1767,76 @@ If we still try, Viper will reports the following message:</p>
 <pre><code class="hljs language-silver">    <span class="hljs-keyword">invariant</span> access(a)
 </code></pre>
 <p>For a complete example, see the Viper encoding of <a href="http://viper.ethz.ch/examples/max-array-elimination.html">Array Max, by elimination</a>.</p>
+<h2 id="adt-plugin">ADT plugin</h2><pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">adt</span> List[T] {
+    Nil()
+    Cons(value: T, tail: List[T])
+}<div class="load-code"></div>
+</code></pre>
+<p>The ADT plugin is an extension to Viper that enables declarations of algebraic datatypes. These consist of one or more constructors, each of which has zero or more arguments. Any instance of such a datatype then corresponds to exactly one of these constructors. There is syntax to identify which constructor an instance corresponds to, as well as syntax to extract the arguments given to that constructor. As in the example above, ADTs can have type parameters and can be recursive.</p>
+<p>Iternally, the ADT syntax is translated into domains and domain function applications.</p>
+<p>The plugin is enabled by default, and can be disabled with the command-line option <code>--disableAdtPlugin</code>.</p>
+<h3 id="discriminators">Discriminators</h3><p>For every constructor of the ADT, a <em>discriminator</em> is generated. Syntactically, this is a field with the name <code>is&lt;Constructor&gt;</code> with a <code>Bool</code> type.</p>
+<pre><code class="hljs language-silver"><span class="hljs-keyword">assert</span> Cons(<span class="hljs-number">1</span>, Cons(<span class="hljs-number">2</span>, Nil())).isCons
+<span class="hljs-keyword">assert</span> Nil().isNil
+</code></pre>
+<h3 id="destructors">Destructors</h3><p>For every argument of every constructor of the ADT, a <em>destructor</em> is generated. This is a field that extracts the given argument out of the constructor, and is only well-defined if the ADT instance is known to correspond to the given constructor.</p>
+<pre><code class="hljs language-silver"><span class="hljs-keyword">assert</span> Cons(<span class="hljs-number">1</span>, Nil()).value == <span class="hljs-number">1</span>
+<span class="hljs-keyword">assert</span> Cons(<span class="hljs-number">1</span>, Nil()).tail == Nil()
+
+<span class="hljs-comment">// this expression is not well-defined:</span>
+<span class="hljs-comment">// assert Nil().value == 0</span>
+</code></pre>
+<h3 id="derived-methods">Derived methods</h3><p>Smilarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.</p>
+<pre><code class="hljs language-silver"><span class="hljs-keyword">import</span> &lt;<span class="hljs-keyword">adt</span>/<span class="hljs-keyword">derives</span>.vpr&gt;
+
+<span class="hljs-keyword">adt</span> Name[...] {
+    ...
+} <span class="hljs-keyword">derives</span> {
+    ...
+}
+</code></pre>
+<p>The block after the <code>derives</code> keyword is a list of functions that should be derived for the declared ADT. At the moment, the only supported operation is <code>contains</code>, but this may change in future Viper versions.</p>
+<p>Note that the <code>import &lt;adt/derives.vpr&gt;</code> is required for derived methods to work.</p>
+<h3 id="contains"><code>contains</code></h3><p>When the <code>contains</code> operation is derived, the function <code>contains</code> becomes available for the given ADT. Given a value and an ADT instance, it evaluates to <code>true</code> if the former value is found inside the ADT instance, as one of its constructor arguments. This evaluation works recursively.</p>
+<pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">import</span> &lt;<span class="hljs-keyword">adt</span>/<span class="hljs-keyword">derives</span>.vpr&gt;
+
+<span class="hljs-keyword">adt</span> List[T] {
+    Nil()
+    Cons(value: T, tail: List[T])
+} <span class="hljs-keyword">derives</span> {
+    contains
+}
+
+<span class="hljs-keyword">method</span> client() {
+    <span class="hljs-keyword">var</span> x: List[<span class="hljs-type">Int</span>] := Cons(<span class="hljs-number">42</span>, Cons(<span class="hljs-number">33</span>, Nil()))
+
+    <span class="hljs-comment">// test for the &quot;value&quot; argument of type Int in x</span>
+    <span class="hljs-keyword">assert</span> contains(<span class="hljs-number">42</span>, x)
+    <span class="hljs-keyword">assert</span> contains(<span class="hljs-number">33</span>, x)
+
+    <span class="hljs-comment">// test for the &quot;tail&quot; argument of type List[Int] in x</span>
+    <span class="hljs-keyword">assert</span> contains((Nil() : List[<span class="hljs-type">Int</span>]), x)
+    <span class="hljs-keyword">assert</span> contains(Cons(<span class="hljs-number">33</span>, Nil()), x)
+}<div class="load-code"></div>
+</code></pre>
+<p>By default, all arguments of every constructor of an ADT are considered for the <code>contains</code> operation. An optional comma-separated blocklist of arguments can be declared, which will cause the <code>contains</code> operation to ignore the named arguments:</p>
+<pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">import</span> &lt;<span class="hljs-keyword">adt</span>/<span class="hljs-keyword">derives</span>.vpr&gt;
+
+<span class="hljs-keyword">adt</span> Tree[T] {
+    Leaf()
+    Node(left: Tree[T], val: T, right: Tree[T])
+} <span class="hljs-keyword">derives</span> {
+    contains without left, right
+}
+
+<span class="hljs-keyword">method</span> client() {
+    <span class="hljs-keyword">var</span> x: Tree[<span class="hljs-type">Int</span>] := Node(Leaf(), <span class="hljs-number">42</span>, Node(Leaf(), <span class="hljs-number">33</span>, Leaf()))
+    <span class="hljs-keyword">assert</span> contains(<span class="hljs-number">42</span>, x)
+
+    <span class="hljs-comment">// will fail to prove, because &quot;right&quot; is in the blocklist</span>
+    <span class="hljs-keyword">assert</span> contains(Node(Leaf(), <span class="hljs-number">33</span>, Leaf()), x)
+}<div class="load-code"></div>
+</code></pre>
 <h1 id="termination">Termination</h1><p>In the context of Viper, reasoning about termination serves (at least) two purposes: the first is to prove that methods and loops terminate, the second is to ensure that Viper functions are <em>well-defined</em>. The second aspect is crucial even for front-ends that are not concerned with total correctness, because specifications, often expressed via Viper’s pure functions, would be meaningless if the involved functions were not well-defined.</p>
 <p>Front-ends can encode their own termination proofs, but since proving termination is a crucial verification task with subtle pitfalls, Viper has support for termination proofs built in, based on the well-known approach of <em>termination measures</em> (ranking functions).</p>
 <div class="alert alert-note note">
