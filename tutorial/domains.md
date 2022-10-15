@@ -285,7 +285,7 @@ method client()
 ```
 
 This method will not verify without adding a suitable loop invariant.
-If we still try, Viper will reports the following message:
+If we still try, Viper will report the following message:
 
 ```silver
 Assignment might fail. There might be insufficient permission to access slot(a, i).val.
