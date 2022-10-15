@@ -337,7 +337,7 @@ assert Cons(1, Nil()).tail == Nil()
 
 ### Derived methods
 
-Smilarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.
+Similarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.
 
 ```silver
 import <adt/derives.vpr>
