@@ -148,7 +148,7 @@ Viper's built-in map type `Map[T, U]` represents immutable partial maps from ele
 
 * map domain: `domain(m)` evaluates to the set of all keys contained in the map.
 
-* map range: `range(m)` evalutes to the set of all values contained in the map.
+* map range: `range(m)` evaluates to the set of all values contained in the map.
 
 * map cardinality: `|m|` evaluates to the number of keys contained in the map.
 
@@ -182,7 +182,7 @@ In addition to expressions, Viper supports three kinds of resource assertions: a
 
 * [Magic wands](#magic-wands) `A1 --* A2` represent the permission to get assertion `A2` in exchange for giving up assertion `A1`.
 
-* Conjunctions `A1 && A2` (similar to the separating conjnuction `*` in separation logic); see the section on [fractional permissions](#fractional-permissions).
+* Conjunctions `A1 && A2` (similar to the separating conjunction `*` in separation logic); see the section on [fractional permissions](#fractional-permissions).
 
 * Implication `b ==> A`, denotes that assertion `A` holds if the boolean expression `b` is true. Note that only pure expressions may occur on the left of implications, not general assertions.
 

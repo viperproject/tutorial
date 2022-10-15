@@ -310,7 +310,7 @@ adt List[T] {
 
 The ADT plugin is an extension to Viper that enables declarations of algebraic datatypes. These consist of one or more constructors, each of which has zero or more arguments. Any instance of such a datatype then corresponds to exactly one of these constructors. There is syntax to identify which constructor an instance corresponds to, as well as syntax to extract the arguments given to that constructor. As in the example above, ADTs can have type parameters and can be recursive.
 
-Iternally, the ADT syntax is translated into domains and domain function applications.
+Internally, the ADT syntax is translated into domains and domain function applications.
 
 The plugin is enabled by default, and can be disabled with the command-line option `--disableAdtPlugin`.
 
