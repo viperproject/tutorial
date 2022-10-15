@@ -22,7 +22,7 @@ statements use the appropriate number (and types) of variables on the left-hand 
 A
 method call can be understood as an exhale of the method precondition, a reassignment of the variables used to store result parameters, and inhale of the method postcondition.
 Finally, a `new` statement creates a new object and inhales exclusive permission
-to all (possibly none) fields listed comma-separated within the parantheses. As a special case, `x := new(*)` inhales permission to
+to all (possibly none) fields listed comma-separated within the parentheses. As a special case, `x := new(*)` inhales permission to
 *all* fields declared in the Viper program. Note that neither method calls nor
 object creation are expressions. Hence, they must not occur as receivers, method
 arguments, etc.; instead of nesting these constructs, one typically assigns their results first to local variables, and then uses these.

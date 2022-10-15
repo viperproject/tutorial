@@ -145,7 +145,7 @@ method removeFirst(first: Ref, last: Ref, values: Seq[Int])
 
 //exercise//
 
-* Implement a `prepend` method that adds an element at the front of the list. You can use `Seq(x) ++ s` to concatenate a sequence `s` to a singleton sequence containing `x` (see the [section on sequences](#sequences) for details). Note that verifyng your method will most-likely depend on a sequence identity such as `(Seq(x) ++ s)[1..] == s`. Such identities are not always provided automatically by the current sequence support. In case your example doesn't verify, try adding the appropriate equality in an `assert` statement; this should tell the verifier to prove the equality first, and then use it.
-* Write a client method which takes an lseg in its precondition, calls your prepend method to prepend `42` to the front, and then uses `removeFirst` to get this value back. Can you assert afterwards that the returned value is `42`? What if you extend the specification of `removeFirst`?
+* Implement a `prepend` method that adds an element at the front of the list. You can use `Seq(x) ++ s` to concatenate a sequence `s` to a singleton sequence containing `x` (see the [section on sequences](#sequences) for details). Note that verifying your method will most-likely depend on a sequence identity such as `(Seq(x) ++ s)[1..] == s`. Such identities are not always provided automatically by the current sequence support. In case your example doesn't verify, try adding the appropriate equality in an `assert` statement; this should tell the verifier to prove the equality first, and then use it.
+* Write a client method which takes an `lseg` in its precondition, calls your prepend method to prepend `42` to the front, and then uses `removeFirst` to get this value back. Can you assert afterwards that the returned value is `42`? What if you extend the specification of `removeFirst`?
 
 ///

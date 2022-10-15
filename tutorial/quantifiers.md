@@ -79,7 +79,7 @@ There are a number of restrictions on what can be used as a set of trigger expre
   1. Each quantified variable must occur at least once in a trigger set.
   2. Each trigger expression must include at least one quantified variable.
   3. Each trigger expression must have some additional structure (typically a function application); a quantified variable alone cannot be used as a trigger expression.
-  4. Arithmetic and boolean operators may *not* occur in trigger expresssions.
+  4. Arithmetic and boolean operators may *not* occur in trigger expressions.
   5. Accessibility predicates (the `acc` keyword) may not be used in trigger expressions.
 
 Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. `x.f`) and Viper's built-in sequence and set operators. Note that the *types* of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.
