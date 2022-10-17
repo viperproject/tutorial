@@ -285,7 +285,7 @@ method client()
 ```
 
 This method will not verify without adding a suitable loop invariant.
-If we still try, Viper will reports the following message:
+If we still try, Viper will report the following message:
 
 ```silver
 Assignment might fail. There might be insufficient permission to access slot(a, i).val.
@@ -310,7 +310,7 @@ adt List[T] {
 
 The ADT plugin is an extension to Viper that enables declarations of algebraic datatypes. These consist of one or more constructors, each of which has zero or more arguments. Any instance of such a datatype then corresponds to exactly one of these constructors. There is syntax to identify which constructor an instance corresponds to, as well as syntax to extract the arguments given to that constructor. As in the example above, ADTs can have type parameters and can be recursive.
 
-Iternally, the ADT syntax is translated into domains and domain function applications.
+Internally, the ADT syntax is translated into domains and domain function applications.
 
 The plugin is enabled by default, and can be disabled with the command-line option `--disableAdtPlugin`.
 
@@ -337,7 +337,7 @@ assert Cons(1, Nil()).tail == Nil()
 
 ### Derived methods
 
-Smilarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.
+Similarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.
 
 ```silver
 import <adt/derives.vpr>

@@ -174,7 +174,7 @@ function collatz(n: Int): Int
 
 ### Star
 
-To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure is equivalent to providing no decreases clause at all, but may be useful for documenation purposes.
+To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the *star* measure `*`. This special measure is equivalent to providing no decreases clause at all, but may be useful for documentation purposes.
 
 ```silver-runnable
 function nonterm(): Int
