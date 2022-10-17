@@ -256,7 +256,7 @@ Heap locations can be accessed only if the corresponding permission is <em>held<
 <p>Every Viper operation, i.e., every statement, expression, or assertion, has an implicit or explicit specification expressing which field permissions the operation requires, i.e., which locations it accesses. The part of the heap denoted this way is called the <em>footprint</em> of an operation.
 Permissions enable preserving information about heap values in Viper: as long as the footprint of an expression is disjoint from the footprint of a method call, it can be concluded that the call does not change the expression’s value, even if the concrete method implementation is unknown. Preserving properties this way is called <em>framing</em>: e.g. we might say that the value of an expression is <em>framed</em> across a method call, or in general, across a statement.
 For example: the footprints of the expression <code>x.f == 0</code> and the field assignment statement <code>x.f := 1</code> are not disjoint, and the property <code>x.f == 0</code> can therefore not be framed across the assignment. In contrast, the property could be framed across <code>y.f := 0</code> if <code>y</code> and <code>x</code> were known to not be aliases. Permissions can also be used to guarantee non-aliasing, as will be discussed in more detail <a href="#non-aliasing">later</a>.</p>
-<p>In pre- and postconditions, and generally in assertions, permission to a field is denoted by an <em>accessibility predicate</em>: an assertion which is written <code>acc(x.f)</code>. An accessibility predicate in a method’s precondition can be understood as an obligation for a caller to <em>transfer</em> the permission to the callee, thereby giving it up. Consequently, an accessibility predicate in a postcondition can be understood as a permission transfer in the opposite direction: from callee to calleer.</p>
+<p>In pre- and postconditions, and generally in assertions, permission to a field is denoted by an <em>accessibility predicate</em>: an assertion which is written <code>acc(x.f)</code>. An accessibility predicate in a method’s precondition can be understood as an obligation for a caller to <em>transfer</em> the permission to the callee, thereby giving it up. Consequently, an accessibility predicate in a postcondition can be understood as a permission transfer in the opposite direction: from callee to caller.</p>
 <p>A simple example is given next: a method <code>inc</code> that increments the field <code>x.f</code> by an arbitrary value <code>i</code>.</p>
 <pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">field</span> f : <span class="hljs-type">Int</span>
 
@@ -360,7 +360,7 @@ Well-definedness conditions in Viper guarantee not only that assertions have a m
 Such assertions are therefore checked to be guaranteed well-defined in all states they can possibly be evaluated in.</p>
 <!--TODO: Would it make sense to have, probably at the end of the tutorial, a list of all well-definedness checks?-->
 
-<p>As an example, the assertion ‘n &lt; i/j’ is not well-defined in general; it cannot be used in e.g. a method precondition unless that precondition also guarantees that the value of <code>j</code> cannot be <code>0</code>. The assertion ‘j &gt; 0 &amp;&amp; n &lt; i/j’ is well-defined, since the first conjunct is well-defined by itself, and ensures the well-definedness of the second conjunct. In general, the (short-circuiting) order of evaluation of logical connectives is taken into account for well-definedness conditions. For example, <code>j != 0 ==&gt; n &lt; i/j</code> is also well-defined (the right hand side’s value is only used when the left hand side is true, which guarantees its well-definedness condition).</p>
+<p>As an example, the assertion <code>n &lt; i/j</code> is not well-defined in general; it cannot be used in e.g. a method precondition unless that precondition also guarantees that the value of <code>j</code> cannot be <code>0</code>. The assertion <code>j &gt; 0 &amp;&amp; n &lt; i/j</code> is well-defined, since the first conjunct is well-defined by itself, and ensures the well-definedness of the second conjunct. In general, the (short-circuiting) order of evaluation of logical connectives is taken into account for well-definedness conditions. For example, <code>j != 0 ==&gt; n &lt; i/j</code> is also well-defined (the right hand side’s value is only used when the left hand side is true, which guarantees its well-definedness condition).</p>
 <p>Well-definedness in Viper also requires that all heap locations read by the assertion are accessible, i.e., that the corresponding permissions are held. Again, this must be the case for all possible states in which the assertion could be evaluated.
 To ensure this property, Viper requires specification assertions to be <em>self-framing</em>: i.e., each such assertion must include permission to at least the locations it reads. As an example, <code>acc(x.f)</code> and <code>acc(x.f) &amp;&amp; x.f &gt; 0</code> are self-framing, whereas <code>x.f &gt; 0</code> and <code>acc(x.f.g)</code> are not: in the latter two cases, the meanings of the assertions depend on the value of the field <code>x.f</code>, to which permission is not included.</p>
 <p>Viper checks well-definedness, and thus also self-framedness, according to a left-to-right evaluation order. The assertion <code>acc(x.f) &amp;&amp; 0 &lt; x.f</code> is therefore accepted as self-framing, but <code>0 &lt; x.f &amp;&amp; acc(x.f)</code> is not. This restriction is typically easy to work around in practice.</p>
@@ -619,8 +619,8 @@ argument, a value-typed mathematical sequence, represents the values stored in t
 <div class="alert alert-info exercise">
 
 <ul>
-<li>Implement a <code>prepend</code> method that adds an element at the front of the list. You can use <code>Seq(x) ++ s</code> to concatenate a sequence <code>s</code> to a singleton sequence containing <code>x</code> (see the <a href="#sequences">section on sequences</a> for details). Note that verifyng your method will most-likely depend on a sequence identity such as <code>(Seq(x) ++ s)[1..] == s</code>. Such identities are not always provided automatically by the current sequence support. In case your example doesn’t verify, try adding the appropriate equality in an <code>assert</code> statement; this should tell the verifier to prove the equality first, and then use it.</li>
-<li>Write a client method which takes an lseg in its precondition, calls your prepend method to prepend <code>42</code> to the front, and then uses <code>removeFirst</code> to get this value back. Can you assert afterwards that the returned value is <code>42</code>? What if you extend the specification of <code>removeFirst</code>?</li>
+<li>Implement a <code>prepend</code> method that adds an element at the front of the list. You can use <code>Seq(x) ++ s</code> to concatenate a sequence <code>s</code> to a singleton sequence containing <code>x</code> (see the <a href="#sequences">section on sequences</a> for details). Note that verifying your method will most-likely depend on a sequence identity such as <code>(Seq(x) ++ s)[1..] == s</code>. Such identities are not always provided automatically by the current sequence support. In case your example doesn’t verify, try adding the appropriate equality in an <code>assert</code> statement; this should tell the verifier to prove the equality first, and then use it.</li>
+<li>Write a client method which takes an <code>lseg</code> in its precondition, calls your prepend method to prepend <code>42</code> to the front, and then uses <code>removeFirst</code> to get this value back. Can you assert afterwards that the returned value is <code>42</code>? What if you extend the specification of <code>removeFirst</code>?</li>
 </ul>
 </div>
 
@@ -797,7 +797,7 @@ sequence), a function is introduced that computes the abstraction. This usage of
 <li>Each quantified variable must occur at least once in a trigger set.</li>
 <li>Each trigger expression must include at least one quantified variable.</li>
 <li>Each trigger expression must have some additional structure (typically a function application); a quantified variable alone cannot be used as a trigger expression.</li>
-<li>Arithmetic and boolean operators may <em>not</em> occur in trigger expresssions.</li>
+<li>Arithmetic and boolean operators may <em>not</em> occur in trigger expressions.</li>
 <li>Accessibility predicates (the <code>acc</code> keyword) may not be used in trigger expressions.</li>
 </ol>
 <p>Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. <code>x.f</code>) and Viper’s built-in sequence and set operators. Note that the <em>types</em> of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.</p>
@@ -1211,7 +1211,7 @@ statements use the appropriate number (and types) of variables on the left-hand 
 A
 method call can be understood as an exhale of the method precondition, a reassignment of the variables used to store result parameters, and inhale of the method postcondition.
 Finally, a <code>new</code> statement creates a new object and inhales exclusive permission
-to all (possibly none) fields listed comma-separated within the parantheses. As a special case, <code>x := new(*)</code> inhales permission to
+to all (possibly none) fields listed comma-separated within the parentheses. As a special case, <code>x := new(*)</code> inhales permission to
 <em>all</em> fields declared in the Viper program. Note that neither method calls nor
 object creation are expressions. Hence, they must not occur as receivers, method
 arguments, etc.; instead of nesting these constructs, one typically assigns their results first to local variables, and then uses these.</p>
@@ -1397,7 +1397,7 @@ follows:</p>
 </li>
 <li><p>unary minus <code>-e</code>: Negates the value of <code>e</code> if <code>e</code> is itself an integer.</p>
 </li>
-<li><p>addition, subtraction, multiplication, division, modulo (<code>e1 + e2</code>, <code>e1 - e2</code>, <code>e1 * e2</code>, <code>e1 / e2</code>, <code>e1 % e2</code>). For all of these, both operands are expected to be integers, and the result will be an integer. These operators are overloaded; similar operators exist returning <code>Perm</code>-typed values; Viper will choose the appropriate operator based on the type information available. The only observable ambiguity is for division, since integer division truncates and <code>Perm</code>-typeed division does not. In ambiguous cases, the alternative syntax <code>e1 \ e2</code> can be used to force <code>Int</code>-typed division (<code>Perm</code>-typed is otherwise the default).</p>
+<li><p>addition, subtraction, multiplication, division, modulo (<code>e1 + e2</code>, <code>e1 - e2</code>, <code>e1 * e2</code>, <code>e1 / e2</code>, <code>e1 % e2</code>). For all of these, both operands are expected to be integers, and the result will be an integer. These operators are overloaded; similar operators exist returning <code>Perm</code>-typed values; Viper will choose the appropriate operator based on the type information available. The only observable ambiguity is for division, since integer division truncates and <code>Perm</code>-typed division does not. In ambiguous cases, the alternative syntax <code>e1 \ e2</code> can be used to force <code>Int</code>-typed division (<code>Perm</code>-typed is otherwise the default).</p>
 </li>
 </ul>
 <h3 id="boolean-expressions">Boolean expressions</h3><ul>
@@ -1503,7 +1503,7 @@ follows:</p>
 </li>
 <li><p>map domain: <code>domain(m)</code> evaluates to the set of all keys contained in the map.</p>
 </li>
-<li><p>map range: <code>range(m)</code> evalutes to the set of all values contained in the map.</p>
+<li><p>map range: <code>range(m)</code> evaluates to the set of all values contained in the map.</p>
 </li>
 <li><p>map cardinality: <code>|m|</code> evaluates to the number of keys contained in the map.</p>
 </li>
@@ -1532,7 +1532,7 @@ follows:</p>
 </li>
 <li><p><a href="#magic-wands">Magic wands</a> <code>A1 --* A2</code> represent the permission to get assertion <code>A2</code> in exchange for giving up assertion <code>A1</code>.</p>
 </li>
-<li><p>Conjunctions <code>A1 &amp;&amp; A2</code> (similar to the separating conjnuction <code>*</code> in separation logic); see the section on <a href="#fractional-permissions">fractional permissions</a>.</p>
+<li><p>Conjunctions <code>A1 &amp;&amp; A2</code> (similar to the separating conjunction <code>*</code> in separation logic); see the section on <a href="#fractional-permissions">fractional permissions</a>.</p>
 </li>
 <li><p>Implication <code>b ==&gt; A</code>, denotes that assertion <code>A</code> holds if the boolean expression <code>b</code> is true. Note that only pure expressions may occur on the left of implications, not general assertions.</p>
 </li>
@@ -1760,7 +1760,7 @@ Intuitively, this axiom expresses that for any pair <code>(a, i)</code>, <code>s
 }
 </code></pre>
 <p>This method will not verify without adding a suitable loop invariant.
-If we still try, Viper will reports the following message:</p>
+If we still try, Viper will report the following message:</p>
 <pre><code class="hljs language-silver">Assignment might fail. There might be insufficient permission to access slot(a, i).val.
 </code></pre>
 <p>Therefore, we need to add the permissions to the array to the loop invariant:</p>
@@ -1773,7 +1773,7 @@ If we still try, Viper will reports the following message:</p>
 }<div class="load-code"></div>
 </code></pre>
 <p>The ADT plugin is an extension to Viper that enables declarations of algebraic datatypes. These consist of one or more constructors, each of which has zero or more arguments. Any instance of such a datatype then corresponds to exactly one of these constructors. There is syntax to identify which constructor an instance corresponds to, as well as syntax to extract the arguments given to that constructor. As in the example above, ADTs can have type parameters and can be recursive.</p>
-<p>Iternally, the ADT syntax is translated into domains and domain function applications.</p>
+<p>Internally, the ADT syntax is translated into domains and domain function applications.</p>
 <p>The plugin is enabled by default, and can be disabled with the command-line option <code>--disableAdtPlugin</code>.</p>
 <h3 id="discriminators">Discriminators</h3><p>For every constructor of the ADT, a <em>discriminator</em> is generated. Syntactically, this is a field with the name <code>is&lt;Constructor&gt;</code> with a <code>Bool</code> type.</p>
 <pre><code class="hljs language-silver"><span class="hljs-keyword">assert</span> Cons(<span class="hljs-number">1</span>, Cons(<span class="hljs-number">2</span>, Nil())).isCons
@@ -1786,7 +1786,7 @@ If we still try, Viper will reports the following message:</p>
 <span class="hljs-comment">// this expression is not well-defined:</span>
 <span class="hljs-comment">// assert Nil().value == 0</span>
 </code></pre>
-<h3 id="derived-methods">Derived methods</h3><p>Smilarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.</p>
+<h3 id="derived-methods">Derived methods</h3><p>Similarly to derivable methods in Haskell or Rust, the ADT plugin provides a syntax to derive certain operations for ADTs.</p>
 <pre><code class="hljs language-silver"><span class="hljs-keyword">import</span> &lt;<span class="hljs-keyword">adt</span>/<span class="hljs-keyword">derives</span>.vpr&gt;
 
 <span class="hljs-keyword">adt</span> Name[...] {
@@ -1992,7 +1992,7 @@ Swap the tuple elements, i.e., change the decreases clause to `n, m`. For which 
                collatz(<span class="hljs-number">3</span> * n + <span class="hljs-number">1</span>)
 }<div class="load-code"></div>
 </code></pre>
-<h3 id="star">Star</h3><p>To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the <em>star</em> measure <code>*</code>. This special measure is equivalent to providing no decreases clause at all, but may be useful for documenation purposes.</p>
+<h3 id="star">Star</h3><p>To explicate that a function is not checked for termination, and may thus not terminate, Viper supports the <em>star</em> measure <code>*</code>. This special measure is equivalent to providing no decreases clause at all, but may be useful for documentation purposes.</p>
 <pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">function</span> nonterm(): <span class="hljs-type">Int</span>
   decreases * <span class="hljs-comment">// Whole clause could as well have been omitted</span>
 { <span class="hljs-number">1</span> + nonterm() }<div class="load-code"></div>
