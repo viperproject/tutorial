@@ -67,7 +67,7 @@ function gte(x: Ref, a: Int): Int
 * Unlike methods, function applications are not handled modularly (for functions with bodies): changing the body of a function affects client code
 * See the [section on functions](#functions) for details
 
-### Predicates
+### Predicates {#predicate-sub}
 
 ```silver
 predicate list(this: Ref) {
