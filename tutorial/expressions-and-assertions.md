@@ -156,7 +156,7 @@ Viper's built-in map type `Map[T, U]` represents immutable partial maps from ele
 
 Expressions of type `Perm` are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).
 
-* Fractional permission expressions `e1/e2`, where both `e1` and `e2` are integers, evaluate to a Perm value that is a rational whose numerator is `e1` and whose denominator is `e2`. A well-definedness condition is that `e2` must not equal 0. `e1/e2` can also denote a permission amount divided by an integer if `e1` is an expression of type `Perm` and `e2` is an expression of type `Int`.
+* Fractional permission expressions `e1/e2`, where both `e1` and `e2` are integers, evaluate to a Perm value whose numerator is `e1` and whose denominator is `e2`. A well-definedness condition is that `e2` must not equal 0. `e1/e2` can also denote a permission amount divided by an integer if `e1` is an expression of type `Perm` and `e2` is an expression of type `Int`.
 
 * The `Perm`-typed literals `none` and  `write` denote no permission and a full permission, corresponding to `0/1` and `1/1`, respectively.
 
