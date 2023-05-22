@@ -44,7 +44,7 @@ Viper's standard library provides definitions of well-founded orders for most ty
 |`Ref`<br>(`ref.vpr`)| `r1 <_ r2 <==> r1 == null && r2 != null`
 |`Bool`<br>(`bool.vpr`)| `b1 <_ b2 <==> b1 == false && b2 == true`
 |`Int`<br>(`int.vpr`)| `i1 <_ i2 <==> i1 < i2 && 0 <= i2`
-|`Rational`<br>(`rational.vpr`):| `r1 <_ r2 <==> r1 <= r2 - 1/1 && 0/1 <= r2`
+|`Rational`<br>(`rational.vpr`, rationals will be deprecated in the summer 2023 release):| `r1 <_ r2 <==> r1 <= r2 - 1/1 && 0/1 <= r2`
 |`Perm`<br>(`perm.vpr`)| `p1 <_ p2 <==> p1 <= p2 - write && none <= p2`
 |`Seq[T]`<br>(`seq.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
 |`Set[T]`<br>(`set.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`

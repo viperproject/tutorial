@@ -4,7 +4,7 @@
 
 Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.
 
-The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting rational numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`), sequence (`Seq[T]`), and map (`Map[T, U]`) types, and users can define custom types using [domains](#domains).
+The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting real numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`), sequence (`Seq[T]`), and map (`Map[T, U]`) types, and users can define custom types using [domains](#domains).
 
 Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression `x % y` is not well-defined if `y` is equal to zero, and the expression `o.f` is only well-defined if the current method has the permission to read `o.f` (which also implies that `o` is not null).
 
@@ -154,7 +154,7 @@ Viper's built-in map type `Map[T, U]` represents immutable partial maps from ele
 
 ### Perm expressions
 
-Expressions of type `Perm` are rational numbers and are usually used to represent permission amounts (though they can be used for other purposes).
+Expressions of type `Perm` are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).
 
 * Fractional permission expressions `e1/e2`, where both `e1` and `e2` are integers, evaluate to a Perm value whose numerator is `e1` and whose denominator is `e2`. A well-definedness condition is that `e2` must not equal 0. `e1/e2` can also denote a permission amount divided by an integer if `e1` is an expression of type `Perm` and `e2` is an expression of type `Int`.
 
