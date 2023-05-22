@@ -232,7 +232,7 @@ should result in a verification error. Viper supports both <code>//</code> and <
 <li><code>Ref</code> for references (to objects, except for the built-in <code>Ref</code> constant <code>null</code>)</li>
 <li><code>Bool</code> for Boolean values</li>
 <li><code>Int</code> for mathematical (unbounded) integers</li>
-<li><code>Rational</code> for mathematical (unbounded) rationals</li>
+<li><code>Rational</code> for mathematical (unbounded) rationals (this type is expected to be deprecated in the summer 2023 release)</li>
 <li><code>Perm</code> for permission amounts (see the <a href="#permissions">section on permissions</a> for details)</li>
 <li><code>Seq[T]</code> for immutable sequences with element type <code>T</code></li>
 <li><code>Set[T]</code> for immutable sets with element type <code>T</code></li>
@@ -1369,7 +1369,7 @@ follows:</p>
 <li>Note that <code>unfolding</code> is an <a href="#expressions">expression</a>, not a statement</li>
 </ul>
 <h1 id="expressions-and-assertions">Expressions and Assertions</h1><h2 id="expressions">Expressions</h2><p>Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.</p>
-<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting rational numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>), sequence (<code>Seq[T]</code>), and map (<code>Map[T, U]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
+<p>The primitive types supported in Viper are booleans (<code>Bool</code>), integers (<code>Int</code>), permission amounts (<code>Perm</code>), denoting real numbers, and references to heap objects (<code>Ref</code>). In addition, there are built-in parameterised set (<code>Set[T]</code>), multiset (<code>Multiset[T]</code>), sequence (<code>Seq[T]</code>), and map (<code>Map[T, U]</code>) types, and users can define custom types using <a href="#domains">domains</a>.</p>
 <p>Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression <code>x % y</code> is not well-defined if <code>y</code> is equal to zero, and the expression <code>o.f</code> is only well-defined if the current method has the permission to read <code>o.f</code> (which also implies that <code>o</code> is not null).</p>
 <p>In the following, we list the different kinds of expressions, remark on their well-definedness conditions (if any) and the value that they evaluate to.</p>
 <h3 id="expressions-of-multiple-types">Expressions of multiple types</h3><ul>
@@ -1508,7 +1508,7 @@ follows:</p>
 <li><p>map cardinality: <code>|m|</code> evaluates to the number of keys contained in the map.</p>
 </li>
 </ul>
-<h3 id="perm-expressions">Perm expressions</h3><p>Expressions of type <code>Perm</code> are rational numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
+<h3 id="perm-expressions">Perm expressions</h3><p>Expressions of type <code>Perm</code> are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
 <ul>
 <li><p>Fractional permission expressions <code>e1/e2</code>, where both <code>e1</code> and <code>e2</code> are integers, evaluate to a Perm value whose numerator is <code>e1</code> and whose denominator is <code>e2</code>. A well-definedness condition is that <code>e2</code> must not equal 0. <code>e1/e2</code> can also denote a permission amount divided by an integer if <code>e1</code> is an expression of type <code>Perm</code> and <code>e2</code> is an expression of type <code>Int</code>.</p>
 </li>
@@ -1879,7 +1879,7 @@ By default, i.e. if no termination measure is specified, then Viper won't check 
 <td><code>i1 &lt;_ i2 &lt;==&gt; i1 &lt; i2 &amp;&amp; 0 &lt;= i2</code></td>
 </tr>
 <tr>
-<td><code>Rational</code><br>(<code>rational.vpr</code>):</td>
+<td><code>Rational</code><br>(<code>rational.vpr</code>, rationals will be deprecated in the summer 2023 release):</td>
 <td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td>
 </tr>
 <tr>
