@@ -129,7 +129,7 @@ define link(x, y) {
 * `Ref` for references (to objects, except for the built-in `Ref` constant `null`)
 * `Bool` for Boolean values
 * `Int` for mathematical (unbounded) integers
-* `Rational` for mathematical (unbounded) rationals
+* `Rational` for mathematical (unbounded) rationals (this type is expected to be deprecated in the summer 2023 release)
 * `Perm` for permission amounts (see the [section on permissions](#permissions) for details)
 * `Seq[T]` for immutable sequences with element type `T`
 * `Set[T]` for immutable sets with element type `T`
