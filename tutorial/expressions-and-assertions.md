@@ -4,7 +4,7 @@
 
 Viper supports a number of different kinds of expressions, which can be evaluated to a value of one of the types supported in Viper.
 
-The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting rational numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`), sequence (`Seq[T]`), and map (`Map[T, U]`) types, and users can define custom types using [domains](#domains).
+The primitive types supported in Viper are booleans (`Bool`), integers (`Int`), permission amounts (`Perm`), denoting real numbers, and references to heap objects (`Ref`). In addition, there are built-in parameterised set (`Set[T]`), multiset (`Multiset[T]`), sequence (`Seq[T]`), and map (`Map[T, U]`) types, and users can define custom types using [domains](#domains).
 
 Evaluating an expression never changes the state of the program, i.e., expression evaluation has no side effects. However, expression evaluation comes with well-definedness conditions for some expressions: evaluating an expression can cause a verification failure if the expression is not well-defined in the current program state; this leads to a verification error. As an example, the expression `x % y` is not well-defined if `y` is equal to zero, and the expression `o.f` is only well-defined if the current method has the permission to read `o.f` (which also implies that `o` is not null).
 
@@ -92,24 +92,6 @@ Similar to sets, Viper supports multisets:
 
 * `e1 in e2`, where `e1` has type `T` and `e2` has type `Multiset[T]`, denotes the multiplicity of `e1` in `e2`. 
 
-### Map expressions
-
-Viper has a built-in parametric partial map type `Map[K, V]`, where `K` is a type parameter that describes the type of the keys in the map, and `V` similarly describes the type of the values in the map. Like sets, maps are immutable (i.e., they represent mathematical maps), and they map a finite amount of keys to values.
-
-* empty map: `Map[K, V]()` returns an empty map of type `Map[K, V]`, i.e., a map whose domain is empty. The type arguments are optional if the type is clear from the context; then simply `Map()` can be written.
-
-* map literals: `Map(e1 := e2, e3 := e4, ...)` evaluates to a map containing only the explicitly enumerated mappings (i.e, mapping e1 to e2, e3 to e4 etc.), where all keys must have a common type `K` and all values must have a common type `V` s.t. the resulting expression has the type `Map[K, V]`. If multiple key-value pairs have the same key, the map contains the value of the latest such pair. I.e., `Map(1 := 3, 1 := 5)` will contain value 5 for key 1.
-
-* map domain and range: If `m` is a map of type `Map[K, V]`, then `domain(m)` is the finite domain (of type `Set[K]`) of `m`, i.e., the set of keys it contains. Similarly, `range(m)` denotes the range (or image) of `m`, which has type `Set[V]`.
-
-* map cardinality: `|m|` denotes the cardinality of the map `m`, i.e., the cardinality of its domain.  
-
-* map lookup: If `m` is a map of type `Map[K, V]` and `e` has a type `K`, then `m[e]` looks up the value of key `e` in `m`.  As a well-definedness condition, `e` must be known to be in the domain of `m`, otherwise this expression will result in a verification error.
-
-* map membership: `e in m`, where `m` has type `Map[K, V]` and `e` has type `K`, is true iff `e` is in the domain of `m`.
-
-* map update: If `m` is a map of type `Map[K, V]`, `e1` has type `K` and `e2` has type `V`, then `m[e1 := e2]` is a map that is identical to `m` except the key-value-pair `e1 -> e2` has been added (or its value updated).
-
 ### Sequence expressions {#sequences}
 
 Viper's built-in sequence type `Seq[T]` represents immutable finite sequences of elements of type `T`.
@@ -134,27 +116,25 @@ Viper's built-in sequence type `Seq[T]` represents immutable finite sequences of
 
 ### Map expressions {#maps}
 
-Viper's built-in map type `Map[T, U]` represents immutable partial maps from elements of type `T` to elements of type `U`.
+Viper has a built-in parametric partial map type `Map[K, V]`, where `K` is a type parameter that describes the type of the keys in the map, and `V` similarly describes the type of the values in the map. Like sets, maps are immutable (i.e., they represent mathematical maps), and they map a finite amount of keys to values.
 
-* empty map: `Map[T, U]()` evaluates to an empty map of type `Map[T, U]`. As with empty set literals, the type arguments only have to be stated explicitly if they are not clear from the surrounding context.
+* empty map: `Map[K, V]()` returns an empty map of type `Map[K, V]`, i.e., a map whose domain is empty. As with empty set literals, the type arguments are optional if the type is clear from the context; then simply `Map()` can be written.
 
-* map literal: `Map(k1 := v1, k2 := v2, ..., kn := vn)` evaluates to a map mapping the keys `k1` to `kn` to the values `v1` to `vn`, respectively. It has type `Map[T, U]`, where `T` is the common type of the expressions `k1` to `kn` and `U` is the common type of the expressions `v1` to `vn`.
+* map literals: `Map(e1 := e2, e3 := e4, ...)` evaluates to a map containing only the explicitly enumerated mappings (i.e, mapping e1 to e2, e3 to e4 etc.), where all keys must have a common type `K` and all values must have a common type `V` s.t. the resulting expression has the type `Map[K, V]`. If multiple key-value pairs have the same key, the map contains the value of the latest such pair. I.e., `Map(1 := 3, 1 := 5)` will contain value 5 for key 1.
 
-* map lookup: `m[e]` looks up the value corresponding to the key `e` in the map `m`. This expression is well-defined if `e` is contained in the domain of `m`.
+* map domain and range: If `m` is a map of type `Map[K, V]`, then `domain(m)` is the finite domain (of type `Set[K]`) of `m`, i.e., the set of keys it contains. Similarly, `range(m)` denotes the range (or image) of `m`, which has type `Set[V]`.
 
-* map update: `m[k := v]` denotes the map that is identical to `m`, except that the key `k` maps to `v`. The key may or may not exist in the original map.
+* map cardinality: `|m|` denotes the cardinality of the map `m`, i.e., the cardinality of its domain.  
 
-* map member check: `k in m` evaluates to true if `k` is part of the domain of map `m`.
+* map lookup: If `m` is a map of type `Map[K, V]` and `e` has a type `K`, then `m[e]` looks up the value of key `e` in `m`.  As a well-definedness condition, `e` must be known to be in the domain of `m`, otherwise this expression will result in a verification error.
 
-* map domain: `domain(m)` evaluates to the set of all keys contained in the map.
+* map membership: `e in m`, where `m` has type `Map[K, V]` and `e` has type `K`, is true iff `e` is in the domain of `m`.
 
-* map range: `range(m)` evaluates to the set of all values contained in the map.
-
-* map cardinality: `|m|` evaluates to the number of keys contained in the map.
+* map update: If `m` is a map of type `Map[K, V]`, `e1` has type `K` and `e2` has type `V`, then `m[e1 := e2]` is a map that is identical to `m` except the key-value-pair `e1 -> e2` has been added (or its value updated).
 
 ### Perm expressions
 
-Expressions of type `Perm` are rational numbers and are usually used to represent permission amounts (though they can be used for other purposes).
+Expressions of type `Perm` are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).
 
 * Fractional permission expressions `e1/e2`, where both `e1` and `e2` are integers, evaluate to a Perm value whose numerator is `e1` and whose denominator is `e2`. A well-definedness condition is that `e2` must not equal 0. `e1/e2` can also denote a permission amount divided by an integer if `e1` is an expression of type `Perm` and `e2` is an expression of type `Int`.
 
