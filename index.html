@@ -1452,23 +1452,6 @@ follows:</p>
 <li><p><code>e1 in e2</code>, where <code>e1</code> has type <code>T</code> and <code>e2</code> has type <code>Multiset[T]</code>, denotes the multiplicity of <code>e1</code> in <code>e2</code>.</p>
 </li>
 </ul>
-<h3 id="map-expressions">Map expressions</h3><p>Viper has a built-in parametric partial map type <code>Map[K, V]</code>, where <code>K</code> is a type parameter that describes the type of the keys in the map, and <code>V</code> similarly describes the type of the values in the map. Like sets, maps are immutable (i.e., they represent mathematical maps), and they map a finite amount of keys to values.</p>
-<ul>
-<li><p>empty map: <code>Map[K, V]()</code> returns an empty map of type <code>Map[K, V]</code>, i.e., a map whose domain is empty. The type arguments are optional if the type is clear from the context; then simply <code>Map()</code> can be written.</p>
-</li>
-<li><p>map literals: <code>Map(e1 := e2, e3 := e4, ...)</code> evaluates to a map containing only the explicitly enumerated mappings (i.e, mapping e1 to e2, e3 to e4 etc.), where all keys must have a common type <code>K</code> and all values must have a common type <code>V</code> s.t. the resulting expression has the type <code>Map[K, V]</code>. If multiple key-value pairs have the same key, the map contains the value of the latest such pair. I.e., <code>Map(1 := 3, 1 := 5)</code> will contain value 5 for key 1.</p>
-</li>
-<li><p>map domain and range: If <code>m</code> is a map of type <code>Map[K, V]</code>, then <code>domain(m)</code> is the finite domain (of type <code>Set[K]</code>) of <code>m</code>, i.e., the set of keys it contains. Similarly, <code>range(m)</code> denotes the range (or image) of <code>m</code>, which has type <code>Set[V]</code>.</p>
-</li>
-<li><p>map cardinality: <code>|m|</code> denotes the cardinality of the map <code>m</code>, i.e., the cardinality of its domain.  </p>
-</li>
-<li><p>map lookup: If <code>m</code> is a map of type <code>Map[K, V]</code> and <code>e</code> has a type <code>K</code>, then <code>m[e]</code> looks up the value of key <code>e</code> in <code>m</code>.  As a well-definedness condition, <code>e</code> must be known to be in the domain of <code>m</code>, otherwise this expression will result in a verification error.</p>
-</li>
-<li><p>map membership: <code>e in m</code>, where <code>m</code> has type <code>Map[K, V]</code> and <code>e</code> has type <code>K</code>, is true iff <code>e</code> is in the domain of <code>m</code>.</p>
-</li>
-<li><p>map update: If <code>m</code> is a map of type <code>Map[K, V]</code>, <code>e1</code> has type <code>K</code> and <code>e2</code> has type <code>V</code>, then <code>m[e1 := e2]</code> is a map that is identical to <code>m</code> except the key-value-pair <code>e1 -&gt; e2</code> has been added (or its value updated).</p>
-</li>
-</ul>
 <h3 id="sequences">Sequence expressions</h3><p>Viper’s built-in sequence type <code>Seq[T]</code> represents immutable finite sequences of elements of type <code>T</code>.</p>
 <ul>
 <li><p>empty sequence: <code>Seq[T]()</code> evaluates to an empty sequence of type <code>Seq[T]</code>. As with empty set literals, the type argument only has to be stated explicitly if it is not clear from the surrounding context.</p>
@@ -1490,23 +1473,21 @@ follows:</p>
 <li><p>sequence member check: <code>e in s</code> evaluates to true if <code>e</code> is in the sequence <code>s</code>.</p>
 </li>
 </ul>
-<h3 id="maps">Map expressions</h3><p>Viper’s built-in map type <code>Map[T, U]</code> represents immutable partial maps from elements of type <code>T</code> to elements of type <code>U</code>.</p>
+<h3 id="maps">Map expressions</h3><p>Viper has a built-in parametric partial map type <code>Map[K, V]</code>, where <code>K</code> is a type parameter that describes the type of the keys in the map, and <code>V</code> similarly describes the type of the values in the map. Like sets, maps are immutable (i.e., they represent mathematical maps), and they map a finite amount of keys to values.</p>
 <ul>
-<li><p>empty map: <code>Map[T, U]()</code> evaluates to an empty map of type <code>Map[T, U]</code>. As with empty set literals, the type arguments only have to be stated explicitly if they are not clear from the surrounding context.</p>
+<li><p>empty map: <code>Map[K, V]()</code> returns an empty map of type <code>Map[K, V]</code>, i.e., a map whose domain is empty. As with empty set literals, the type arguments are optional if the type is clear from the context; then simply <code>Map()</code> can be written.</p>
 </li>
-<li><p>map literal: <code>Map(k1 := v1, k2 := v2, ..., kn := vn)</code> evaluates to a map mapping the keys <code>k1</code> to <code>kn</code> to the values <code>v1</code> to <code>vn</code>, respectively. It has type <code>Map[T, U]</code>, where <code>T</code> is the common type of the expressions <code>k1</code> to <code>kn</code> and <code>U</code> is the common type of the expressions <code>v1</code> to <code>vn</code>.</p>
+<li><p>map literals: <code>Map(e1 := e2, e3 := e4, ...)</code> evaluates to a map containing only the explicitly enumerated mappings (i.e, mapping e1 to e2, e3 to e4 etc.), where all keys must have a common type <code>K</code> and all values must have a common type <code>V</code> s.t. the resulting expression has the type <code>Map[K, V]</code>. If multiple key-value pairs have the same key, the map contains the value of the latest such pair. I.e., <code>Map(1 := 3, 1 := 5)</code> will contain value 5 for key 1.</p>
 </li>
-<li><p>map lookup: <code>m[e]</code> looks up the value corresponding to the key <code>e</code> in the map <code>m</code>. This expression is well-defined if <code>e</code> is contained in the domain of <code>m</code>.</p>
+<li><p>map domain and range: If <code>m</code> is a map of type <code>Map[K, V]</code>, then <code>domain(m)</code> is the finite domain (of type <code>Set[K]</code>) of <code>m</code>, i.e., the set of keys it contains. Similarly, <code>range(m)</code> denotes the range (or image) of <code>m</code>, which has type <code>Set[V]</code>.</p>
 </li>
-<li><p>map update: <code>m[k := v]</code> denotes the map that is identical to <code>m</code>, except that the key <code>k</code> maps to <code>v</code>. The key may or may not exist in the original map.</p>
+<li><p>map cardinality: <code>|m|</code> denotes the cardinality of the map <code>m</code>, i.e., the cardinality of its domain.  </p>
 </li>
-<li><p>map member check: <code>k in m</code> evaluates to true if <code>k</code> is part of the domain of map <code>m</code>.</p>
+<li><p>map lookup: If <code>m</code> is a map of type <code>Map[K, V]</code> and <code>e</code> has a type <code>K</code>, then <code>m[e]</code> looks up the value of key <code>e</code> in <code>m</code>.  As a well-definedness condition, <code>e</code> must be known to be in the domain of <code>m</code>, otherwise this expression will result in a verification error.</p>
 </li>
-<li><p>map domain: <code>domain(m)</code> evaluates to the set of all keys contained in the map.</p>
+<li><p>map membership: <code>e in m</code>, where <code>m</code> has type <code>Map[K, V]</code> and <code>e</code> has type <code>K</code>, is true iff <code>e</code> is in the domain of <code>m</code>.</p>
 </li>
-<li><p>map range: <code>range(m)</code> evaluates to the set of all values contained in the map.</p>
-</li>
-<li><p>map cardinality: <code>|m|</code> evaluates to the number of keys contained in the map.</p>
+<li><p>map update: If <code>m</code> is a map of type <code>Map[K, V]</code>, <code>e1</code> has type <code>K</code> and <code>e2</code> has type <code>V</code>, then <code>m[e1 := e2]</code> is a map that is identical to <code>m</code> except the key-value-pair <code>e1 -&gt; e2</code> has been added (or its value updated).</p>
 </li>
 </ul>
 <h3 id="perm-expressions">Perm expressions</h3><p>Expressions of type <code>Perm</code> are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
