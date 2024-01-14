@@ -46,7 +46,7 @@ method QSort(xs: Seq[Ref]) returns (ys: Seq[Ref])
   * The postcondition is assumed after the method call (more precisely, it is [_inhaled_](#inhaling-and-exhaling))
 * See the [permission section](#permissions) for more details and examples
 
-### Functions
+### Functions {#intro-functions}
 
 ```silver
 function gte(x: Ref, a: Int): Int
@@ -67,7 +67,7 @@ function gte(x: Ref, a: Int): Int
 * Unlike methods, function applications are not handled modularly (for functions with bodies): changing the body of a function affects client code
 * See the [section on functions](#functions) for details
 
-### Predicates {#predicate-sub}
+### Predicates {#intro-predicates}
 
 ```silver
 predicate list(this: Ref) {
