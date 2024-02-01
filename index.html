@@ -35,7 +35,7 @@
 <li class="H2"><a href="#built-in-types">Built-in types</a></li>
 <li class="H2"><a href="#imports">Imports</a></li>
 <li class="H1"><a href="#permissions">Permissions</a></li>
-<li class="H2"><a href="#introduction-1">Introduction</a></li>
+<li class="H2"><a href="#perm-introduction">Introduction</a></li>
 <li class="H2"><a href="#vipers-program-state">Viper’s Program State</a></li>
 <li class="H2"><a href="#inhaling-and-exhaling">Inhaling and Exhaling</a></li>
 <li class="H2"><a href="#inhale-and-exhale">Inhale and Exhale Statements</a></li>
@@ -43,7 +43,7 @@
 <li class="H2"><a href="#exclusive-permissions">Exclusive Permissions</a></li>
 <li class="H2"><a href="#non-aliasing">Fractional Permissions</a></li>
 <li class="H1"><a href="#predicates">Predicates</a></li>
-<li class="H1"><a href="#functions-1">Functions</a></li>
+<li class="H1"><a href="#functions">Functions</a></li>
 <li class="H1"><a href="#quantifiers">Quantifiers</a></li>
 <li class="H1"><a href="#quantified-permissions">Quantified Permissions</a></li>
 <li class="H2"><a href="#receiver-expressions-and-injectivity">Receiver Expressions and Injectivity</a></li>
@@ -154,7 +154,7 @@ should result in a verification error. Viper supports both <code>//</code> and <
 </li>
 <li>See the <a href="#permissions">permission section</a> for more details and examples</li>
 </ul>
-<h3 id="functions">Functions</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">function</span> gte(x: <span class="hljs-type">Ref</span>, a: <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span>
+<h3 id="intro-functions">Functions</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">function</span> gte(x: <span class="hljs-type">Ref</span>, a: <span class="hljs-type">Int</span>): <span class="hljs-type">Int</span>
   <span class="hljs-keyword">requires</span> ... <span class="hljs-comment">// precondition</span>
   <span class="hljs-keyword">ensures</span> ... <span class="hljs-comment">// postcondition</span>
 {
@@ -174,7 +174,7 @@ should result in a verification error. Viper supports both <code>//</code> and <
 <li>Unlike methods, function applications are not handled modularly (for functions with bodies): changing the body of a function affects client code</li>
 <li>See the <a href="#functions">section on functions</a> for details</li>
 </ul>
-<h3 id="predicates">Predicates</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">predicate</span> list(this: <span class="hljs-type">Ref</span>) {
+<h3 id="intro-predicates">Predicates</h3><pre><code class="hljs language-silver"><span class="hljs-keyword">predicate</span> list(this: <span class="hljs-type">Ref</span>) {
   ... <span class="hljs-comment">// body (optional)</span>
 }
 </code></pre>
@@ -252,7 +252,7 @@ should result in a verification error. Viper supports both <code>//</code> and <
 <li>The depth-first traversal mechanism enforces that each Viper file is imported at most once,
 including in the cases of multiple (indirect) imports of the same file or of recursive imports.</li>
 </ul>
-<h1 id="permissions">Permissions</h1><h2 id="introduction-1">Introduction</h2><p>Reasoning about the heap of a Viper program is governed by <em>field permissions</em>, which specify the heap locations that a statement, an expression or an assertion may access (read and/or modify).
+<h1 id="permissions">Permissions</h1><h2 id="perm-introduction">Introduction</h2><p>Reasoning about the heap of a Viper program is governed by <em>field permissions</em>, which specify the heap locations that a statement, an expression or an assertion may access (read and/or modify).
 Heap locations can be accessed only if the corresponding permission is <em>held</em> by the currently verified method. The simplest form of field permission is the <em>exclusive</em> permission to a heap location <code>x.f</code>; it expresses that the current method may read and write to the location, whereas other methods or threads are not allowed to access it in any way.</p>
 <p>Every Viper operation, i.e., every statement, expression, or assertion, has an implicit or explicit specification expressing which field permissions the operation requires, i.e., which locations it accesses. The part of the heap denoted this way is called the <em>footprint</em> of an operation.
 Permissions enable preserving information about heap values in Viper: as long as the footprint of an expression is disjoint from the footprint of a method call, it can be concluded that the call does not change the expression’s value, even if the concrete method implementation is unknown. Preserving properties this way is called <em>framing</em>: e.g. we might say that the value of an expression is <em>framed</em> across a method call, or in general, across a statement.
@@ -626,7 +626,7 @@ argument, a value-typed mathematical sequence, represents the values stored in t
 </div>
 
 
-<h1 id="functions-1">Functions</h1><p>Just as predicates can be used to define parameterised (and potentially-recursive) assertions, Viper <em>functions</em> define parameterised and potentially-recursive <em>expressions</em>. A function can have any number of parameters, and always returns a single value; evaluation of a Viper function (just as any other Viper expression) is side-effect free. Function applications may occur both in code and in specifications: anywhere that Viper expressions may occur.</p>
+<h1 id="functions">Functions</h1><p>Just as predicates can be used to define parameterised (and potentially-recursive) assertions, Viper <em>functions</em> define parameterised and potentially-recursive <em>expressions</em>. A function can have any number of parameters, and always returns a single value; evaluation of a Viper function (just as any other Viper expression) is side-effect free. Function applications may occur both in code and in specifications: anywhere that Viper expressions may occur.</p>
 <p>Functions are introduced in top-level declarations of the form:</p>
 <pre><code class="hljs language-silver"><span class="hljs-keyword">function</span> f(...): T
   <span class="hljs-keyword">requires</span> A
