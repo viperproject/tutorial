@@ -1,6 +1,6 @@
 # Permissions {#permissions}
 
-## Introduction
+## Introduction {#perm-introduction}
 
 Reasoning about the heap of a Viper program is governed by *field permissions*, which specify the heap locations that a statement, an expression or an assertion may access (read and/or modify).
 Heap locations can be accessed only if the corresponding permission is *held* by the currently verified method. The simplest form of field permission is the *exclusive* permission to a heap location `x.f`; it expresses that the current method may read and write to the location, whereas other methods or threads are not allowed to access it in any way.
