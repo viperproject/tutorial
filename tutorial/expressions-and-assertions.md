@@ -28,7 +28,7 @@ In the following, we list the different kinds of expressions, remark on their we
 
 * function results `result`: Can only be used in postconditions of top-level Viper functions, and refers to the result of the function application; it therefore has the type of the return value of the function the postcondition belongs to.
 
-* let expressions `let v == (e1) in e2`: Evaluates `e1`, and subsequently evaluates `e2` in a context where the variable `v` is bound to the value of `e1` (currently, the *parentheses are necessary*). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the *argument* of a function call `f(x.f)` in the current state and the function application itself in the current method's old state, this can be expressed by using a let expression as follows: `let y == (x.f) in old(f(y)`.
+* let expressions `let v == (e1) in e2`: Evaluates `e1`, and subsequently evaluates `e2` in a context where the variable `v` is bound to the value of `e1` (currently, the *parentheses are necessary*). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the *argument* of a function call `f(x.f)` in the current state and the function application itself in the current method's old state, this can be expressed by using a let expression as follows: `let y == (x.f) in old(f(y))`.
 
 ### Integer expressions
 
@@ -52,13 +52,12 @@ In the following, we list the different kinds of expressions, remark on their we
 
 `forperm` expressions are useful for implementing leak checks. For example, by asserting `forperm x: Ref [x.f] :: false` we can check that in the current context we do not hold any permission to the field `f`. Note that `forperm` expressions are evaluated in the current heap, including side-effects caused during `exhale` operations, as illustrated in the following example:
 
-```silver
+```silver {.runnable }
 field f: Int
-
 method Foo(x: Ref) {
-    inhale acc(x.f)
-    // exhale forperm y: Ref [y.f] :: false // Fails because we have acc(x.f)
-    exhale acc(x.f) && forperm y: Ref [y.f] :: false // Succeeds because we do not have acc(x.f) anymore.
+  inhale acc(x.f)
+  exhale forperm y: Ref [y.f] :: false // Fails because we have acc(x.f)
+  exhale acc(x.f) && forperm y: Ref [y.f] :: false // Succeeds because we do not have acc(x.f) anymore.
 }
 ```
 
