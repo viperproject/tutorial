@@ -1458,7 +1458,7 @@ follows:</p>
 </li>
 <li><p>sequence literal: <code>Seq(e1, e2, ..., en)</code>, where <code>e1</code>-<code>en</code> are expressions that all have a common type <code>T</code>, represents a sequence of type <code>Seq[T]</code> of <code>n</code> elements, whose elements are the argument expressions (i.e., the first element is <code>e1</code>, the second <code>e2</code> etc., and the last is <code>en</code>.</p>
 </li>
-<li><p>integer sequence literals: <code>[e1..e2]</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
+<li><p>integer sequence literals: <code>[e1..e2)</code>, where <code>e1</code> and <code>e2</code> are <code>Int</code>-typed, represent the sequence of integers ranging from <code>e1</code> until, but excluding, <code>e2</code> (or the empty sequence, if <code>e2</code> is less than or equal to <code>e1</code>).</p>
 </li>
 <li><p>sequence lookup: <code>s[e]</code>, where <code>s</code> is an expression of type <code>Seq[T]</code> for some <code>T</code> and <code>e</code> is an integer, returns the element at index <code>e</code> in the sequence. As a well-definedness condition, <code>e</code> must be known to be non-negative and less than the length of <code>s</code>, otherwise this expression will result in a verification error.</p>
 </li>
