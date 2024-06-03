@@ -100,7 +100,7 @@ Viper's built-in sequence type `Seq[T]` represents immutable finite sequences of
 
 * sequence literal: `Seq(e1, e2, ..., en)`, where `e1`-`en` are expressions that all have a common type `T`, represents a sequence of type `Seq[T]` of `n` elements, whose elements are the argument expressions (i.e., the first element is `e1`, the second `e2` etc., and the last is `en`.
 
-* integer sequence literals: `[e1..e2]`, where `e1` and `e2` are `Int`-typed, represent the sequence of integers ranging from `e1` until, but excluding, `e2` (or the empty sequence, if `e2` is less than or equal to `e1`).
+* integer sequence literals: `[e1..e2)`, where `e1` and `e2` are `Int`-typed, represent the sequence of integers ranging from `e1` until, but excluding, `e2` (or the empty sequence, if `e2` is less than or equal to `e1`).
 
 * sequence lookup: `s[e]`, where `s` is an expression of type `Seq[T]` for some `T` and `e` is an integer, returns the element at index `e` in the sequence. As a well-definedness condition, `e` must be known to be non-negative and less than the length of `s`, otherwise this expression will result in a verification error.
 
