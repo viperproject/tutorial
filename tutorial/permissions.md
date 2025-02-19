@@ -242,7 +242,7 @@ method copyAndInc(x: Ref, y: Ref)
 
 Fractional permissions to the same location are *summed up*: inhaling `acc(x.f, p1) && acc(x.f, p2)` is equivalent to inhaling `acc(x.f, p1 + p2)`, and analogously for exhaling. As before, inhaling permissions maintains the invariant that write permission to a location are exclusive. With fractional permission in mind, this can be rephrased as maintaining the invariant that the permission amount to a location never exceeds 1.
 
-To illustrate this, consider the next example (and its exercises): there, the `assert` statement fails because holding one third permission to each `x.f` and `y.f` does not imply that `x` and `y` cannot be aliases, since the sum of the individual permission amounts does not exceed 1.
+To illustrate this, consider the next example (and its exercises): there, the `assert` statement fails because holding one half permission to each `x.f` and `y.f` does not imply that `x` and `y` cannot be aliases, since the sum of the individual permission amounts does not exceed 1.
 
 ```silver-runnable
 field f: Int
