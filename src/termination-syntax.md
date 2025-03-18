@@ -34,5 +34,3 @@ For the first recursive call `ack(m - 1, 1)`, and the second (outer) recursive c
 > **Exercise**
 >
 > Swap the tuple elements, i.e., change the decreases clause to `n, m`. For which of the recursive calls do you expect error messages?
-
-The well-founded order over tuples need not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.

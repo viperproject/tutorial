@@ -65,8 +65,22 @@ function length(this: Ref): Int
 >
 > Change the body of `length` to just the recursive call `length(this)`. Which error message do you expect?
 
+Additionally, Viper's ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:
+
+```silver-runnable
+adt List[T] {
+    Nil() 
+    Cons(hd: T, tl: List[T])
+}
+
+function llen(l: List[Int]): Int
+    decreases l
+{
+    l.isNil ? 0 : 1 + llen(l.tl)
+}
+```
+
 Final remarks:
 
 * Note that `PredicateInstance` is an internal Viper type, and currently supported only in decreases tuples. The `nested` function is also internal and cannot be used by users.
-* For simplicity, all standard well-founded orders can be imported via `decreases/all.vpr`.
 * Users can also define [custom well-founded orders](./termination-custom-orders.md).
