@@ -836,25 +836,28 @@ sequence), a function is introduced that computes the abstraction. This usage of
 </div>
 
 <h2 id="receiver-expressions-and-injectivity">Receiver Expressions and Injectivity</h2><p>In the above examples, the receiver expressions used to specify permissions (the <code>e</code> expression in <code>acc(e.f)</code>) were always the quantified variable itself. This is not a requirement; for example, in the following code, quantified permissions are used along with a function <code>address</code> in the <code>exhale</code> statement, to exhale permission to multiple field locations:</p>
-<pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">field</span> val : <span class="hljs-type">Int</span>
+<pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">field</span> val: <span class="hljs-type">Int</span>
 
-<span class="hljs-keyword">function</span> address(i:<span class="hljs-type">Int</span>) : <span class="hljs-type">Ref</span>
-<span class="hljs-comment">// ensures forall j:Int, k:Int :: j != k ==&gt; address(j)!=address(k)</span>
+<span class="hljs-keyword">function</span> address(i: <span class="hljs-type">Int</span>): <span class="hljs-type">Ref</span>
+<span class="hljs-comment">//   ensures inverse(result) == i</span>
+
+<span class="hljs-comment">// function inverse(r: Ref): Int</span>
+<span class="hljs-comment">//   ensures address(result) == r</span>
 
 <span class="hljs-keyword">method</span> test()
 {
   <span class="hljs-keyword">inhale</span> <span class="hljs-keyword">acc</span>(address(<span class="hljs-number">3</span>).val, <span class="hljs-number">1</span>/<span class="hljs-number">2</span>)
   <span class="hljs-keyword">inhale</span> <span class="hljs-keyword">acc</span>(address(<span class="hljs-number">2</span>).val, <span class="hljs-number">1</span>/<span class="hljs-number">2</span>)
   <span class="hljs-keyword">inhale</span> <span class="hljs-keyword">acc</span>(address(<span class="hljs-number">1</span>).val, <span class="hljs-number">1</span>/<span class="hljs-number">2</span>)
-  <span class="hljs-keyword">exhale</span> <span class="hljs-keyword">forall</span> i:<span class="hljs-type">Int</span> :: <span class="hljs-number">1</span>&lt;=i &amp;&amp; i&lt;=<span class="hljs-number">3</span> ==&gt; <span class="hljs-keyword">acc</span>(address(i).val, <span class="hljs-number">1</span>/<span class="hljs-number">2</span>)
+  <span class="hljs-keyword">exhale</span> <span class="hljs-keyword">forall</span> i: <span class="hljs-type">Int</span> :: <span class="hljs-number">1</span> &lt;= i &lt;= <span class="hljs-number">3</span> ==&gt; <span class="hljs-keyword">acc</span>(address(i).val, <span class="hljs-number">1</span>/<span class="hljs-number">2</span>)
 }<div class="load-code"></div>
 </code></pre>
-<p>The expression <code>address(i)</code> implicitly defines a mapping between instances <code>i</code> of the quantifier and receiver references <code>address(i)</code>. Such receiver expressions cannot be fully-general: Viper imposes the restriction that this mapping must be provably <em>injective</em>: for any two instances of such a quantifier, the verifier must be able to prove that the corresponding receiver expressions are different. As usual, this condition can be proven using any information available at the particular program point. In addition, injectivity is only required for instances of the quantifier for which permission is actually required; in the above example, the restriction amounts to showing that the references <code>address(1)</code>, <code>address(2)</code> and <code>address(3)</code> are pairwise unequal. In the following exercises, this is illustrated more thoroughly.</p>
+<p>The expression <code>address(i)</code> implicitly defines a mapping between instances <code>i</code> of the quantifier and receiver references <code>address(i)</code>. Such receiver expressions cannot be fully-general: Viper imposes the restriction that this mapping must be provably <em>injective</em>: for any two instances of such a quantifier, the verifier must be able to prove that the corresponding receiver expressions are different. For us, this means proving <code>forall j: Int, k: Int :: j != k ==&gt; address(j) != address(k)</code>. As usual, this condition can be proven using any information available at the particular program point. In addition, injectivity is only required for instances of the quantifier for which permission is actually required; in the above example, the restriction amounts to showing that the references <code>address(1)</code>, <code>address(2)</code> and <code>address(3)</code> are pairwise unequal. In the following exercises, this is illustrated more thoroughly.</p>
 <div class="alert alert-info exercise">
 
 <ul>
-<li>In the above example, try uncommenting the postcondition (<code>ensures</code> line) attached to the <code>address</code> function declaration. The complaint about injectivity should then be removed, since the function postcondition guarantees injectivity of <code>address(i)</code> as a mapping from <code>i</code> to receivers.</li>
-<li>Re-comment out the function postcondition (and check that the error re-occurs). In the example code above, try changing the permission <i>amounts</i> from <code>1/2</code> to <code>1/1</code> throughout. For example, change <code>acc(address(1).val,1/2)</code> to <code>acc(address(1).val, 1/1)</code> (or to <code>acc(address(1).val)</code>, which has the same meaning. This will remove the complaint about injectivity: the permissions held after the three <code>inhale</code> statements are sufficient to guarantee the required inequalities.</li>
+<li>In the above example, try uncommenting the three lines after the <code>address</code> function declaration. The complaint about injectivity should then be removed, since the existence of an inverse function proves injectivity of <code>address</code>.</li>
+<li>Re-comment out the three lines (and check that the error re-occurs). In the example code above, try changing the permission <i>amounts</i> from <code>1/2</code> to <code>1/1</code> throughout. For example, change <code>acc(address(1).val,1/2)</code> to <code>acc(address(1).val, 1/1)</code> (or to <code>acc(address(1).val)</code>, which has the same meaning. This will remove the complaint about injectivity: the permissions held after the three <code>inhale</code> statements are sufficient to guarantee the required inequalities.</li>
 <li>A further alternative is to add instead an additional assumption (somewhere before the <code>exhale</code> statement):
  <code>inhale address(1) != address(2) &amp;&amp; address(2) != address(3) &amp;&amp; address(3) != address(1)</code>. Again, this should make the verifier happy; as also shown in the previous point, these inequalities are sufficient for the <code>exhale</code> to satisfy the injectivity restriction; there is no requirement for <code>address(i)</code> to be injective in general.</div></li>
 </ul>
