@@ -23,8 +23,6 @@ Here, `<tuple>` denotes the termination measure: a tuple of comma-separated expr
 A common example for termination is the standard `factorial` function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 function factorial(n:Int) : Int
   requires 0 <= n
   decreases n
@@ -37,27 +35,24 @@ Viper successfully verifies that `factorial` terminates: at each recursive invoc
 
 ### Predefined Well-Founded Orders {#term_prov_wfo}
 
-Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
+Viper's standard library provides definitions of well-founded orders for most types built into Viper. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
 
-| Build-In Type<br>(file name) | Provided Well-Founded Order |
+| Built-In Type | Provided Well-Founded Order |
 | ---- | ---- |
-|`Ref`<br>(`ref.vpr`)| `r1 <_ r2 <==> r1 == null && r2 != null`
-|`Bool`<br>(`bool.vpr`)| `b1 <_ b2 <==> b1 == false && b2 == true`
-|`Int`<br>(`int.vpr`)| `i1 <_ i2 <==> i1 < i2 && 0 <= i2`
-|`Rational`<br>(`rational.vpr`, rationals will be deprecated in the summer 2023 release):| `r1 <_ r2 <==> r1 <= r2 - 1/1 && 0/1 <= r2`
-|`Perm`<br>(`perm.vpr`)| `p1 <_ p2 <==> p1 <= p2 - write && none <= p2`
-|`Seq[T]`<br>(`seq.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
-|`Set[T]`<br>(`set.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
-|`Multiset[T]`<br>(`multiset.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
-|`PredicateInstance`<br>(`predicate_instance.vpr`)| `p1 <_ p2 <==> nested(p1, p2)`
+|`Ref`| `r1 <_ r2 <==> r1 == null && r2 != null`
+|`Bool`| `b1 <_ b2 <==> b1 == false && b2 == true`
+|`Int`| `i1 <_ i2 <==> i1 < i2 && 0 <= i2`
+|`Perm`| `p1 <_ p2 <==> p1 <= p2 - write && none <= p2`
+|`Seq[T]`| `s1 <_ s2 <==> \|s1\| < \|s2\|`
+|`Set[T]`| `s1 <_ s2 <==> \|s1\| < \|s2\|`
+|`Multiset[T]`| `s1 <_ s2 <==> \|s1\| < \|s2\|`
+|`PredicateInstance`| `p1 <_ p2 <==> nested(p1, p2)`
 
 All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e., can be unfolded only a finite number of times. This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller (and non-negative) depth than `p2`.
 
 Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
 ```silver-runnable
-import <decreases/predicate_instance.vpr>
-
 field next: Ref
 
 predicate list(this: Ref) {
@@ -77,10 +72,24 @@ function length(this: Ref): Int
 Change the body of `length` to just the recursive call `length(this)`. Which error message do you expect?
 ///
 
+Additionally, Viper's ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:
+
+```silver-runnable
+adt List[T] {
+    Nil() 
+    Cons(hd: T, tl: List[T])
+}
+
+function llen(l: List[Int]): Int
+    decreases l
+{
+    l.isNil ? 0 : 1 + llen(l.tl)
+}
+```
+
 Final remarks:
 
 * Note that `PredicateInstance` is an internal Viper type, and currently supported only in decreases tuples. The `nested` function is also internal and cannot be used by users.
-* For simplicity, all standard well-founded orders can be imported via `decreases/all.vpr`.
 * Users can also define [custom well-founded orders](#term_custom_orders).
 
 ## General Syntax of Decreases Tuples
@@ -100,8 +109,6 @@ Special cases, such as empty tuples, tuples of different length, and tuples of d
 A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 function ack(m:Int, n:Int):Int
   decreases m, n
   requires m >= 0
@@ -119,8 +126,6 @@ For the first recursive call `ack(m - 1, 1)`, and the second (outer) recursive c
 //exercise//
 Swap the tuple elements, i.e., change the decreases clause to `n, m`. For which of the recursive calls do you expect error messages?
 ///
-
-The well-founded order over tuples need not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.
 
 ## Special Decreases Tuples
 
@@ -189,8 +194,6 @@ As previously mentioned, Viper offers [predefined orders](#term_prov_wfo) for it
 In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt` in the function's decreases clause.
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 domain MyInt {
   function put(i: Int): MyInt   // Constructor
   function get(m: MyInt): Int   // Destructor
@@ -227,6 +230,8 @@ v1 <_ v2 <==> decreasing(v1, v2) && bounded(v2)
 The necessary properties of `decreasing` and `bounded` for values of type `T` can be defined via axioms. For the `MyInt` type from before, suitable axioms would be:
 
 ```silver
+import <decreases/declaration.vpr>
+
 domain MyIntWellFoundedOrder {
   axiom {
     forall i1: MyInt, i2: MyInt :: {decreasing(i1, i2)}
@@ -240,7 +245,8 @@ domain MyIntWellFoundedOrder {
 ```
 
 //note//
-The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`. This is also what the predefined orders, e.g., `decreases/int.vpr`, do.
+The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`, as shown in the example. This is also what the predefined orders do.
+Viper uses a naming convention where the well-founded order for type `T` should be defined in a domain called `TWellFoundedOrder`; giving it a different name will result in a warning.
 ///
 
 //exercise//
@@ -257,8 +263,6 @@ For mutually recursive functions, Viper implements the following approach (as, e
 A simple case of mutual recursion is illustrated next, by functions `is_even` and `is_odd`:
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 function is_even(x: Int): Bool
   requires x >= 0
   decreases x
@@ -279,9 +283,6 @@ Consider function `is_even`: its termination measure `x` decreases at the indire
 In the example above, the two termination measures are tuples of equal length and type. However, this is not required of mutually recursive functions in order to prove their termination. Consider the next example (which verifies successfully):
 
 ```silver-runnable
-import <decreases/int.vpr>
-import <decreases/bool.vpr>
-
 function fun1(y: Int, b: Bool): Int
   decreases y, b
 {
@@ -299,8 +300,6 @@ function fun2(x: Int): Int
 At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g., Dafny). E.g., for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)`.
 
 //exercise//
-
-* Comment the import of `bool.vpr`, and reverify the program. Can you explain the resulting verification error?
 
 * In the above example, change the call `fun1(x-1, true)` to `fun1(x, true)` -- the program still verifies. That's because Viper appends a `Top` element (an internal value of any type, larger than any other value) to each tuple, a neat trick also implemented by, e.g., Dafny and F*. Can you explain how this helps with checking termination of the call `fun1(x, true)`?
 
@@ -326,8 +325,6 @@ To ensure soundness, only a *single* clause per kind of measure is allowed. More
 The following example illustrates combined conditional termination clauses: function `sign` promises to decrease `x` if positive, and something (wildcard) if `x` is negative. In case `x` is zero, function `sign` does not (promise to) terminate.
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 function sign(x: Int): Int
   decreases x if 1 <= x
   decreases _ if x <= -1
@@ -431,8 +428,6 @@ The currently implemented approach to checking termination of methods is similar
 A straightforward example is method `sum`, shown next:
 
 ```silver-runnable
-import <decreases/int.vpr>
-
 method sum(n: Int) returns (res: Int)
   requires 0 <= n
   decreases
