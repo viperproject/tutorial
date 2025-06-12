@@ -51,9 +51,9 @@ Viper's standard library provides definitions of well-founded orders for most ty
 |`Multiset[T]`<br>(`multiset.vpr`)| `s1 <_ s2 <==> \|s1\| < \|s2\|`
 |`PredicateInstance`<br>(`predicate_instance.vpr`)| `p1 <_ p2 <==> nested(p1, p2)`
 
-All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e., can be unfolded only a finite number of times. This implies that a predicate instance `p1`, which is nested inside a predicate instance `p2`, has a smaller (and non-negative) depth than `p2`.
+All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, the relation between a predicate instance `p2` and the predicate instances `p1` nested within the body of `p2` forms a well-founded order.
 
-Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
+Viper uses this nesting relation to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
 ```silver-runnable
 import <decreases/predicate_instance.vpr>
