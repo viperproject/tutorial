@@ -447,7 +447,7 @@ Intuitively, the statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code> can 
 </div>
 
 <p>Fractional permissions to the same location are <em>summed up</em>: inhaling <code>acc(x.f, p1) &amp;&amp; acc(x.f, p2)</code> is equivalent to inhaling <code>acc(x.f, p1 + p2)</code>, and analogously for exhaling. As before, inhaling permissions maintains the invariant that write permission to a location are exclusive. With fractional permission in mind, this can be rephrased as maintaining the invariant that the permission amount to a location never exceeds 1.</p>
-<p>To illustrate this, consider the next example (and its exercises): there, the <code>assert</code> statement fails because holding one third permission to each <code>x.f</code> and <code>y.f</code> does not imply that <code>x</code> and <code>y</code> cannot be aliases, since the sum of the individual permission amounts does not exceed 1.</p>
+<p>To illustrate this, consider the next example (and its exercises): there, the <code>assert</code> statement fails because holding one half permission to each <code>x.f</code> and <code>y.f</code> does not imply that <code>x</code> and <code>y</code> cannot be aliases, since the sum of the individual permission amounts does not exceed 1.</p>
 <pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">field</span> f: <span class="hljs-type">Int</span>
 
 <span class="hljs-keyword">method</span> test(x: <span class="hljs-type">Ref</span>, y: <span class="hljs-type">Ref</span>) {
