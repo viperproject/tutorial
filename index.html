@@ -1221,15 +1221,17 @@ object creation are expressions. Hence, they must not occur as receivers, method
 arguments, etc.; instead of nesting these constructs, one typically assigns their results first to local variables, and then uses these.</p>
 <h2 id="control-structures">Control Structures</h2><p>Viper supports two main control structures: conditional statements and loops.
 Conditional statements have the following form:</p>
-<pre><code class="hljs language-silver"><span class="hljs-keyword">if</span>(E) {
+<pre><code class="hljs language-silver"><span class="hljs-keyword">if</span> (E1) {
   S1
-} <span class="hljs-keyword">else</span> {
+} <span class="hljs-keyword">elseif</span> (E2) {
   S2
+} <span class="hljs-keyword">else</span> {
+  S3
 }
 </code></pre>
-<p>where the <code>else</code> branch is optional. The semantics is as expected.</p>
+<p>where there may be any number of <code>elseif</code> branches (including none), and the <code>else</code> branch is optional. The semantics is as expected.</p>
 <p>Loops have the following form:</p>
-<pre><code class="hljs language-silver"><span class="hljs-keyword">while</span>(b)
+<pre><code class="hljs language-silver"><span class="hljs-keyword">while</span> (b)
   <span class="hljs-keyword">invariant</span> A
 {
   S
@@ -1261,7 +1263,7 @@ illustrated by the following example:</p>
   <span class="hljs-keyword">var</span> x: <span class="hljs-type">Int</span> := <span class="hljs-number">3</span>
   this.f := <span class="hljs-number">5</span>
 
-  <span class="hljs-keyword">while</span>(<span class="hljs-number">0</span> &lt;= i)
+  <span class="hljs-keyword">while</span> (<span class="hljs-number">0</span> &lt;= i)
     <span class="hljs-keyword">invariant</span> <span class="hljs-keyword">acc</span>(this.g)
   {
     this.g := this.g + <span class="hljs-number">1</span>
