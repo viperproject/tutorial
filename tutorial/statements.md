@@ -33,19 +33,21 @@ Viper supports two main control structures: conditional statements and loops.
 Conditional statements have the following form:
 
 ```silver
-if(E) {
+if (E1) {
   S1
-} else {
+} elseif (E2) {
   S2
+} else {
+  S3
 }
 ```
 
-where the `else` branch is optional. The semantics is as expected.
+where there may be any number of `elseif` branches (including none), and the `else` branch is optional. The semantics is as expected.
 
 Loops have the following form:
 
 ```silver
-while(b)
+while (b)
   invariant A
 {
   S
@@ -79,7 +81,7 @@ method Foo(this: Ref, n: Int)
   var x: Int := 3
   this.f := 5
 
-  while(0 <= i)
+  while (0 <= i)
     invariant acc(this.g)
   {
     this.g := this.g + 1
