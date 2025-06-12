@@ -1419,9 +1419,12 @@ follows:</p>
 </li>
 </ul>
 <p><code>forperm</code> expressions are useful for implementing leak checks. For example, by asserting <code>forperm x: Ref [x.f] :: false</code> we can check that in the current context we do not hold any permission to the field <code>f</code>. Note that <code>forperm</code> expressions are evaluated in the current heap, including side-effects caused during <code>exhale</code> operations, as illustrated in the following example:</p>
-<pre><code class="hljs language-silver"><span class="hljs-keyword">inhale</span> <span class="hljs-keyword">acc</span>(x.f)
-<span class="hljs-keyword">exhale</span> <span class="hljs-keyword">forperm</span> x: <span class="hljs-type">Ref</span> [x.f] :: <span class="hljs-literal">false</span> <span class="hljs-comment">// Would fail because we have acc(x.f)</span>
-<span class="hljs-keyword">acc</span>(x.f) &amp;&amp; <span class="hljs-keyword">forperm</span> x: <span class="hljs-type">Ref</span> [x.f] :: <span class="hljs-literal">false</span> <span class="hljs-comment">// Would succeed because we do not have acc(x.f) anymore.</span>
+<pre><code class="hljs language-silver-runnable"><span class="hljs-keyword">field</span> f: <span class="hljs-type">Int</span>
+<span class="hljs-keyword">method</span> Foo(x: <span class="hljs-type">Ref</span>) {
+  <span class="hljs-keyword">inhale</span> <span class="hljs-keyword">acc</span>(x.f)
+  <span class="hljs-keyword">exhale</span> <span class="hljs-keyword">forperm</span> y: <span class="hljs-type">Ref</span> [y.f] :: <span class="hljs-literal">false</span> <span class="hljs-comment">// Fails because we have acc(x.f)</span>
+  <span class="hljs-keyword">exhale</span> <span class="hljs-keyword">acc</span>(x.f) &amp;&amp; <span class="hljs-keyword">forperm</span> y: <span class="hljs-type">Ref</span> [y.f] :: <span class="hljs-literal">false</span> <span class="hljs-comment">// Succeeds because we do not have acc(x.f) anymore.</span>
+}<div class="load-code"></div>
 </code></pre>
 <p>This is useful, for example, for checking that after the method postcondition is exhaled, the method body does not have any permission left which would be leaked.</p>
 <p>Forperm expressions may not be used in functions or predicates.</p>
