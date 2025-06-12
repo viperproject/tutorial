@@ -52,7 +52,7 @@ In the following, we list the different kinds of expressions, remark on their we
 
 `forperm` expressions are useful for implementing leak checks. For example, by asserting `forperm x: Ref [x.f] :: false` we can check that in the current context we do not hold any permission to the field `f`. Note that `forperm` expressions are evaluated in the current heap, including side-effects caused during `exhale` operations, as illustrated in the following example:
 
-```silver {.runnable }
+```silver-runnable
 field f: Int
 method Foo(x: Ref) {
   inhale acc(x.f)
