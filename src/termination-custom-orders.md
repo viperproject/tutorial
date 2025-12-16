@@ -5,8 +5,6 @@ As previously mentioned, Viper offers [predefined orders](./termination-measures
 In the remainder of this subsection, both approaches will be illustrated using a combination of the `MyInt` example (from the earlier subsection on domains) and a `factorial` function operating on `MyInt`. In the example below, the destructor `get` is used to map a `MyInt` to a regular `Int`, which indirectly allows using `MyInt` in the function's decreases clause.
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 domain MyInt {
   function put(i: Int): MyInt   // Constructor
   function get(m: MyInt): Int   // Destructor

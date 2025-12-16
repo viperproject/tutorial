@@ -5,8 +5,6 @@ For mutually recursive functions, Viper implements the following approach (as, e
 A simple case of mutual recursion is illustrated next, by functions `is_even` and `is_odd`:
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 function is_even(x: Int): Bool
   requires x >= 0
   decreases x
@@ -27,9 +25,6 @@ Consider function `is_even`: its termination measure `x` decreases at the indire
 In the example above, the two termination measures are tuples of equal length and type. However, this is not required of mutually recursive functions in order to prove their termination. Consider the next example (which verifies successfully):
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-import <decreases/bool.vpr>
-
 function fun1(y: Int, b: Bool): Int
   decreases y, b
 {

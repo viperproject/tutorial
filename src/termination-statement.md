@@ -59,8 +59,6 @@ The currently implemented approach to checking termination of methods is similar
 A straightforward example is method `sum`, shown next:
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 method sum(n: Int) returns (res: Int)
   requires 0 <= n
   decreases
