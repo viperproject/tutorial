@@ -85,7 +85,7 @@ domain Pair[A, B] {
 * Declared by keyword `domain`
 * Have a name, which is introduced as an additional _type_ in the Viper program
 * Domains may have type parameters (e.g. `A` and `B` above)
-* A domain's body (delimited by braces) consists of a number function declarations, followed by a number of axioms
+* A domain's body (delimited by braces) consists of a number of function declarations, followed by a number of axioms
   * Domain functions (functions declared inside a `domain`) may have neither a body nor a specification; these are uninterpreted total mathematical functions
   * Domain axioms consist of name (following the `axiom` keyword), and a definition enclosed within braces (which is a boolean expression which may not read the program state in any way)
 * Useful for specifying custom mathematical theories
@@ -106,7 +106,7 @@ define link(x, y) {
   * Macros are not type-checked until after expansion
   * However, macro bodies must be well-formed assertions / statements
 * May have any number of (untyped) parameter names (e.g. `a` and `b` above)
-* The are two kinds of macros
+* There are two kinds of macros
   * Macros defining assertions (or expressions) include the macro definition whitespace-separated afterwards (e.g. `plus` above)
   * Macros defining _statements_ include their definitions within braces (e.g. `link` above)
 * See the [array domain encoding](./domains-array.md) for an example
