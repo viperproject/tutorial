@@ -1,0 +1,333 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Functions - Viper Tutorial</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Viper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="functions"><a class="header" href="#functions">Functions</a></h1>
+<p>Just as predicates can be used to define parameterised (and potentially-recursive) assertions, Viper <em>functions</em> define parameterised and potentially-recursive <em>expressions</em>. A function can have any number of parameters, and always returns a single value; evaluation of a Viper function (just as any other Viper expression) is side-effect free. Function applications may occur both in code and in specifications: anywhere that Viper expressions may occur.</p>
+<p>Functions are introduced in top-level declarations of the form:</p>
+<pre><code class="language-viper">function f(...): T
+  requires A
+  ensures  E1
+{ E2 }
+</code></pre>
+<p>or</p>
+<pre><code class="language-viper">function f(...): T
+  requires A
+  ensures  E1
+</code></pre>
+<p>where <code>f</code> is a globally-unique function name, followed by a possibly-empty list of parameters, and a result type <code>T</code>. Functions may have an arbitrary number of pre- and postconditions; each precondition (indicated by the <code>requires</code> keyword) consists of an assertion <code>A</code>, whereas each postcondition (indicated by the <code>ensures</code> keyword) consists of an expression <code>E1</code>. That is, preconditions may contain resource assertions such as accessibility predicates, but postconditions must not (this difference from methods reflects the fact that function applications are side-effect-free, and so the pre- and post-states of a function application are the same; one can think of function preconditions as also being implicit additional postconditions). The result of the function is referred to using the keyword <code>result</code> in postconditions.</p>
+<p>The following example defines a function <code>listLength</code> that takes a null-terminated simply-linked list and computes its length. As shown in the body of <code>listLength</code>, function applications are written simply as the function name followed by appropriately-typed arguments in parentheses. The precondition of <code>listLength</code> expresses the fact that the function application can only be evaluated when the corresponding <code>list</code> predicate instance is held, while the post-condition expresses the fact that the length of a list is always a non-negative integer.</p>
+<pre><code class="language-viper editable playground">field elem: Int
+field next: Ref
+
+predicate list(this: Ref) {
+  acc(this.elem) &amp;&amp; acc(this.next) &amp;&amp;
+  (this.next != null ==&gt; list(this.next))
+}
+
+function listLength(l:Ref) : Int
+  requires list(l)
+  ensures  result &gt; 0
+{ 
+  unfolding list(l) in l.next == null ? 1 : 1 + listLength(l.next) 
+}
+</code></pre>
+<p>The function body declaration <code>{ E2 }</code> (if provided) must contain an expression <code>E2</code> of (return) type <code>T</code>; it may contain function invocations, including recursive invocations of <code>f</code> itself. Function declarations of the latter form (that is, without a function body) introduce abstract functions, which may be useful for information hiding reasons, or to model functions which need not or cannot be directly implemented, e.g., because they model externally-justified information about the encoded program (such as the behaviour of library code). The following example illustrates this by adding a <code>capacity</code> function, intended to model a capacity suitable for storing the elements of the list in an array-like container.</p>
+<pre><code class="language-viper">function capacity(l:Ref): Int
+  requires list(l)
+  ensures  listLength(l) &lt;= result &amp;&amp; result &lt;= 2 * listLength(l)
+</code></pre>
+<p>Note that functions declared in <a href="./domains.html">Viper domains (i.e. <em>domain functions</em>)</a> are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the <a href="./domains.html">domains section</a> for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.</p>
+<p>Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function.
+In order to enable function termination checks, which are <em>not</em> performed by default, users can specify termination measures, as discussed in <a href="./termination.html">the chapter on termination</a>.
+As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:</p>
+<pre><code class="language-viper editable playground">function bad() : Int
+  ensures 0 == 1
+{ bad() }
+</code></pre>
+<p>Due to the least fixpoint interpretation of <a href="./predicates.html">predicates</a>, any recursive function whose recursive calls occur inside an <code>unfolding</code> expression are guaranteed to be terminating, as in the case of the <code>listLength</code> function above. Consequently, predicates, and other common well-founded orders, are <a href="./termination-measures.html#term_prov_wfo">standard termination measures</a> provided by Viper.</p>
+<p>For non-abstract functions, Viper reasons about function applications in terms of the function bodies. That is, in contrast to methods, it is not always necessary to provide a postcondition in order to convey
+information to the caller of a function. Nevertheless, postconditions are useful for abstract functions and in situations where the property expressed in the postcondition does not directly follow from unfolding the function body once but, for instance, requires induction. In the case of the <code>listLength</code> function, the non-negativity of the result is indeed an inductive property, and is not exploitable by Viper unless stated in the postcondition.</p>
+<p>For every function <em>application</em>, Viper checks that the function precondition is true in the current state, and then assumes the value of the function application to be equal to the function body (if provided), as well as assuming any postconditions. Fully expanding function bodies cannot work for recursive functions. Instead, functions are by-default expanded only once; additional expansions are triggered when unfolding or folding a predicate that is mentioned in the function's preconditions. This feature allows one to traverse recursive structures and simultaneously reason about the permissions and values. For example, since predicate <code>list</code> was mentioned in the precondition of function <code>listLength</code> earlier, the body of any function call <code>listLength(l)</code> is unfolded whenever a predicate <code>list(l)</code> is. This is why the following implementation of the <code>capacity</code> function can be successfully verified:</p>
+<pre><code class="language-viper">function capacity(l:Ref): Int
+  requires list(l)
+  ensures  listLength(l) &lt;= result &amp;&amp; result &lt;= 2 * listLength(l)
+{ unfolding list(l) in l.next == null
+  ? 1
+  : unfolding list(l.next) in l.next.next == null
+  ? 2
+  : 3 + capacity(l.next.next) }
+</code></pre>
+<p>The example below is an alternative version of the previously shown
+list segment example from the <a href="./predicates.html">predicates section</a>: instead of using a predicate parameter for the
+abstract representation of the list segment (as a mathematical
+sequence), a function is introduced that computes the abstraction. This usage of functions to eliminate  predicate parameters which are redundant (in the sense that their values can instead be computed given any predicate instance and its other parameters) is common in Viper.</p>
+<pre><code class="language-viper editable playground">field elem: Int
+field next: Ref
+
+predicate lseg(this: Ref, last: Ref) {
+  this != last ==&gt;
+    acc(this.elem) &amp;&amp; acc(this.next) &amp;&amp;
+    this.next != null &amp;&amp;
+    lseg(this.next, last)
+}
+
+function values(this: Ref, last: Ref): Seq[Int]
+  requires lseg(this, last)
+{
+  unfolding lseg(this, last) in 
+    this == last
+      ? Seq[Int]()
+      : Seq(this.elem) ++ values(this.next, last)
+}
+
+method removeFirst(this: Ref, last: Ref) returns (first: Int, rest: Ref)
+  requires lseg(this, last)
+  requires this != last
+  ensures  lseg(rest, last)
+  ensures  values(rest, last) == old(values(this, last)[1..])
+{
+  unfold lseg(this, last)
+
+  first := this.elem
+  rest := this.next
+}
+</code></pre>
+<p>The <code>values</code> function requires an <code>lseg</code> predicate instance in its precondition to obtain the permissions to traverse the list. Its body uses an <code>unfolding</code> expression to obtain the predicate instance required for the recursive application.</p>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Use the <code>values</code> function to strengthen the postcondition of <code>removeFirst</code> by stating that <code>first</code> was indeed the first element of the segment.</li>
+<li>Extend the example by a <code>contains</code> function that checks whether or not a list segment contains a given element.</li>
+<li>Extend the example by implementing an <code>append</code> method that appends an element to a list segment
+(similar to the one used in the predicate section). Afterwards:
+<ul>
+<li>Use <code>contains</code> to express that the appended element is contained in the resulting segment.</li>
+<li>Alternatively, use <code>values</code> to express that: (1) the given an element has been appended and (2) that the values stored in the rest of the list segment have not been changed.</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="predicates.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="quantifiers.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="predicates.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="quantifiers.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="editor.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="editor.js"></script>
+        <script src="mode-viper.js"></script>
+
+
+    </div>
+    </body>
+</html>

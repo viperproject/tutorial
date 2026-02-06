@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Statement termination (experimental) - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,24 +166,68 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
+                        <h1 id="statement-termination-experimental"><a class="header" href="#statement-termination-experimental">Statement Termination (Experimental)</a></h1>
+<blockquote>
+<p><strong>Warning</strong></p>
+<p>Termination checks outside of functions -- for methods and loops, and method and function calls -- are considered experimental: their semantics could change in the future, or they might be removed from Viper completely.</p>
+<p>We encourage you to experiment with the current implementation, and to let us know if it suits your needs and whether changes or additional features would benefit your verification efforts, etc.</p>
+</blockquote>
+<h2 id="term_fct_calls"><a class="header" href="#term_fct_calls">Function Calls inside Methods</a></h2>
+<p>The development of the <em>experimental</em> termination checks for statements was (partly) guided by Viper's intended use as an intermediate verification language. This shaped, among other things, how function calls are currently handled.</p>
+<p>Front-ends may use Viper functions to encode (pure) program procedures, but front-ends may also use functions to encode proof-relevant properties. Similarly, Viper methods may be used to encode (impure) program procedures, or to encode proof lemmas. Moreover, encoded program procedures could contain Viper statements corresponding to actual statements from the source program, interspersed with Viper statements that encode additional proof steps.</p>
+<p>Consider, e.g., a Viper function <code>elems(ll)</code> that denotes the set of all elements in a potentially cyclic linked-list <code>ll</code>. A statement such as <code>inhale es == elems(ll)</code> could be part of a sequence of program statements -- in which case <code>elems(ll)</code> should probably terminate -- or it could be an additional proof step, in which case it would suffice if <code>elems(ll)</code> were well-defined.</p>
+<p><strong>Function calls inside Viper methods (as opposed to calls inside functions) are therefore (currently) not checked for termination</strong>, and front-ends would have to generate appropriate checks where necessary. Potential alternatives include (1) to always check termination -- probably too restrictive; (2) to enable users to specify termination requirements at call-site, e.g. via attributes/annotations -- but the latter are currently not available in Viper.</p>
+<h2 id="term_loops"><a class="header" href="#term_loops">Checking Loop Termination</a></h2>
+<p>Viper <code>while</code> loops accept decreases clauses at the position of invariants, as illustrated by the following code snippet:</p>
+<pre><code class="language-viper">while (0 &lt; i)
+  decreases i
+{
+  i := i - 1
+}
+</code></pre>
+<p>Given such a specification, Viper will check that the termination measure decreases if the loop body is executed again. <strong>A successful verification then implies that the loop is always bounded, i.e. that a finite unrolling of the loop exists</strong>. Consequently, Viper does (currently) not check that each statement, including nested loops, in the loop body terminates, as illustrated by the next code snippet:</p>
+<pre><code class="language-viper">method m() // might not terminate
+
+while (0 &lt; i)
+  decreases i // verifies successfully (finite unrolling exists)
+{
+  i := i - 1
+  m()
+  while (true) {}
+}
+</code></pre>
+<p>We have chosen this approach for the following reasons (but are happy to receive feedback and discuss alternatives):</p>
+<ul>
+<li>
+<p>Minimality: Interpreting loop termination as "a finite unrolling exists" can be seen as the weakest reasonable requirement, compared to the stronger (additional) requirement of all body statements having to terminate (note: the same argument does not apply to functions).</p>
+</li>
+<li>
+<p>Uniformity: When proving method termination (discussed next), the current approach directly exhibits the same behaviour for both syntactic <code>while</code> loops and loops encoded via <code>goto</code>s and <code>label</code>s (but see the note below). If loop bodies had to terminate as well, it would pose the question of which statements belonged to a goto-loop, which in general cannot be answered unambiguously (e.g. when inferring a while-loop from a goto-loop). This uniformity also extends to manually unrolled loops, as some front-ends might do.</p>
+</li>
+<li>
+<p>Expressiveness: If loop body termination checks are required, they can be encoded easily (potentially via a synthetic method that only hosts the loop body).</p>
+</li>
+<li>
+<p>Familiarity: The same approach is used in Dafny (but then again, Dafny was not designed as an intermediate verification language)</p>
+</li>
+</ul>
+<h2 id="term_methods"><a class="header" href="#term_methods">Checking Method Termination</a></h2>
+<p>The currently implemented approach to checking termination of methods is similar to the previously described approach for functions: decreases clauses can be specified at the position of preconditions; if provided, <strong>Viper checks that the termination measure decreases in each directly or indirectly recursive method invocation, and that other method calls, as well as loops, terminate</strong>. As <a href="#term_fct_calls">previously described</a>, <em>function</em> applications inside methods are <em>not</em> checked for termination.</p>
+<p>A straightforward example is method <code>sum</code>, shown next:</p>
+<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
+
+method sum(n: Int) returns (res: Int)
   requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+  decreases
+  ensures res == n * (n + 1) / 2
 {
   res := 0
   var i: Int := 0;
-  while(i &lt;= n)
+
+  while (i &lt;= n)
     invariant i &lt;= (n + 1)
     invariant res == (i - 1) * i / 2
+    decreases n-i
   {
     res := res + i
     i := i + 1
@@ -193,22 +237,23 @@ approaches into the Viper language and thereby benefit from its tool support and
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
+<li>Remove the decreases-clause from the loop and observe that the method no longer verifies.</li>
+<li>Revert to the initial program, add declaration <code>method m()</code> to the program, and call <code>m</code> inside the loop. Observe that it is (again) the method that fails to verify now.</li>
+<li>Avoid the error by removing the decreases-clause from method <code>sum</code> (or by adding a wildcard decreases-clause to method <code>m</code>).</li>
+<li>Revert to the initial program, add a nested loop, e.g. <code>var j: Int := n; while(0 &lt; j) { j := j - 1 }</code>, and observe the resulting verification failure. Experiment a bit with adding new and removing existing decreases clauses.</li>
 </ul>
 </blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>Final remark: Viper (currently) performs a call-graph analysis for methods to detect mutually recursive methods. Analogous to <a href="./termination-special-tuples.html#term_empty_tuple">the case of functions</a>, this is done for convenience, to unburden users from having to write "artificial" constant termination measures for non-recursive methods. This could be considered a deviation from Viper's otherwise method-modular verification approach -- please let us know if this poses a problem in your use case of Viper.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="termination-abstract.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="further-info.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +263,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="termination-abstract.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="further-info.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

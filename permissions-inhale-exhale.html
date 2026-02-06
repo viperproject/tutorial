@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Inhaling and exhaling - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,81 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+                        <h1 id="inhaling-and-exhaling"><a class="header" href="#inhaling-and-exhaling">Inhaling and Exhaling</a></h1>
+<p>As previously mentioned, accessibility predicates in a method's precondition, such as <code>acc(x.f)</code> in the precondition of <code>inc</code>, can be understood as specifying that permission to a field (here <code>x.f</code>) must be transferred from caller to callee.
+The process of gaining permission (which happens in the callee), is called <em>inhaling</em> permissions; the opposite process of losing permission (in the caller) is called <em>exhaling</em>. Both operations thus update the amount of currently held permissions: from a caller's perspective, permissions required by a precondition are removed before the call and permissions guaranteed by a postcondition are gained after the call returns. From a callee's perspective, the opposite happens.</p>
+<p>Similar permission transfers also happen at other points in a Viper program; most notably, when verifying loops: a loop invariant specifies the permissions transferred (1) from the enclosing context to the first loop iteration, (2) from one loop iteration to the next, and (3) from the last loop iteration back to the enclosing context. Inside a loop body, heap locations may only be accessed if the required permissions have been explicitly transferred from the surrounding context to the loop body via the loop invariant.</p>
+<p>In addition to specifying which permissions to transfer, Viper assertions may also specify constraints on values, just like in traditional specification languages. For example, a precondition <code>acc(x.f) &amp;&amp; x.f &gt; 0</code> requires permission to location <code>x.f</code> and that its value is positive. Note that the occurrence of <code>x.f</code> inside <code>acc(x.f)</code> denotes the <em>location</em> (in compiler parlance, <code>x.f</code> as an lvalue); the meaning of an accessibility predicate is independent of the value of <code>x.f</code> as an expression (as used, e.g., in <code>x.f &gt; 0</code>).</p>
+<p>Consider now the call in the first line of method <code>client</code> in the example below: <code>set</code>'s precondition specifies that the permission to <code>a.f</code> is transferred from the caller to the callee, and that <code>i</code> must be greater than <code>a.f</code>. Thus, method <code>client</code> has to exhale the permission to <code>a.f</code> (which is inhaled by <code>set</code>) and the caller has to prove that <code>a.f &lt; i</code> (which it currently cannot). Conversely, the postcondition causes the permission to be transferred back to the caller when <code>set</code> terminates, i.e., it is inhaled by method <code>client</code>, and the caller gains the knowledge that <code>a.f == 5</code>.
+When verifying method <code>set</code> itself, the opposite happens: permission to <code>x.f</code> is inhaled before the method body is verified, alongside the fact that <code>x.f &lt; i</code>. After the body has been verified, permission to <code>x.f</code> are exhaled and it is checked that <code>x.f</code>'s value is indeed <code>i</code>.</p>
+<pre><code class="language-viper editable playground">field f: Int
+
+method client(a: Ref)
+  requires acc(a.f)
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  set(a, 5)
+  a.f := 6
+}
+
+method set(x: Ref, i: Int)
+  requires acc(x.f) &amp;&amp; x.f &lt; i
+  ensures  acc(x.f) &amp;&amp; x.f == i
+{
+  x.f := i
 }
 </code></pre>
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
+<li>Method <code>client</code> fails to verify: the precondition of the call <code>set(a, 5)</code> may not hold. Can you fix this (without modifying method <code>set</code>)?</li>
+<li>Afterwards, add the following call as the last statement to method <code>client</code>: <code>set(a, a.f)</code>. Verification will now fail again. Remedy the situation by slightly weakening method <code>set</code>'s precondition.</li>
+<li>Finally, comment out the postcondition of method <code>set</code>. Verification will fail again because method <code>client</code> does not have permission for the assignment to <code>a.f</code>. When a method call terminates, all remaining permissions that are not transferred back to its caller (via its postcondition) are <em>leaked</em> (lost).</li>
 </ul>
 </blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>Note that when encoding, e.g., a garbage-collected source language into Viper, the design choice that any excess permissions get leaked is convenient; it allows heap-based data to simply go out of scope and become unreachable. However, in the case of <code>set</code> in the example above, such leaking is presumably not the intention. Viper can also be used to check that certain permissions are <em>not</em> leaked; see the <code>perm</code> expression in the <a href="./expressions.html">section on expressions</a> for more details.</p>
+<h2 id="inhale-and-exhale-statements"><a class="header" href="#inhale-and-exhale-statements">Inhale and Exhale Statements</a></h2>
+<p>To enable the encoding of programming language features that are not directly supported by Viper, such as forking and joining threads or acquiring and releasing locks, Viper allows one to explicitly exhale or inhale permissions via the statements <code>exhale A</code> and <code>inhale A</code>, where <code>A</code> is a Viper assertion such as method <code>set</code>'s precondition <code>acc(x.f) &amp;&amp; i &lt; x.f</code>. From a caller's perspective, <code>set</code>'s pre- and postcondition can be seen as syntactic sugar for appropriate exhale and inhale statements before and after a call to the method.</p>
+<p>The informal semantics of <code>exhale A</code> is as follows:</p>
+<ol>
+<li><em>Assert</em> that all value constraints in <code>A</code> hold; if not, verification fails</li>
+<li><em>Assert</em> that all permissions denoted (via accessibility predicates) by <code>A</code> are currently held; if not, verification fails</li>
+<li><em>Remove</em> the permissions denoted by <code>A</code></li>
+</ol>
+<p>The informal semantics of <code>inhale A</code> is as follows:</p>
+<ol>
+<li><em>Add</em> the permissions denoted by <code>A</code> to the program state</li>
+<li><em>Assume</em> that all value constraints in <code>A</code> hold</li>
+</ol>
+<p>As an example, consider the following Viper program (ignoring, for the moment, the commented-out lines):</p>
+<pre><code class="language-viper editable playground">field f: Int
+
+method set_inex(x: Ref, i: Int) {
+  // x.f := i
+  inhale acc(x.f)
+  x.f := i
+  // exhale acc(x.f)
+  // x.f := i
+}
+</code></pre>
+<p>Unlike the previous example, this method has no pre- and postcondition (no <code>requires</code>/<code>ensures</code>). This means that we start verification of the method body in a state with no permissions. The statement <code>inhale acc(x.f)</code> causes the corresponding permission to be added to the state, allowing the assignment on the following line to verify.</p>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Uncomment the first line of the method body. This will cause a verification error (on that line) since we try to access the location <code>x.f</code> before inhaling the necessary permission.</li>
+<li>Alternatively, uncomment the last two lines of the method body. This will cause a verification error for the last line, since we exhale the permission <code>x.f</code> before accessing the heap location.</li>
+<li>Uncomment the exhale statement and duplicate it, i.e., attempt to exhale permission to <code>x.f</code> twice. What happens?</li>
+</ul>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="permissions-state.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="permissions-self-framing.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +250,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="permissions-state.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="permissions-self-framing.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

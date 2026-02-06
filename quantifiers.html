@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Quantifiers - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,90 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+                        <h1 id="quantifiers"><a class="header" href="#quantifiers">Quantifiers</a></h1>
+<p>Viper's assertions can include <code>forall</code> and <code>exists</code> quantifiers, with the following syntax:</p>
+<pre><code class="language-viper">forall [vars] :: [triggers] A
+</code></pre>
+<pre><code class="language-viper">exists [vars] :: e
+</code></pre>
+<p>Here <code>[vars]</code> is a list of comma-separated declarations of variables which are being quantified over, <code>[triggers]</code> consists of a number of so-called <em>trigger expressions</em> in curly braces (explained next), and <code>A</code> (and <code>e</code>) is a Viper assertion (respectively, boolean expression) potentially including the quantified variables. Unlike existential quantifiers, <code>forall</code> quantifiers in Viper <em>may</em> contain resource assertions; this possibility is explained in the <a href="./quantified-permissions.html">section on quantified permissions</a>.</p>
+<p>Trigger expressions take a crucial role in guiding the SMT solver towards a quick solution, by restricting the instantiations of a quantified assertion. In particular, when a <code>forall</code>-quantified assertion is a hypothesis for a proof goal, the triggers inform the SMT solver to instantiate the quantifier only when it encounters expressions (which are not themselves under a quantifier) of forms matching the trigger. Let's first illustrate with an example:</p>
+<pre><code class="language-viper">assume forall i: Int, j: Int :: {f(i), g(j)} f(i) &amp;&amp; i &lt; j ==&gt; g(j)
+assert ...f(h(5))...g(k(7))... // some proof goal
+</code></pre>
+<p>Here, assuming that the SMT solver encounters both the expressions <code>f(h(5))</code> and <code>g(k(7))</code>, the body of the quantification will be instantiated with <code>i == h(5)</code> and <code>j == k(7)</code>, obtaining <code>f(h(5)) &amp;&amp; h(5) &lt; k(7) ==&gt; g(k(7))</code>. If no other pairs of expressions matching the triggers are encountered, no other instantiations of the quantifier will be made.</p>
+<p>In general, a <code>forall</code> quantifier can have any number of sets of trigger expressions; these are written one after the other, each enclosed within braces. Multiple such sets prescribe alternative triggering conditions; multiple expressions <em>within</em> a single trigger set prescribe that expressions matching <em>each</em> of the trigger expressions must be encountered before an instantiation may be made.</p>
+<p>You can check how triggers affect the verification in the following examples:</p>
+<ul>
+<li>in <code>restrictive_triggers</code> the triggers are too restrictive and do not allow the right instantiation of the quantifier;</li>
+<li>in <code>dangerous_triggers</code> the bad choice of the triggers leads to an infinite loop of instantiations (in this case, each instantiation results in a new expression which matches the trigger): a problem known as <a href="http://www.hpl.hp.com/techreports/2003/HPL-2003-148.pdf"><em>matching loop</em></a>. In this case, the SMT solver times out without providing an answer.</li>
+<li>in <code>good_triggers</code> the choice of the triggers allows the SMT solver to quickly provide the right answer, preventing the problematic matching loop of the previous example.</li>
+</ul>
+<pre><code class="language-viper editable playground">function magic(i:Int) : Int
+
+method restrictive_triggers()
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  // Our definition of `magic`, with a very restrictive trigger
+  assume forall i: Int :: { magic(magic(magic(i))) }
+    magic(magic(i)) == magic(2 * i) + i
+
+  // The following should verify. However, the verification fails
+  // because the triggers are too restrictive and the quantifier
+  // can not be intantiated.
+  assert magic(magic(10)) == magic(20) + 10
+}
+
+method dangerous_triggers()
+{
+  // Our definition of `magic`, with a matching loop
+  assume forall i: Int :: { magic(i) }
+    magic(magic(i)) == magic(2 * i) + i
+
+  // The following should fail, because our definition says nothing
+  // about this equality. However, if you uncomment the assertion
+  // the verification will time out and give no answer because of the
+  // matching loop caused by instantiating the quantifier.
+  // assert magic(magic(10)) == magic(87987978) + 10
+}
+
+method good_triggers()
+{
+  // Our definition of `magic`
+  assume forall i: Int :: { magic(magic(i)) }
+    magic(magic(i)) == magic(2 * i) + i
+  
+  // The following verifies, as expected
+  assert magic(magic(10)) == magic(20) + 10
+
+  // The following fails, as expected, because our definition says
+  // nothing about this equality. The verification terminates
+  // quickly because we don't have matching loops; the SMT solver
+  // quickly exhausts the available quantifier instantiations. 
+  assert magic(magic(10)) == magic(87987978) + 10
 }
 </code></pre>
-<blockquote>
-<p><strong>Exercise</strong></p>
-<ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
-</ul>
-</blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>There are a number of restrictions on what can be used as a set of trigger expressions:</p>
+<ol>
+<li>Each quantified variable must occur at least once in a trigger set.</li>
+<li>Each trigger expression must include at least one quantified variable.</li>
+<li>Each trigger expression must have some additional structure (typically a function application); a quantified variable alone cannot be used as a trigger expression.</li>
+<li>Arithmetic and boolean operators may <em>not</em> occur in trigger expressions.</li>
+<li>Accessibility predicates (the <code>acc</code> keyword) may not be used in trigger expressions.</li>
+</ol>
+<p>Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. <code>x.f</code>) and Viper's built-in sequence and set operators. Note that the <em>types</em> of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.</p>
+<p>If no triggers are specified, Viper will infer them automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.</p>
+<p>The underlying tools currently have limited support for existential quantifications: the syntax for <code>exists</code> does not allow the specification of triggers (which play a dual role for existential quantifiers, in controlling the potential witnesses/instantiations considered when <em>proving</em> an existentially-quantified formula), so existential quantifications should be used sparingly due to the risk of matching loops. This limitation is planned to be lifted in the near future.</p>
+<p>For more details on triggers and the e-matching approach to quantifier instantiation, we recommend the <a href="https://dl.acm.org/citation.cfm?id=1670416">Programming with Triggers</a> paper.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="functions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="quantified-permissions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +259,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="functions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="quantified-permissions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

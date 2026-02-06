@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Termination measures and decreases clauses - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,73 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
+                        <h1 id="termination-measures-and-decreases-clauses"><a class="header" href="#termination-measures-and-decreases-clauses">Termination Measures and <code>decreases</code> Clauses</a></h1>
+<p>To prove termination of a recursive function, users must specify a termination measure: a Viper expression whose value is checked to decrease at each recursive call, with respect to a well-founded order. Termination measures are provided via <em>decreases clauses</em>:</p>
+<pre><code class="language-viper">decreases &lt;tuple&gt;
+</code></pre>
+<p>Here, <code>&lt;tuple&gt;</code> denotes the termination measure: a tuple of comma-separated expressions. In this tutorial, we interchangeably refer to <code>&lt;tuple&gt;</code> as <em>termination measure</em> and <em>decreases tuple</em>. For functions and methods, a decreases tuple can be defined at the position of a precondition, for a loop, at the position of an invariant.</p>
+<p>A common example for termination is the standard <code>factorial</code> function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.</p>
+<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
+
+function factorial(n:Int) : Int
   requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+  decreases n
+{ n == 0 ? 1 : n * factorial(n-1) }
+</code></pre>
+<p>Viper successfully verifies that <code>factorial</code> terminates: at each recursive invocation, it checks that 1. the termination measure <code>n</code> decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file <code>decreases/int.vpr</code>, which is part of Viper's standard library.</p>
+<p><em>Hint</em>: If you run the Viper verifier Silicon (symbolic-execution-based) with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
+<h2 id="term_prov_wfo"><a class="header" href="#term_prov_wfo">Predefined Well-Founded Orders</a></h2>
+<p>Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the <code>decreases</code> folder. The following table lists all provided orders; we write <code>s1 &lt;_ s2</code> if <code>s1</code> is less than <code>s2</code> with respect to the order.</p>
+<div class="table-wrapper"><table><thead><tr><th>Build-In Type<br>(file name)</th><th>Provided Well-Founded Order</th></tr></thead><tbody>
+<tr><td><code>Ref</code><br>(<code>ref.vpr</code>)</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 == null &amp;&amp; r2 != null</code></td></tr>
+<tr><td><code>Bool</code><br>(<code>bool.vpr</code>)</td><td><code>b1 &lt;_ b2 &lt;==&gt; b1 == false &amp;&amp; b2 == true</code></td></tr>
+<tr><td><code>Int</code><br>(<code>int.vpr</code>)</td><td><code>i1 &lt;_ i2 &lt;==&gt; i1 &lt; i2 &amp;&amp; 0 &lt;= i2</code></td></tr>
+<tr><td><code>Rational</code><br>(<code>rational.vpr</code>, rationals will be deprecated in the summer 2023 release):</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td></tr>
+<tr><td><code>Perm</code><br>(<code>perm.vpr</code>)</td><td><code>p1 &lt;_ p2 &lt;==&gt; p1 &lt;= p2 - write &amp;&amp; none &lt;= p2</code></td></tr>
+<tr><td><code>Seq[T]</code><br>(<code>seq.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
+<tr><td><code>Set[T]</code><br>(<code>set.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
+<tr><td><code>Multiset[T]</code><br>(<code>multiset.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
+<tr><td><code>PredicateInstance</code><br>(<code>predicate_instance.vpr</code>)</td><td><code>p1 &lt;_ p2 &lt;==&gt; nested(p1, p2)</code></td></tr>
+</tbody></table>
+</div>
+<p>All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e., can be unfolded only a finite number of times. This implies that a predicate instance <code>p1</code>, which is nested inside a predicate instance <code>p2</code>, has a smaller (and non-negative) depth than <code>p2</code>.</p>
+<p>Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance <code>list(this)</code>, is used as the termination measure. This works because the recursive call is nested under the unfolding of <code>list(this)</code>, and takes the smaller predicate instance <code>list(this.next)</code>.</p>
+<pre><code class="language-viper editable playground">import &lt;decreases/predicate_instance.vpr&gt;
+
+field next: Ref
+
+predicate list(this: Ref) {
+  acc(this.next) &amp;&amp;
+  (this.next != null ==&gt; list(this.next))
+}
+
+function length(this: Ref): Int
+  decreases list(this)
+  requires list(this)
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  unfolding list(this) in this.next == null ? 1 : 1 + length(this.next)
 }
 </code></pre>
 <blockquote>
 <p><strong>Exercise</strong></p>
-<ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
-</ul>
+<p>Change the body of <code>length</code> to just the recursive call <code>length(this)</code>. Which error message do you expect?</p>
 </blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>Final remarks:</p>
+<ul>
+<li>Note that <code>PredicateInstance</code> is an internal Viper type, and currently supported only in decreases tuples. The <code>nested</code> function is also internal and cannot be used by users.</li>
+<li>For simplicity, all standard well-founded orders can be imported via <code>decreases/all.vpr</code>.</li>
+<li>Users can also define <a href="./termination-custom-orders.html">custom well-founded orders</a>.</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="termination.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="termination-syntax.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +242,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="termination.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="termination-syntax.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

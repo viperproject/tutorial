@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Fractional permissions - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,87 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+                        <h1 id="fractional-permissions"><a class="header" href="#fractional-permissions">Fractional Permissions</a></h1>
+<p>Exclusive permissions are too restrictive for some applications. For instance, it is typically safe for multiple threads of a source program to concurrently access the same heap location as long as all accesses are reads. That is, read access can safely be shared. However, if any thread potentially writes to a heap location, no other should typically be allowed to concurrently read it (otherwise, the program has a <em>data race</em>). To support encoding such scenarios, Viper also supports <em>fractional permissions</em> with a <em>permission amount</em> between 0 and 1. Any non-zero permission amount allows read access to the corresponding heap location, but only the exclusive permission (1) allows modifications.</p>
+<p>The general form of an accessibility predicate for field permissions is <code>acc(e.f, p)</code>, where <code>e</code> is a <code>Ref</code>-typed expression, <code>f</code> is a field name, and <code>p</code> denotes a permission amount. Permission amounts are denoted by <code>write</code> for exclusive permissions, <code>none</code> for zero permission, quotients of two <code>Int</code>-typed expressions <code>i1/i2</code> to denote a fractional permission; any <code>Perm</code>-typed expression may be used here. <code>Perm</code> is the type of permission amounts, which is a built-in type that can be used like any other type. The permission amount parameter <code>p</code> is optional and defaults to <code>write</code>. For example, <code>acc(e.f)</code>, <code>acc(e.f, write)</code> and <code>acc(e.f, 1/1)</code> all have the same meaning.</p>
+<p>The next example illustrates the usage of fractional permissions to distinguish between read and write access: there, method <code>copyAndInc</code> requires write permission to <code>x.f</code>, but only read permission (we arbitrarily chose <code>1/2</code>, but any non-zero fraction would suffice) to <code>y.f</code>.</p>
+<pre><code class="language-viper editable playground">field f: Int
+
+method copyAndInc(x: Ref, y: Ref)
+  requires acc(x.f) &amp;&amp; acc(y.f, 1/2)
+  ensures  acc(x.f) &amp;&amp; acc(y.f, 1/2)
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  x.f := y.f + 1
 }
 </code></pre>
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
+<li>Change the permission amount for <code>x.f</code> to <code>9/10</code>, i.e., the corresponding accessibility predicates to <code>acc(x.f, 9/10)</code>. Where does the code fail (and why)?</li>
+<li>Alternatively, change the implementation to <code>y.f := x.f + 1</code>.</li>
+<li>Revert to the original example. Afterwards, change the permission amount for <code>y.f</code> to <code>none</code> (or <code>0/1</code>). Where does the code fail (and why)?</li>
 </ul>
 </blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>Fractional permissions to the same location are <em>summed up</em>: inhaling <code>acc(x.f, p1) &amp;&amp; acc(x.f, p2)</code> is equivalent to inhaling <code>acc(x.f, p1 + p2)</code>, and analogously for exhaling. As before, inhaling permissions maintains the invariant that write permission to a location are exclusive. With fractional permission in mind, this can be rephrased as maintaining the invariant that the permission amount to a location never exceeds 1.</p>
+<p>To illustrate this, consider the next example (and its exercises): there, the <code>assert</code> statement fails because holding one third permission to each <code>x.f</code> and <code>y.f</code> does not imply that <code>x</code> and <code>y</code> cannot be aliases, since the sum of the individual permission amounts does not exceed 1.</p>
+<pre><code class="language-viper editable playground">field f: Int
+
+method test(x: Ref, y: Ref) {
+  inhale acc(x.f, 1/2) &amp;&amp; acc(y.f, 1/2)
+  assert x != y
+}
+</code></pre>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Change both permission amounts to <code>2/3</code>. The <code>assert</code> statement will now verify.</li>
+<li>Revert to the original example. Afterwards, replace the <code>assert</code> statement by <code>inhale x == y</code> and add the statement <code>exhale acc(x.f, 1/1)</code> to the end of method <code>test</code>. The code verifies, which illustrates that permission amounts are summed up.</li>
+<li>Revert to the original example. Afterwards, replace the <code>assert</code> statement by <code>exhale acc(x.f, 1/8) &amp;&amp; acc(x.f, 1/8)</code>, and add the subsequent statement <code>exhale acc(x.f, 1/4)</code>. The code verifies, which illustrates that permission amounts can be split up.</li>
+<li>Revert to the original example. Afterwards, add a third argument <code>z: Ref</code> to the signature of method <code>test</code>, add the conjunct <code>acc(z.f, 1/2)</code> to the <code>inhale</code> statement and change the <code>assert</code> statement to <code>x != y || x != z</code>. This verifies , but neither disjunct on their own will. Why?</li>
+</ul>
+</blockquote>
+<p>While fractional permissions no longer always guarantee non-aliasing between references, as demonstrated by the previous example, they still enable framing, e.g., across method calls: from a caller's perspective, holding on to a non-zero permission amount to a location <code>x.f</code> across a method call guarantees that the value of <code>x.f</code> cannot be affected by the call. That is, because the callee would need to obtain write permission, i.e., permission amount 1, which cannot happen as long as the caller retains its fraction.</p>
+<p>The next example illustrates the use of fractional permissions for framing: there, method <code>client</code> can frame the property <code>b.f == 3</code> across the call to <code>copyAndInc</code> because <code>client</code> retains half the permission to <code>b.f</code> across the call. Note that the postcondition of <code>copyAndInc</code> does not explicitly state that the value of <code>y.f</code> remains unchanged.</p>
+<pre><code class="language-viper editable playground">field f: Int
+
+method copyAndInc(x: Ref, y: Ref)
+  requires acc(x.f) &amp;&amp; acc(y.f, 1/2)
+  ensures  acc(x.f) &amp;&amp; acc(y.f, 1/2)
+  ensures  x.f == y.f + 1
+{
+  x.f := y.f + 1
+}
+
+method client(a: Ref, b: Ref) {
+  inhale acc(a.f) &amp;&amp; acc(b.f)
+
+  a.f := 1
+  b.f := 3
+
+  copyAndInc(a, b)
+
+  assert b.f == 3 &amp;&amp; a.f == 4
+}
+</code></pre>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Add the statement <code>exhale acc(b.f, 1/2)</code> right before the invocation of <code>copyAndInc</code>. Since method <code>client</code> temporarily loses all permission to <code>b.f</code>, the property <code>b.f == 3</code> can no longer be framed across the call. Note that method <code>client</code> cannot deduce modularly (i.e., without considering the body of method <code>copyAndInc</code>) that <code>copyAndInc</code> does <em>not</em> modify <code>b.f</code>; the method body might inhale the other half permission (e.g., modelling the acquisition of a lock) and thus, be able to assign to <code>b.f</code>.</li>
+<li>Can you fix the new code by changing the specifications of method <code>copyAndInc</code>?</li>
+<li>Revert to the original example. Afterwards, modify method <code>client</code> as follows: change the invocation of method <code>copyAndInc</code> to <code>copyAndInc(a, a)</code>, and change the <code>assert</code> statement to <code>assert b.f == 3 &amp;&amp; a.f == 2</code>. To verify the resulting code, you'll have to change the specifications of method <code>copyAndInc</code>.</li>
+<li>Can you find specifications for method <code>copyAndInc</code> that allow verifying both versions of method <code>client</code>: the original implementation (<code>copyAndInc(a, b); assert b.f == 3 &amp;&amp; a.f == 4</code>) and the new one (<code>copyAndInc(a, a); assert b.f == 3 &amp;&amp; a.f == 2</code>). That is, can you find specifications that work, regardless of whether or not the passed references are aliases?</li>
+</ul>
+</blockquote>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="permissions-exclusive.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="predicates.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +256,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="permissions-exclusive.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="predicates.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

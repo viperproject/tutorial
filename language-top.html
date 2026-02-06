@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Top-level declarations - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,134 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+                        <h1 id="top-level-declarations"><a class="header" href="#top-level-declarations">Top-level declarations</a></h1>
+<h2 id="fields"><a class="header" href="#fields">Fields</a></h2>
+<pre><code class="language-viper">field val: Int
+field next: Ref
+</code></pre>
+<ul>
+<li>Declared by keyword <code>field</code></li>
+<li>Every object has all fields (there are no classes in Viper)</li>
+<li>See the <a href="./permissions.html">section on permissions</a> for examples</li>
+</ul>
+<h2 id="methods"><a class="header" href="#methods">Methods</a></h2>
+<pre><code class="language-viper">method QSort(xs: Seq[Ref]) returns (ys: Seq[Ref])
+  requires ... // precondition
+  ensures ... // postcondition
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  // body (optional)
 }
 </code></pre>
-<blockquote>
-<p><strong>Exercise</strong></p>
 <ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
+<li>Declared by keyword <code>method</code></li>
+<li>Have input and output parameters (e.g., <code>xs</code> and <code>ys</code>)</li>
+<li>Method calls can modify the program state; see the <a href="./statements.html">section on statements</a> for details
+<ul>
+<li>Hence calls <em>cannot</em> be used in specifications</li>
 </ul>
-</blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+</li>
+<li>Modular verification of methods and method calls
+<ul>
+<li>The body may include some number of <em>statements</em> (including recursive calls)</li>
+<li>The body is invisible at call site (changing the body does not affect client code)</li>
+<li>The precondition is checked before the method call (more precisely, it is <a href="./permissions-inhale-exhale.html"><em>exhaled</em></a>)</li>
+<li>The postcondition is assumed after the method call (more precisely, it is <a href="./permissions-inhale-exhale.html"><em>inhaled</em></a>)</li>
+</ul>
+</li>
+<li>See the <a href="./permissions.html">section on permissions</a> for more details and examples</li>
+</ul>
+<h2 id="intro-functions"><a class="header" href="#intro-functions">Functions</a></h2>
+<pre><code class="language-viper">function gte(x: Ref, a: Int): Int
+  requires ... // precondition
+  ensures ... // postcondition
+{
+  ...  // body (optional)
+}
+</code></pre>
+<ul>
+<li>Declared by keyword <code>function</code></li>
+<li>Have input parameters (e.g., <code>x</code> and <code>a</code>) and one output return value</li>
+<li>The keyword <code>result</code> may be used in a function's postcondition to refer to the return value</li>
+<li>Function applications may read but not modify the program state
+<ul>
+<li>Function applications <em>can</em> be used in specifications</li>
+<li>Permissions (and resource assertions in general) may be mentioned in a function's precondition, but not in its postcondition</li>
+</ul>
+</li>
+<li>If a function has a body, the body is a single <em>expression</em> (possibly including recursive calls to functions)</li>
+<li>Unlike methods, function applications are not handled modularly (for functions with bodies): changing the body of a function affects client code</li>
+<li>See the <a href="./functions.html">section on functions</a> for details</li>
+</ul>
+<h2 id="intro-predicates"><a class="header" href="#intro-predicates">Predicates</a></h2>
+<pre><code class="language-viper">predicate list(this: Ref) {
+  ... // body (optional)
+}
+</code></pre>
+<ul>
+<li>Declared by keyword <code>predicate</code></li>
+<li>Have input parameters (e.g., <code>head</code>)</li>
+<li>Typically used to abstract over assertions and to specify the shape of recursive data structures</li>
+<li>Predicate instances (e.g. <code>list(x)</code>) are <em>resource assertions</em> in Viper</li>
+<li>See the <a href="./predicates.html">section on predicates</a> for details</li>
+</ul>
+<h2 id="intro-domains"><a class="header" href="#intro-domains">Domains</a></h2>
+<pre><code class="language-viper">domain Pair[A, B] {
+  function getFirst(p: Pair[A, B]): A
+  // other functions
+
+  axiom ax_1 {
+    ... // axiom body
+  }
+  // other axioms
+}
+</code></pre>
+<ul>
+<li>Declared by keyword <code>domain</code></li>
+<li>Have a name, which is introduced as an additional <em>type</em> in the Viper program</li>
+<li>Domains may have type parameters (e.g. <code>A</code> and <code>B</code> above)</li>
+<li>A domain's body (delimited by braces) consists of a number function declarations, followed by a number of axioms
+<ul>
+<li>Domain functions (functions declared inside a <code>domain</code>) may have neither a body nor a specification; these are uninterpreted total mathematical functions</li>
+<li>Domain axioms consist of name (following the <code>axiom</code> keyword), and a definition enclosed within braces (which is a boolean expression which may not read the program state in any way)</li>
+</ul>
+</li>
+<li>Useful for specifying custom mathematical theories</li>
+<li>See the <a href="./domains.html">section on domains</a> for details</li>
+</ul>
+<h2 id="macros"><a class="header" href="#macros">Macros</a></h2>
+<pre><code class="language-viper">define plus(a, b) (a+b)
+define link(x, y) {
+  assert x.next == null 
+  x.next := y
+}
+</code></pre>
+<ul>
+<li>Declared by keyword <code>define</code></li>
+<li>C-style, syntactically expanded macros
+<ul>
+<li>Macros are not type-checked until after expansion</li>
+<li>However, macro bodies must be well-formed assertions / statements</li>
+</ul>
+</li>
+<li>May have any number of (untyped) parameter names (e.g. <code>a</code> and <code>b</code> above)</li>
+<li>The are two kinds of macros
+<ul>
+<li>Macros defining assertions (or expressions) include the macro definition whitespace-separated afterwards (e.g. <code>plus</code> above)</li>
+<li>Macros defining <em>statements</em> include their definitions within braces (e.g. <code>link</code> above)</li>
+</ul>
+</li>
+<li>See the <a href="./domains-array.html">array domain encoding</a> for an example</li>
+</ul>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="language.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="language-types.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +303,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="language.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="language-types.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

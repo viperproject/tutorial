@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Declaring new types - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,67 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
-{
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+                        <h1 id="declaring-new-types"><a class="header" href="#declaring-new-types">Declaring New Types</a></h1>
+<p>The following domain defines a new type <code>MyType</code> with two type parameters:</p>
+<pre><code class="language-viper editable playground">domain MyType[A,B] {
+  function constructor_a(x: A): MyType[A,B]
+  function constructor_b(y: B): MyType[A,B]
+  function bin_oper(a: MyType[A,B], b: MyType[A,B]): MyType[A,B]
 }
 </code></pre>
-<blockquote>
-<p><strong>Exercise</strong></p>
-<ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
-</ul>
-</blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>In this demo we create a new type called <code>MyType</code>. It's defined with two type parameters <code>A</code> and <code>B</code>. The encoding provides two constructors and a binary operation.</p>
+<p>The following client code demonstrates how the type <code>MyType</code> can be used in a Viper program:</p>
+<pre><code class="language-viper">method client(a: MyType[Bool, Ref])
+  requires a == bin_oper(a,a)
+{
+  var b: MyType[Int, Bool] := constructor_a(11)
+  var c: MyType[Int, Bool] := constructor_b(true)
+  var d: MyType[Int, Bool] := bin_oper(b,c)
+  
+  // The following code will be rejected by the typechecker,
+  //  because a and d are created with different type parameters.
+  var e: MyType[Int, Bool] := bin_oper(a,d)
+}
+</code></pre>
+<p>Note that Viper does not support type parameters as part of function and method declarations; the only type parameters available are those of the enclosing domain. This has the practical implication that one must instantiate all type parameters of a domain type before they can be used outside of the domain definition. This instantiation is usually implicit; so long as the type-checker can figure out the necessary instantiations, then they need not be provided.</p>
+<p>By default, Viper provides only two built-in operations for domain types: <code>==</code> and <code>!=</code>. Other operations must be encoded via domain functions and given a meaning via appropriate domain axioms.</p>
+<h2 id="encoding-a-list-adt"><a class="header" href="#encoding-a-list-adt">Encoding a list ADT</a></h2>
+<p>For a more realistic demo, we can encode an algebraic list datatype. We start with the function declarations.</p>
+<pre><code class="language-viper editable playground">domain List[T] {
+  /* Constructors */
+
+  function Nil(): List[T]
+  function Cons(head: T, tail: List[T]): List[T]
+
+  /* Destructors */
+
+  function head_Cons(xs: List[T]): T  // requires is_Cons(xs)
+  function tail_Cons(xs: List[T]): List[T] // requires is_Cons(xs)
+
+  /* Constructor types */
+
+  function type(xs: List[T]): Int
+  unique function type_Nil(): Int
+  unique function type_Cons(): Int
+
+  /* Axioms omitted */
+}
+</code></pre>
+<p>A mathematical list needs two constructors: <code>Nil</code>, which takes no parameters, and <code>Cons</code>, which takes a scalar value of type <code>T</code> and the tail list (of type <code>List[T]</code>) and returns the new list.</p>
+<p>An algebraic datatype requires a deconstructor for each parameter of each of its constructors (alternatively, if one implements tuple types, one can write a single destructor for each constructor). In the case of a list ADT, we will need only two deconstructors (for the parameters of <code>Cons</code>). The deconstructors are called <code>head_Cons</code> and <code>tail_Cons</code>, respectively.</p>
+<p>Finally, we encode the integer function <code>type</code> which denotes whether the type of the list constructor is <code>Nil</code> or <code>Cons</code>. In this case, we could use a Boolean function for this purpose. However, there could be more than two constructors of an ADT in the general case.</p>
+<p>Notice that we use the keyword <code>unique</code> to declare domain functions whose values (while not concretely known) should be guaranteed different from those returned by any other <code>unique</code> domain functions. Sometimes the value of a function is irrelevant by itself, as long as it is guaranteed to be unique, as in the case of identification functions <code>type_Nil</code> and <code>type_Cons</code>.</p>
+<p>The full axiomatisation of these functions and some use cases are available in the <a href="http://viper.ethz.ch/examples/encoding-adts.html">Encoding ADTs example</a>.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="domains.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="domains-axiomatising.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +236,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="domains.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="domains-axiomatising.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

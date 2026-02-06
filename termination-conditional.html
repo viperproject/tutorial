@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction - Viper Tutorial</title>
+        <title>Conditional termination - Viper Tutorial</title>
 
 
         <!-- Custom HTML head -->
@@ -166,49 +166,62 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
-<img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
-<a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
-approaches into the Viper language and thereby benefit from its tool support and automation.</p>
-<p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
-<p>The following simple example shows a method that computes the sum of the first <code>n</code> positive natural numbers. The method declaration includes a <em>precondition</em> (the assertion following <code>requires</code>) to restrict the argument to non-negative values. This expresses the fact that method <code>sum</code> can only be assumed to behave correctly (in particular, do not crash) for non-negative values. The method declaration also includes a <em>postcondition</em> (the assertion following <code>ensures</code>) to guarantee properties of the result variable <code>res</code>. The postcondition is the only information that a caller of the method <code>sum</code> can use to correlate the call result and argument. In particular, in absence of post-condition a caller of method <code>sum</code> cannot make use of the fact that the result is non-negative. This would be required, for example, in order to be able to call <code>sum</code> on its own result. Method preconditions and postconditions together make up a method's <em>specification</em>.</p>
-<p>Viper verifies <em>partial correctness</em> of program statements; that is, verification guarantees that <em>if</em> a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of <code>sum</code> is guaranteed to hold whenever a call to <code>sum</code> terminates. Verification of loops also requires specification: the loop in <code>sum</code>'s body needs a <em>loop invariant</em> (if omitted, the default loop invariant is <code>true</code>, which is typically not strong enough to prove interesting properties of the program). The loop invariant in <code>sum</code> could also be written in one line with the boolean operator <code>&amp;&amp;</code> placed between the two assertions.</p>
-<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
-  requires 0 &lt;= n
-  ensures  res == n * (n + 1) / 2
+                        <h1 id="conditional-termination"><a class="header" href="#conditional-termination">Conditional Termination</a></h1>
+<p>We previously presented three different kinds of termination measures: a tuple <code>e1, e2, ...</code>, wildcard (<code>_</code>) for "just assume that something is decreased", and star (<code>*</code>) for "no termination guarantees". It may sometimes be desirable to combine different measures, e.g., in order to reduce proof efforts by providing a concrete decreases tuple for certain invocations only, complemented with wildcard for the remaining invocations.</p>
+<p>To account for this, Viper supports <em>conditional termination</em> clauses for the first two  kinds of measures (tuple, wildcard):</p>
+<pre><code class="language-viper">decreases &lt;tuple&gt; ... if &lt;condition&gt;
+decreases _ if &lt;condition&gt;
+</code></pre>
+<p>Here, <code>&lt;condition&gt;</code> is a boolean expression under which the decreases clause is considered. Omitting the condition, as in all previous examples, is equivalent to <code>if true</code>. Consequently, the condition <code>false</code> is equivalent to not providing the decreases clause at all.</p>
+<blockquote>
+<p><strong>Note</strong></p>
+<p>To ensure soundness, only a <em>single</em> clause per kind of measure is allowed. Moreover, it is not allowed to "downgrade" from a tuple to a wildcard: if <code>&lt;tuple&gt;</code>'s condition held in the call's prestate, then <code>&lt;tuple&gt;</code> must decrease, even if the wildcard condition holds at a recursive call.</p>
+</blockquote>
+<p>The following example illustrates combined conditional termination clauses: function <code>sign</code> promises to decrease <code>x</code> if positive, and something (wildcard) if <code>x</code> is negative. In case <code>x</code> is zero, function <code>sign</code> does not (promise to) terminate.</p>
+<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
+
+function sign(x: Int): Int
+  decreases x if 1 &lt;= x
+  decreases _ if x &lt;= -1
+  decreases * // can also simply be omitted
 {
-  res := 0
-  var i: Int := 0;
-  while(i &lt;= n)
-    invariant i &lt;= (n + 1)
-    invariant res == (i - 1) * i / 2
-  {
-    res := res + i
-    i := i + 1
-  }
+  x == 0 ? sign(x) :
+  1 &lt; x  ? sign(x - 1) :
+  x &lt; -1 ? sign(x + 1) :
+           x
+}
+
+function caller(x: Int): Int
+  decreases // must terminate
+{
+  sign(x)
 }
 </code></pre>
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
-<li>This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.</li>
-<li>You can also edit the examples freely, and try out your own versions. Try commenting the <code>requires</code> line (the method <em>precondition</em>) - this
-should result in a verification error. Viper supports both <code>//</code> and <code>/* ... */</code> styles for comments.</li>
-<li>Try implementing a recursive version of the <code>sum</code> method. Note that Viper does not allow method calls within compound expressions; a call to <code>sum</code> must have the form <code>x := sum(e)</code> for some variable <code>x</code> and expression <code>e</code>, and not, e.g <code>x := sum(e) + 42</code>. Does the same specification work also for your recursive implementation?</li>
-<li>Try implementing client code which calls the <code>sum</code> method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.</li>
+<li>Function <code>caller</code> does not verify. Why is that?</li>
+<li>Strengthen function <code>caller</code>'s specification to make it verify.</li>
 </ul>
 </blockquote>
-<p>This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our <a href="http://www.pm.inf.ethz.ch/research/viper.html">Viper-related research papers</a>.</p>
-<p>If you have comments, questions or feedback about Viper, including this tutorial, we would be happy to receive them! Please send your emails to <a href="mailto:viper@inf.ethz.ch">viper@inf.ethz.ch</a></p>
+<p>We refer to the condition <code>1 &lt;= x</code> of the clause <code>decreases x if 1 &lt;= x</code> as the <em>tuple condition</em>, and to the condition <code>x &lt;= -1</code> of the clause <code>decreases _ if x &lt;= -1</code> as the <em>wildcard condition</em>. The disjunction of the two, i.e. <code>1 &lt;= x || x &lt;= -1</code>, is the <em>termination condition</em>: the effective condition under which the function (promises to) terminate.</p>
+<p>When verifying termination of function <code>sign</code>, the following happens for the recursive invocations:</p>
+<ul>
+<li><code>sign(x)</code>: the termination check is vacuous because the invocation happens under the condition <code>x == 0</code>, for which <code>sign</code> does not promise to terminate.</li>
+<li><code>sign(x - 1)</code>: termination measure <code>x</code> is checked to decrease, since the call happens under the condition <code>1 &lt; x</code> (which implies that the tuple condition held in the prestate).</li>
+<li><code>sign(x + 1)</code>: the termination check is again vacuous because the call happens under the condition <code>x &lt; -1</code>, which is the wildcard condition and termination is therefore assumed.</li>
+</ul>
+<p>When verifying termination of function <code>caller</code>, the termination condition (<code>1 &lt;= x || x &lt;= -1</code>) of function <code>sign</code> is checked. Since it might not hold, a verification error is reported.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="termination-mutual-recursion.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
-                            <a rel="next prefetch" href="structure.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="termination-abstract.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -218,8 +231,11 @@ should result in a verification error. Viper supports both <code>//</code> and <
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="termination-mutual-recursion.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
-                    <a rel="next prefetch" href="structure.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="termination-abstract.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -1,0 +1,379 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Magic Wands - Viper Tutorial</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Viper Tutorial</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="magic-wands"><a class="header" href="#magic-wands">Magic Wands</a></h1>
+<p><em>Note: this section introduces a somewhat advanced feature of the Viper language, which users who are just starting out with Viper may wish to skip over for the moment.</em></p>
+<p>When reasoning with unbounded data structures, it can often be useful to specify properties of <em>partial</em> versions of these data structures. For example, during an iterative traversal of a linked list, one typically needs a specification relating the prefix of the list already visited, to a view of the overall data structure. Directly specifying such prefixes (or more generally, instances of data structures with a "hole"), tends to lead to auxiliary predicate definitions (e.g. an <code>lseg</code> predicate for list <em>segments</em>), which in turn necessitate additional lemmas or ghost methods for converting between multiple views of the same structure.</p>
+<p>Viper includes a powerful alternative mechanism, which is often useful for evading these problems: the magic wand connective. A magic wand assertion is written <code>A --* B</code>, where <code>A</code> and <code>B</code> are Viper assertions. Like permissions to field locations and instances of predicates, magic wands are a type of <em>resource</em>, instances of which can be held in a Viper program state; these can be added and removed from the state via <code>inhale</code> and <code>exhale</code> operations, just as for other resources.</p>
+<p>A magic wand instance <code>A --* B</code> abstractly represents a resource which, if <em>combined</em> with the resources represented by <code>A</code>, can be <em>exchanged</em> for the resources represented by <code>B</code>. For example, <code>A</code> could represent the permissions to the postfix of a linked-list (where we are now), and <code>B</code> could represent the permissions to the entire list; the magic wand then abstractly represents the leftover permissions to the prefix of the list. In this case, <em>both</em> the postfix <code>A</code> and a magic wand <code>A --* B</code> could be given up, to reobtain <code>B</code>, describing the entire list. This "giving up" step, is called <em>applying</em> the magic wand, and is directed in Viper with an <code>apply</code> statement:</p>
+<pre><code class="language-viper">inhale A
+inhale A --* B
+apply A --* B
+assert B // succeeds; would fail before the apply statement
+</code></pre>
+<p>To understand a typical use-case for magic wands more concretely, consider the following iterative code for appending two linked lists:</p>
+<pre><code class="language-viper">field next : Ref
+field val : Int
+
+method append_iterative(l1 : Ref, l2: Ref)
+  {
+    if(l1.next == null) { // easy case
+      l1.next := l2
+    } else {
+      var tmp : Ref := l1.next
+
+      while(tmp.next != null)
+      {
+        tmp := tmp.next
+      }
+      tmp.next := l2
+    }
+  }
+</code></pre>
+<p>Using a standard linked-list predicate <code>list</code>, and a function <code>elems</code> to fetch the sequence of elements stored in a linked-list, we can specify the intended behaviour of our method, and add a first-attempt at a loop invariant, as follows:</p>
+<pre><code class="language-viper editable playground">field next : Ref
+field val : Int
+
+predicate list(start : Ref)
+{
+  acc(start.val) &amp;&amp; acc(start.next) &amp;&amp;
+      (start.next != null ==&gt; list(start.next))
+}
+
+function elems(start: Ref) : Seq[Int]
+  requires list(start)
+{
+  unfolding list(start) in (
+    (start.next == null ? Seq(start.val) :
+     Seq(start.val) ++ elems(start.next) ))  
+}
+
+method append_iterative(l1 : Ref, l2: Ref)
+  requires list(l1) &amp;&amp; list(l2) &amp;&amp; l2 != null
+  ensures list(l1)
+  ensures elems(l1) == old(elems(l1) ++ elems(l2))
+  {
+    unfold list(l1)
+    if(l1.next == null) { // easy case
+      l1.next := l2; fold list(l1)
+    } else {
+      var tmp : Ref := l1.next
+      var index : Int := 1 // extra variable: useful for specification
+
+      while(unfolding list(tmp) in tmp.next != null)
+        invariant index &gt;= 0
+        invariant list(tmp)
+        // what about the prefix of the list?
+      {
+        unfold list(tmp)
+        var prev : Ref := tmp // extra variable: useful for specification
+        tmp := tmp.next
+        index := index + 1
+      }
+      unfold list(tmp)
+      tmp.next := l2
+      fold list(tmp)
+      // how do we get back to list(l1) ?
+    }
+  }
+</code></pre>
+<p>In this version of the code, we've added the extra variables <code>index</code> (representing how far through the linked-list the <code>tmp</code> reference is), and <code>prev</code>; both will be convenient for writing a specification later in this section. As commented in the file, the specification is not sufficient to verify the code. The loop invariant tracks permission to the postfix linked-list (referenced by <code>tmp</code>). However, it includes neither permissions nor value information about the <em>prefix</em> of the list between <code>l1</code> and the <code>tmp</code> reference. Since these permissions are not tracked by the loop invariant, they are effectively leaked during the loop execution; with the loop invariant given there is no way after the loop to obtain permission to the entire list (the predicate instance <code>list(l1)</code>), as required in the postcondition.</p>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Run the example code above. The check of the postcondition should fail, since the required predicate instance <code>list(l1)</code> is not held after the loop.</li>
+<li>Try changing the loop invariant by adding the additional conjunct <code>&amp;&amp; elems(tmp) == old(elems(l1))[index..]</code> at the end. Re-run the example - the behaviour should be unchanged. This conjunct expresses that the elements from <code>tmp</code> onwards have not been modified so far.</li>
+<li>Instead of this additional conjunct, why can't we simply write <code>&amp;&amp; elems(tmp) == old(elems(tmp))</code>? You might like to try making this change, and running the example. Recall that <code>old</code> expressions do not affect the evaluation of local variables; the reason is not to do with <code>tmp</code>'s value directly. Consider instead the precondition of <code>elems</code>; which predicate instances were held in the pre-state of the method?</li>
+</ul>
+</blockquote>
+<p>We can now employ magic wands to retain the lost permissions. In order to retain (during execution of the loop) the permissions to the previously-visited nodes in the list, we use a magic wand <code>list(tmp) --* list(l1)</code>. This magic wand represents sufficient resources to guarantee that <em>if</em> we give up a <code>list(tmp)</code> predicate along with this wand, we can obtain a <code>list(l1)</code> predicate; conceptually, it represents the permissions to the earlier segment of the list between <code>l1</code> and <code>tmp</code>.</p>
+<pre><code class="language-viper editable playground">field next : Ref
+field val : Int
+
+predicate list(start : Ref)
+{
+  acc(start.val) &amp;&amp; acc(start.next) &amp;&amp;
+    (start.next != null ==&gt; list(start.next))
+}
+
+function elems(start: Ref) : Seq[Int]
+  requires list(start)
+{
+  unfolding list(start) in (
+    (start.next == null ? Seq(start.val) :
+     Seq(start.val) ++ elems(start.next) ))  
+}
+
+method appendit_wand(l1 : Ref, l2: Ref)
+  requires list(l1) &amp;&amp; list(l2) &amp;&amp; l2 != null
+  ensures list(l1) // &amp;&amp; elems(l1) == old(elems(l1) ++ elems(l2))
+  {
+    unfold list(l1)
+    if(l1.next == null) { // easy case
+      l1.next := l2; fold list(l1)
+    } else {
+      var tmp : Ref := l1.next
+      var index : Int := 1
+
+      // package the magic wand required in the loop invariant below
+      package list(tmp) --* list(l1)
+      { // show how to get from list(tmp) to list(l1):
+        fold list(l1) // also requires acc(l1.val) &amp;&amp; acc(l1.next)
+      }
+
+      while(unfolding list(tmp) in tmp.next != null)
+        invariant index &gt;= 0
+        invariant list(tmp)// &amp;&amp; elems(tmp) == old(elems(l1))[index..]
+        invariant list(tmp) --* list(l1) // magic wand instance
+      {
+        unfold list(tmp)
+        var prev : Ref := tmp
+        tmp := tmp.next
+        index := index + 1
+
+        package list(tmp) --* list(l1) // package new magic wand
+        { // we get from list(tmp) to list(l1) by ...
+          fold list(prev)
+          apply list(prev) --* list(l1)
+        }  
+      }
+      unfold list(tmp)
+      tmp.next := l2
+      fold list(tmp)
+      apply list(tmp) --* list(l1) // regain predicate for whole list
+    }
+  }
+</code></pre>
+<p>The additional loop invariant includes an instance of a magic wand: <code>list(tmp) --* list(l1)</code>. Such a magic wand instance denotes a new kind of <em>resource</em> in Viper (in addition to field permissions and predicate instances); as such, it can be inhaled and exhaled just as other resource assertions. This particular magic wand instance can (when applied), be used up to exchange <em>any</em> <code>list(tmp)</code> predicate instance for a <code>list(l1)</code> predicate instance. In this example, the magic wand notionally represents the permissions to the prefix of the list between <code>l1</code> and <code>tmp</code>. These magic wand instances are created via <code>package</code> operations, which are explained below.</p>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Run the example code above. The check of the postcondition should succeed, in contrast to the previous example.</li>
+<li>Try changing the loop invariant by adding the additional conjunct <code>&amp;&amp; elems(tmp) == old(elems(l1))[index..]</code> at the end. Re-run the example - the behaviour should be unchanged. This conjunct expresses that the elements from <code>tmp</code> onwards have not been modified so far.</li>
+<li>Instead of this additional conjunct, why can't we simply write <code>&amp;&amp; elems(tmp) == old(elems(tmp))</code>? You might like to try making this change, and running the example. Recall that <code>old</code> expressions do not affect the evaluation of local variables; the reason is not to do with <code>tmp</code>'s value directly. Consider instead the precondition of <code>elems</code>; which predicate instances were held in the pre-state of the method?</li>
+</ul>
+</blockquote>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="quantified-permissions-injectivity.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="magic-wands-package.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="quantified-permissions-injectivity.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="magic-wands-package.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="ace.js"></script>
+        <script src="mode-rust.js"></script>
+        <script src="editor.js"></script>
+        <script src="theme-dawn.js"></script>
+        <script src="theme-tomorrow_night.js"></script>
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="editor.js"></script>
+        <script src="mode-viper.js"></script>
+
+
+    </div>
+    </body>
+</html>
