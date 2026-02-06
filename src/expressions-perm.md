@@ -1,0 +1,13 @@
+# Perm expressions
+
+Expressions of type `Perm` are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).
+
+* Fractional permission expressions `e1/e2`, where both `e1` and `e2` are integers, evaluate to a Perm value whose numerator is `e1` and whose denominator is `e2`. A well-definedness condition is that `e2` must not equal 0. `e1/e2` can also denote a permission amount divided by an integer if `e1` is an expression of type `Perm` and `e2` is an expression of type `Int`.
+
+* The `Perm`-typed literals `none` and  `write` denote no permission and a full permission, corresponding to `0/1` and `1/1`, respectively.
+
+* The special literal `wildcard` denotes an unspecified positive amount. The specific value represented by `wildcard` is not fixed but is chosen anew every time a `wildcard` expression is encountered. In particular, if a `wildcard` amount of permission to a field or predicate is to be exhaled, a value less than the currently held amount is chosen, so that it is always possible to exhale (or assert having) a `wildcard` amount of any permission, unless no permission at all is currently held. However, exhaling and subsequently inhaling a `wildcard` permission to a location will not restore the initial permission amount, since it will not be known that the inhaled `wildcard` amount is equal to the exhaled one. The `wildcard` permission amount provides a convenient way to implement duplicable read-only resources, which, for example, can be used to model immutable data.
+
+* `perm(e.f)`: Evaluates to the amount of permission the current method has to the specified location. Similarly, `perm(P(e1, ..., en))` returns the amount of permission held for the specified predicate instance. Similarly to `forperm`, the values of `perm` expressions take into account the side-effects of e.g. ongoing `exhale` operations. For example `exhale acc(x.f) && perm(x.f) > none` should always fail, while `exhale perm(x.f) > none && acc(x.f)` will succeed (if the full permission to `x.f` was held before the `exhale`).
+
+* Permissions can be added (`e1 + e2`), subtracted (`e1 - e2`), multiplied (`e1 * e2`) or divided (`e1 / e2`). In the first two cases, `e1` and `e2` must both be `Perm`-typed. In the case of multiplication, either two `Perm`-typed expressions or one `Perm`-typed and one `Int`-typed are possible. For divisions, the first expression must be `Perm`-typed and the second of type `Int` (though of course ordinary fractions, where both expressions are `Int`-typed, also exist). The results in all cases will be `Perm`-typed expressions.

@@ -11,56 +11,29 @@ jobs:
       with:
         path: "tutorial"
 
-    - name: Checkout generator
-      uses: actions/checkout@v2
-      with:
-        repository: "viperproject/viperonline-tutorial-generator"
-        token: ${{ secrets.GH_PAT }}
-        path: "generator"
-
     - name: Checkout build branch
       uses: actions/checkout@v2
       with:
         ref: "build"
-        path: "generator/build"
+        path: "tutorial/book"
 
-    - name: Create directory structure
-      run: |
-        cd generator
-        rm -rf build/css build/images build/js
-        cp -r assets/css build/css
-        cp -r assets/images build/images
-        cp -r assets/js build/js
-
-    - name: Install node packages
-      run: |
-        cd generator
-        npm install
+    - name: Setup mdBook
+      uses: peaceiris/actions-mdbook@v1
+      with:
+        mdbook-version: "latest"
 
     - name: Generate tutorial
       run: |
-        cd generator
-        node index.js \
-          ../tutorial/tutorial/introduction.md \
-          ../tutorial/tutorial/structure.md \
-          ../tutorial/tutorial/permissions.md \
-          ../tutorial/tutorial/predicates.md \
-          ../tutorial/tutorial/functions.md \
-          ../tutorial/tutorial/quantifiers.md \
-          ../tutorial/tutorial/quantified-permissions.md \
-          ../tutorial/tutorial/magic-wands.md \
-          ../tutorial/tutorial/statements.md \
-          ../tutorial/tutorial/expressions-and-assertions.md \
-          ../tutorial/tutorial/domains.md \
-          ../tutorial/tutorial/termination.md \
-          ../tutorial/tutorial/further-info.md
+        cd tutorial
+        mdbook build
 
     - name: Create build commit
+      if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
       run: |
-        cd generator/build
+        cd tutorial/book
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add css images js index.html
+        git add css FontAwesome fonts *.html *.js *.css
         git commit -m "Deploy $(date +'%Y-%m-%d %H:%M:%S')"
 
     - name: Push tutorial to build branch
@@ -69,4 +42,4 @@ jobs:
       with:
         branch: build
         force: true
-        directory: generator/build
+        directory: tutorial/book

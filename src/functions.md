@@ -4,7 +4,7 @@ Just as predicates can be used to define parameterised (and potentially-recursiv
 
 Functions are introduced in top-level declarations of the form:
 
-```silver
+```viper
 function f(...): T
   requires A
   ensures  E1
@@ -13,7 +13,7 @@ function f(...): T
 
 or
 
-```silver
+```viper
 function f(...): T
   requires A
   ensures  E1
@@ -23,7 +23,7 @@ where `f` is a globally-unique function name, followed by a possibly-empty list 
 
 The following example defines a function `listLength` that takes a null-terminated simply-linked list and computes its length. As shown in the body of `listLength`, function applications are written simply as the function name followed by appropriately-typed arguments in parentheses. The precondition of `listLength` expresses the fact that the function application can only be evaluated when the corresponding `list` predicate instance is held, while the post-condition expresses the fact that the length of a list is always a non-negative integer.
 
-```silver-runnable
+```viper,editable,playground
 field elem: Int
 field next: Ref
 
@@ -42,32 +42,32 @@ function listLength(l:Ref) : Int
 
 The function body declaration `{ E2 }` (if provided) must contain an expression `E2` of (return) type `T`; it may contain function invocations, including recursive invocations of `f` itself. Function declarations of the latter form (that is, without a function body) introduce abstract functions, which may be useful for information hiding reasons, or to model functions which need not or cannot be directly implemented, e.g., because they model externally-justified information about the encoded program (such as the behaviour of library code). The following example illustrates this by adding a `capacity` function, intended to model a capacity suitable for storing the elements of the list in an array-like container.
 
-```silver
+```viper
 function capacity(l:Ref): Int
   requires list(l)
   ensures  listLength(l) <= result && result <= 2 * listLength(l)
 ```
 
-Note that functions declared in [Viper domains (i.e. *domain functions*)](#domains) are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the [domains section](#domains) for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.
+Note that functions declared in [Viper domains (i.e. *domain functions*)](./domains.md) are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the [domains section](./domains.md) for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.
 
 Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function.
-In order to enable function termination checks, which are *not* performed by default, users can specify termination measures, as discussed in [the chapter on termination](#termination).
+In order to enable function termination checks, which are *not* performed by default, users can specify termination measures, as discussed in [the chapter on termination](./termination.md).
 As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:
 
-```silver-runnable
+```viper,editable,playground
 function bad() : Int
   ensures 0 == 1
 { bad() }
 ```
 
-Due to the least fixpoint interpretation of [predicates](#predicates), any recursive function whose recursive calls occur inside an `unfolding` expression are guaranteed to be terminating, as in the case of the `listLength` function above. Consequently, predicates, and other common well-founded orders, are [standard termination measures](#term_prov_wfo) provided by Viper.
+Due to the least fixpoint interpretation of [predicates](./predicates.md), any recursive function whose recursive calls occur inside an `unfolding` expression are guaranteed to be terminating, as in the case of the `listLength` function above. Consequently, predicates, and other common well-founded orders, are [standard termination measures](./termination-measures.md#term_prov_wfo) provided by Viper.
 
 For non-abstract functions, Viper reasons about function applications in terms of the function bodies. That is, in contrast to methods, it is not always necessary to provide a postcondition in order to convey
 information to the caller of a function. Nevertheless, postconditions are useful for abstract functions and in situations where the property expressed in the postcondition does not directly follow from unfolding the function body once but, for instance, requires induction. In the case of the `listLength` function, the non-negativity of the result is indeed an inductive property, and is not exploitable by Viper unless stated in the postcondition. 
 
 For every function *application*, Viper checks that the function precondition is true in the current state, and then assumes the value of the function application to be equal to the function body (if provided), as well as assuming any postconditions. Fully expanding function bodies cannot work for recursive functions. Instead, functions are by-default expanded only once; additional expansions are triggered when unfolding or folding a predicate that is mentioned in the function's preconditions. This feature allows one to traverse recursive structures and simultaneously reason about the permissions and values. For example, since predicate `list` was mentioned in the precondition of function `listLength` earlier, the body of any function call `listLength(l)` is unfolded whenever a predicate `list(l)` is. This is why the following implementation of the `capacity` function can be successfully verified:
 
-```silver
+```viper
 function capacity(l:Ref): Int
   requires list(l)
   ensures  listLength(l) <= result && result <= 2 * listLength(l)
@@ -79,11 +79,11 @@ function capacity(l:Ref): Int
 ```
 
 The example below is an alternative version of the previously shown
-list segment example from the [predicates section](#predicates): instead of using a predicate parameter for the
+list segment example from the [predicates section](./predicates.md): instead of using a predicate parameter for the
 abstract representation of the list segment (as a mathematical
 sequence), a function is introduced that computes the abstraction. This usage of functions to eliminate  predicate parameters which are redundant (in the sense that their values can instead be computed given any predicate instance and its other parameters) is common in Viper.
 
-```silver-runnable
+```viper,editable,playground
 field elem: Int
 field next: Ref
 
@@ -118,13 +118,10 @@ method removeFirst(this: Ref, last: Ref) returns (first: Int, rest: Ref)
 
 The `values` function requires an `lseg` predicate instance in its precondition to obtain the permissions to traverse the list. Its body uses an `unfolding` expression to obtain the predicate instance required for the recursive application.
 
-//exercise//
-
-* Use the `values` function to strengthen the postcondition of `removeFirst` by stating that `first` was indeed the first element of the segment.
-* Extend the example by a `contains` function that checks whether or not a list segment contains a given element.
-* Extend the example by implementing an `append` method that appends an element to a list segment
-  (similar to the one used in the predicate section). Afterwards:
-  * Use `contains` to express that the appended element is contained in the resulting segment.
-  * Alternatively, use `values` to express that: (1) the given an element has been appended and (2) that the values stored in the rest of the list segment have not been changed.
-
-///
+> **Exercise**
+> * Use the `values` function to strengthen the postcondition of `removeFirst` by stating that `first` was indeed the first element of the segment.
+> * Extend the example by a `contains` function that checks whether or not a list segment contains a given element.
+> * Extend the example by implementing an `append` method that appends an element to a list segment
+>   (similar to the one used in the predicate section). Afterwards:
+>   * Use `contains` to express that the appended element is contained in the resulting segment.
+>   * Alternatively, use `values` to express that: (1) the given an element has been appended and (2) that the values stored in the rest of the list segment have not been changed.

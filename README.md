@@ -6,16 +6,28 @@ Feel free to submit your fixes and additions via pull requests.
 
 Please report technical issues via the issue tracker.
 
-# Editing 
+## Building
 
-## Interactive Viper code snippets
+The tutorial uses [`mdbook`](https://rust-lang.github.io/mdBook/) to generate HTML pages. To build, run (from the repository root):
 
-In order to create an interacative code snippet (which can be verified directly in the web browser), inser the code in the following way: 
+```bash
+mdbook build
+```
 
+This creates a folder called `book`. To watch for changes and automatically rebuild files when the source content updates:
 
-````Markdown
+```bash
+mdbook serve
+```
 
-```silver {.runnable }
+## Editing
+
+### Interactive Viper code snippets
+
+In order to create an interacative code snippet (which can be verified directly in the web browser), insert the code in the following way: 
+
+````md
+```viper,editable,playground
 method foobar() 
 {
 	assert false
@@ -23,17 +35,11 @@ method foobar()
 ```
 ````
 
-## Including exercises
+### Including exercises
 
 Use the following syntax in order to include an exercise to the tutorial: 
 
-```Markdown
-
-//exercise//
-
-* Sub-task A
-* Sub-task B
-* Sub-task C
-
-///
+```md
+> **Exercise**
+> * ...
 ```

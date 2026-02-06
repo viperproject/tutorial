@@ -1,0 +1,15 @@
+[book]
+authors = ["ETH Zurich"]
+language = "en"
+src = "src"
+title = "Viper Tutorial"
+
+[output.html.playpen]
+editable = true
+
+[output.html]
+additional-js = [
+    "editor.js",
+    "mode-viper.js",
+]
+# additional-js = ["highlight.viper.js"]

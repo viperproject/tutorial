@@ -1,0 +1,19 @@
+# Expressions of multiple types
+
+* field access `e.f`: to be well-defined, this requires at least some permission to read the field location; returns a value of the type of the field.
+
+* function application `f(...)`: the function can either be a domain function or a top-level, (potentially heap-dependent) function. In the latter case, for a function application to be well-defined the function's precondition must be fulfilled, and in both cases, the argument expressions must be well-defined and have the expected types. Evaluates to a value of the return type of the function. See the respective sections for more information on top-level [functions](./functions.md) and [domains](./domains.md).
+
+* typed function application `(f(...) : Type)`: a variant of the above that additionally enforces that the return type of the function application to be the one given in the expression. This is particularly useful with [domains](./domains.md) with type parameters, for example `(Nil() : List[Bool])`. The parentheses are mandatory.
+
+* local variable and parameter evaluation `x`: read the current value of the named variable or parameter. Note that it is possible to read local variables which have not been assigned to; in this case, the expression will evaluate to an arbitrary value of its type.
+
+* conditional expressions `e1 ? e2 : e3`, where `e1` has type `Bool` and `e2` and `e3` must have the same type; evaluates to `e2` if `e1` is `true`, and otherwise to `e3`. Short-circuiting evaluation is taken into account when checking well-definedness conditions; e.g. `e2` need only be well-defined when `e1` evaluates to true.
+
+* unfolding expressions `unfolding acc(P(...), p) in e`: Requires that the current method has at least the permission amount `p` of the predicate instance `P(...)`. Evaluates `e` in a context where (this amount of) the predicate instance has been temporarily unfolded (i.e., `P` is no longer available, but its contents are).
+
+* old and labelled-old expressions `old(e)` and `old[l](e)`: Evaluates expression `e` in a different (older) version of the heap. In the first case, this is the heap at the start of the current method call; in the second, it is the heap at the position of the label `l`. For the second expression to be well-defined, the label `l` must be in the same method as the old-expression, and must have been encountered by the time the old-expression is evaluated; as a result, old-expressions cannot be used in functions, predicates or preconditions (they also cannot be used in postconditions but for a different reason: they would be meaningless for the caller). It is not supported to refer back to a label inside a loop body from outside of the loop body. Note that old expressions does not affect the value of variable references; `old(x.f)`, for example, evaluates to the value that the field `f` of the object that the variable `x` *currently* points to had at the beginning of the method.
+
+* function results `result`: Can only be used in postconditions of top-level Viper functions, and refers to the result of the function application; it therefore has the type of the return value of the function the postcondition belongs to.
+
+* let expressions `let v == (e1) in e2`: Evaluates `e1`, and subsequently evaluates `e2` in a context where the variable `v` is bound to the value of `e1` (currently, the *parentheses are necessary*). Let expressions are often convenient when one needs to write an expression with many repetitions, or one that concerns several different heaps. For example, if one wishes to evaluate the *argument* of a function call `f(x.f)` in the current state and the function application itself in the current method's old state, this can be expressed by using a let expression as follows: `let y == (x.f) in old(f(y))`.

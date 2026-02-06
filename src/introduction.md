@@ -14,7 +14,7 @@ The following simple example shows a method that computes the sum of the first `
 
  Viper verifies *partial correctness* of program statements; that is, verification guarantees that *if* a program state is reached, then the properties specified at that program state are guaranteed to hold. For example, the postcondition of `sum` is guaranteed to hold whenever a call to `sum` terminates. Verification of loops also requires specification: the loop in `sum`'s body needs a *loop invariant* (if omitted, the default loop invariant is `true`, which is typically not strong enough to prove interesting properties of the program). The loop invariant in `sum` could also be written in one line with the boolean operator `&&` placed between the two assertions.
 
-```silver-runnable
+```viper,editable,playground
 method sum(n: Int) returns (res: Int)
   requires 0 <= n
   ensures  res == n * (n + 1) / 2
@@ -31,15 +31,12 @@ method sum(n: Int) returns (res: Int)
 }
 ```
 
-//exercise//
-
-* This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.
-* You can also edit the examples freely, and try out your own versions. Try commenting the `requires` line (the method *precondition*) - this
+> **Exercise**
+> * This tutorial features runnable examples, which use the Viper verifiers. You can run the example by hitting the "play" button - it should verify without errors.
+> * You can also edit the examples freely, and try out your own versions. Try commenting the `requires` line (the method *precondition*) - this
   should result in a verification error. Viper supports both `//` and `/* ... */` styles for comments.
-* Try implementing a recursive version of the `sum` method. Note that Viper does not allow method calls within compound expressions; a call to `sum` must have the form `x := sum(e)` for some variable `x` and expression `e`, and not, e.g `x := sum(e) + 42`. Does the same specification work also for your recursive implementation?
-* Try implementing client code which calls the `sum` method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.
-
-///
+> * Try implementing a recursive version of the `sum` method. Note that Viper does not allow method calls within compound expressions; a call to `sum` must have the form `x := sum(e)` for some variable `x` and expression `e`, and not, e.g `x := sum(e) + 42`. Does the same specification work also for your recursive implementation?
+> * Try implementing client code which calls the `sum` method in order to computes the sum of the first 5 natural numbers. Provide a suitable postcondition.
 
 This tutorial gives an overview of the features of the Viper language and explains their syntax and semantics. We provide examples and exercises throughout, to illustrate the basic usage of these features. We encourage readers to experiment with the examples and often suggest variations of the presented examples to try out. The tutorial does not aim to explain the workings of the Viper verifiers in general, nor the advanced usage of Viper's language features for building custom verification tools: for these topics, we refer interested readers to our [Viper-related research papers](http://www.pm.inf.ethz.ch/research/viper.html).
 

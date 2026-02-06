@@ -1,20 +1,20 @@
-# Quantifiers {#quantifiers}
+# Quantifiers
 
 Viper's assertions can include `forall` and `exists` quantifiers, with the following syntax:
 
-```silver
+```viper
 forall [vars] :: [triggers] A
 ```
 
-```silver
+```viper
 exists [vars] :: e
 ```
 
-Here `[vars]` is a list of comma-separated declarations of variables which are being quantified over, `[triggers]` consists of a number of so-called *trigger expressions* in curly braces (explained next), and `A` (and `e`) is a Viper assertion (respectively, boolean expression) potentially including the quantified variables. Unlike existential quantifiers, `forall` quantifiers in Viper *may* contain resource assertions; this possibility is explained in the [section on quantified permissions](#quantified-permissions).
+Here `[vars]` is a list of comma-separated declarations of variables which are being quantified over, `[triggers]` consists of a number of so-called *trigger expressions* in curly braces (explained next), and `A` (and `e`) is a Viper assertion (respectively, boolean expression) potentially including the quantified variables. Unlike existential quantifiers, `forall` quantifiers in Viper *may* contain resource assertions; this possibility is explained in the [section on quantified permissions](./quantified-permissions.md).
 
 Trigger expressions take a crucial role in guiding the SMT solver towards a quick solution, by restricting the instantiations of a quantified assertion. In particular, when a `forall`-quantified assertion is a hypothesis for a proof goal, the triggers inform the SMT solver to instantiate the quantifier only when it encounters expressions (which are not themselves under a quantifier) of forms matching the trigger. Let's first illustrate with an example:
 
-```silver
+```viper
 assume forall i: Int, j: Int :: {f(i), g(j)} f(i) && i < j ==> g(j)
 assert ...f(h(5))...g(k(7))... // some proof goal
 ```
@@ -29,7 +29,7 @@ You can check how triggers affect the verification in the following examples:
 - in `dangerous_triggers` the bad choice of the triggers leads to an infinite loop of instantiations (in this case, each instantiation results in a new expression which matches the trigger): a problem known as [*matching loop*](http://www.hpl.hp.com/techreports/2003/HPL-2003-148.pdf). In this case, the SMT solver times out without providing an answer.
 - in `good_triggers` the choice of the triggers allows the SMT solver to quickly provide the right answer, preventing the problematic matching loop of the previous example.
 
-```silver-runnable
+```viper,editable,playground
 function magic(i:Int) : Int
 
 method restrictive_triggers()
