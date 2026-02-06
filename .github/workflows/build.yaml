@@ -45,4 +45,4 @@ jobs:
       with:
         branch: build
         force: true
-        directory: tutorial/book
+        directory: tutorial-build
