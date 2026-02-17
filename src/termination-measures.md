@@ -27,7 +27,7 @@ Viper successfully verifies that `factorial` terminates: at each recursive invoc
 
 Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
 
-| Build-In Type<br>(file name) | Provided Well-Founded Order |
+| Built-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
 |`Ref`<br>(`ref.vpr`)| `r1 <_ r2 <==> r1 == null && r2 != null`
 |`Bool`<br>(`bool.vpr`)| `b1 <_ b2 <==> b1 == false && b2 == true`
