@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
+            window.path_to_searchindex_js = "searchindex-4b97232e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -204,7 +204,9 @@ function factorial(m: MyInt): Int
 <pre><code class="language-plain">v1 &lt;_ v2 &lt;==&gt; decreasing(v1, v2) &amp;&amp; bounded(v2)
 </code></pre>
 <p>The necessary properties of <code>decreasing</code> and <code>bounded</code> for values of type <code>T</code> can be defined via axioms. For the <code>MyInt</code> type from before, suitable axioms would be:</p>
-<pre><code class="language-viper">domain MyIntWellFoundedOrder {
+<pre><code class="language-viper">import &lt;decreases/declaration.vpr&gt;
+
+domain MyIntWellFoundedOrder {
   axiom {
     forall i1: MyInt, i2: MyInt :: {decreasing(i1, i2)}
       get(i1) &lt; get(i2) &lt;==&gt; decreasing(i1, i2)
@@ -217,7 +219,8 @@ function factorial(m: MyInt): Int
 </code></pre>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>The functions <code>decreasing</code> and <code>bounded</code> must be declared by the Viper program to verify, which is easiest done by importing <code>decreases/declaration.vpr</code>. This is also what the predefined orders, e.g., <code>decreases/int.vpr</code>, do.</p>
+<p>The functions <code>decreasing</code> and <code>bounded</code> must be declared by the Viper program to verify, which is easiest done by importing <code>decreases/declaration.vpr</code>, as shown in the example. This is also what the predefined orders do.
+Viper uses a naming convention where the well-founded order for type <code>T</code> should be defined in a domain called <code>TWellFoundedOrder</code>; giving it a different name will result in a warning.</p>
 </blockquote>
 <blockquote>
 <p><strong>Exercise</strong></p>

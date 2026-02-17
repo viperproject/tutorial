@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
+            window.path_to_searchindex_js = "searchindex-4b97232e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -2096,10 +2096,21 @@ function length(this: Ref): Int
 <p><strong>Exercise</strong></p>
 <p>Change the body of <code>length</code> to just the recursive call <code>length(this)</code>. Which error message do you expect?</p>
 </blockquote>
+<p>Additionally, Viper’s ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
+<pre><code class="language-silver-runnable">adt List[T] {
+    Nil() 
+    Cons(hd: T, tl: List[T])
+}
+
+function llen(l: List[Int]): Int
+    decreases l
+{
+    l.isNil ? 0 : 1 + llen(l.tl)
+}
+</code></pre>
 <p>Final remarks:</p>
 <ul>
 <li>Note that <code>PredicateInstance</code> is an internal Viper type, and currently supported only in decreases tuples. The <code>nested</code> function is also internal and cannot be used by users.</li>
-<li>For simplicity, all standard well-founded orders can be imported via <code>decreases/all.vpr</code>.</li>
 <li>Users can also define <a href="#custom-well-founded-orders">custom well-founded orders</a>.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -2128,7 +2139,6 @@ a1 &lt;_ b1  ||  a1 == b1 &amp;&amp; (a2, ...) &lt;_ (b2, ...)
 <p><strong>Exercise</strong></p>
 <p>Swap the tuple elements, i.e., change the decreases clause to <code>n, m</code>. For which of the recursive calls do you expect error messages?</p>
 </blockquote>
-<p>The well-founded order over tuples need not be imported (and cannot be customised). However, the well-founded orders of the types appearing in the tuple must be.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="special-decreases-tuples"><a class="header" href="#special-decreases-tuples">Special <code>decreases</code> Tuples</a></h1>
 <p>Viper supports three decreases tuples whose semantics require further explanation.</p>
@@ -2203,7 +2213,9 @@ function factorial(m: MyInt): Int
 <pre><code class="language-plain">v1 &lt;_ v2 &lt;==&gt; decreasing(v1, v2) &amp;&amp; bounded(v2)
 </code></pre>
 <p>The necessary properties of <code>decreasing</code> and <code>bounded</code> for values of type <code>T</code> can be defined via axioms. For the <code>MyInt</code> type from before, suitable axioms would be:</p>
-<pre><code class="language-viper">domain MyIntWellFoundedOrder {
+<pre><code class="language-viper">import &lt;decreases/declaration.vpr&gt;
+
+domain MyIntWellFoundedOrder {
   axiom {
     forall i1: MyInt, i2: MyInt :: {decreasing(i1, i2)}
       get(i1) &lt; get(i2) &lt;==&gt; decreasing(i1, i2)
@@ -2216,7 +2228,8 @@ function factorial(m: MyInt): Int
 </code></pre>
 <blockquote>
 <p><strong>Note</strong></p>
-<p>The functions <code>decreasing</code> and <code>bounded</code> must be declared by the Viper program to verify, which is easiest done by importing <code>decreases/declaration.vpr</code>. This is also what the predefined orders, e.g., <code>decreases/int.vpr</code>, do.</p>
+<p>The functions <code>decreasing</code> and <code>bounded</code> must be declared by the Viper program to verify, which is easiest done by importing <code>decreases/declaration.vpr</code>, as shown in the example. This is also what the predefined orders do.
+Viper uses a naming convention where the well-founded order for type <code>T</code> should be defined in a domain called <code>TWellFoundedOrder</code>; giving it a different name will result in a warning.</p>
 </blockquote>
 <blockquote>
 <p><strong>Exercise</strong></p>
@@ -2262,7 +2275,6 @@ function fun2(x: Int): Int
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
-<li>Comment the import of <code>bool.vpr</code>, and reverify the program. Can you explain the resulting verification error?</li>
 <li>In the above example, change the call <code>fun1(x-1, true)</code> to <code>fun1(x, true)</code> – the program still verifies. That’s because Viper appends a <code>Top</code> element (an internal value of any type, larger than any other value) to each tuple, a neat trick also implemented by, e.g., Dafny and F*. Can you explain how this helps with checking termination of the call <code>fun1(x, true)</code>?</li>
 </ul>
 </blockquote>

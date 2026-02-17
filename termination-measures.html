@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
+            window.path_to_searchindex_js = "searchindex-4b97232e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -227,10 +227,21 @@ function length(this: Ref): Int
 <p><strong>Exercise</strong></p>
 <p>Change the body of <code>length</code> to just the recursive call <code>length(this)</code>. Which error message do you expect?</p>
 </blockquote>
+<p>Additionally, Viper’s ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
+<pre><code class="language-silver-runnable">adt List[T] {
+    Nil() 
+    Cons(hd: T, tl: List[T])
+}
+
+function llen(l: List[Int]): Int
+    decreases l
+{
+    l.isNil ? 0 : 1 + llen(l.tl)
+}
+</code></pre>
 <p>Final remarks:</p>
 <ul>
 <li>Note that <code>PredicateInstance</code> is an internal Viper type, and currently supported only in decreases tuples. The <code>nested</code> function is also internal and cannot be used by users.</li>
-<li>For simplicity, all standard well-founded orders can be imported via <code>decreases/all.vpr</code>.</li>
 <li>Users can also define <a href="./termination-custom-orders.html">custom well-founded orders</a>.</li>
 </ul>
 
