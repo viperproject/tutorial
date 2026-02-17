@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -186,9 +186,7 @@ decreases _ if &lt;condition&gt;
 <p>To ensure soundness, only a <em>single</em> clause per kind of measure is allowed. Moreover, it is not allowed to “downgrade” from a tuple to a wildcard: if <code>&lt;tuple&gt;</code>’s condition held in the call’s prestate, then <code>&lt;tuple&gt;</code> must decrease, even if the wildcard condition holds at a recursive call.</p>
 </blockquote>
 <p>The following example illustrates combined conditional termination clauses: function <code>sign</code> promises to decrease <code>x</code> if positive, and something (wildcard) if <code>x</code> is negative. In case <code>x</code> is zero, function <code>sign</code> does not (promise to) terminate.</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-function sign(x: Int): Int
+<pre><code class="language-viper editable playground">function sign(x: Int): Int
   decreases x if 1 &lt;= x
   decreases _ if x &lt;= -1
   decreases * // can also simply be omitted

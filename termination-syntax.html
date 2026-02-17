@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -183,9 +183,7 @@ a1 &lt;_ b1  ||  a1 == b1 &amp;&amp; (a2, ...) &lt;_ (b2, ...)
 </code></pre>
 <p>Special cases, such as empty tuples, tuples of different length, and tuples of different types will be discussed later.</p>
 <p>A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-function ack(m:Int, n:Int):Int
+<pre><code class="language-viper editable playground">function ack(m:Int, n:Int):Int
   decreases m, n
   requires m &gt;= 0
   requires n &gt;= 0

@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -177,9 +177,7 @@
                         <h1 id="custom-well-founded-orders"><a class="header" href="#custom-well-founded-orders">Custom Well-Founded Orders</a></h1>
 <p>As previously mentioned, Viper offers <a href="./termination-measures.html#term_prov_wfo">predefined orders</a> for its built-in types, plus predicates. However, via <a href="./domains.html">domains</a>, Viper also enables users to define their own types. In order to use values of custom types as termination measures, users can either define a mapping from custom to some built-in type, or they can directly define a well-founded order over the custom type.</p>
 <p>In the remainder of this subsection, both approaches will be illustrated using a combination of the <code>MyInt</code> example (from the earlier subsection on domains) and a <code>factorial</code> function operating on <code>MyInt</code>. In the example below, the destructor <code>get</code> is used to map a <code>MyInt</code> to a regular <code>Int</code>, which indirectly allows using <code>MyInt</code> in the function’s decreases clause.</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-domain MyInt {
+<pre><code class="language-viper editable playground">domain MyInt {
   function put(i: Int): MyInt   // Constructor
   function get(m: MyInt): Int   // Destructor
   function dec(m: MyInt): MyInt // Decrement by one

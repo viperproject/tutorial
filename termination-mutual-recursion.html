@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -177,9 +177,7 @@
                         <h1 id="mutual-recursion"><a class="header" href="#mutual-recursion">Mutual Recursion</a></h1>
 <p>For mutually recursive functions, Viper implements the following approach (as, e.g., <a href="https://homepage.cs.uiowa.edu/~tinelli/classes/181/Papers/dafny-reference.pdf">Dafny</a> does as well): given a mutually recursive function <code>fun</code>, Viper verifies that <code>fun</code> function’s termination measure decreases at each <em>indirectly</em> recursive call. By transitivity, this implies that the measure decreased by the time a recursive invocation of <code>fun</code> takes place.</p>
 <p>A simple case of mutual recursion is illustrated next, by functions <code>is_even</code> and <code>is_odd</code>:</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-function is_even(x: Int): Bool
+<pre><code class="language-viper editable playground">function is_even(x: Int): Bool
   requires x &gt;= 0
   decreases x
 {
@@ -195,10 +193,7 @@ function is_odd(y: Int): Bool
 </code></pre>
 <p>Consider function <code>is_even</code>: its termination measure <code>x</code> decreases at the indirectly recursive call <code>is_odd(x-1)</code>, where <code>is_odd</code>’s termination measure <code>y</code> is instantiated with <code>x-1</code>. Analogously, <code>is_odd</code>’s termination measure decreases at the call <code>is_even(y-1)</code>.</p>
 <p>In the example above, the two termination measures are tuples of equal length and type. However, this is not required of mutually recursive functions in order to prove their termination. Consider the next example (which verifies successfully):</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-import &lt;decreases/bool.vpr&gt;
-
-function fun1(y: Int, b: Bool): Int
+<pre><code class="language-viper editable playground">function fun1(y: Int, b: Bool): Int
   decreases y, b
 {
     (b     ? fun1(y, false) : 1)

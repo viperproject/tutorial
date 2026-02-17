@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -222,9 +222,7 @@ while (0 &lt; i)
 <h2 id="term_methods"><a class="header" href="#term_methods">Checking Method Termination</a></h2>
 <p>The currently implemented approach to checking termination of methods is similar to the previously described approach for functions: decreases clauses can be specified at the position of preconditions; if provided, <strong>Viper checks that the termination measure decreases in each directly or indirectly recursive method invocation, and that other method calls, as well as loops, terminate</strong>. As <a href="#term_fct_calls">previously described</a>, <em>function</em> applications inside methods are <em>not</em> checked for termination.</p>
 <p>A straightforward example is method <code>sum</code>, shown next:</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-method sum(n: Int) returns (res: Int)
+<pre><code class="language-viper editable playground">method sum(n: Int) returns (res: Int)
   requires 0 &lt;= n
   decreases
   ensures res == n * (n + 1) / 2

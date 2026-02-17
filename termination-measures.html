@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-49421e4a.js";
+            window.path_to_searchindex_js = "searchindex-f6c50bf4.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-4d4ff1ac.js"></script>
@@ -180,9 +180,7 @@
 </code></pre>
 <p>Here, <code>&lt;tuple&gt;</code> denotes the termination measure: a tuple of comma-separated expressions. In this tutorial, we interchangeably refer to <code>&lt;tuple&gt;</code> as <em>termination measure</em> and <em>decreases tuple</em>. For functions and methods, a decreases tuple can be defined at the position of a precondition, for a loop, at the position of an invariant.</p>
 <p>A common example for termination is the standard <code>factorial</code> function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/int.vpr&gt;
-
-function factorial(n:Int) : Int
+<pre><code class="language-viper editable playground">function factorial(n:Int) : Int
   requires 0 &lt;= n
   decreases n
 { n == 0 ? 1 : n * factorial(n-1) }
@@ -190,7 +188,7 @@ function factorial(n:Int) : Int
 <p>Viper successfully verifies that <code>factorial</code> terminates: at each recursive invocation, it checks that 1. the termination measure <code>n</code> decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file <code>decreases/int.vpr</code>, which is part of Viper’s standard library.</p>
 <p><em>Hint</em>: If you run the Viper verifier Silicon (symbolic-execution-based) with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
 <h2 id="term_prov_wfo"><a class="header" href="#term_prov_wfo">Predefined Well-Founded Orders</a></h2>
-<p>Viper’s standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the <code>decreases</code> folder. The following table lists all provided orders; we write <code>s1 &lt;_ s2</code> if <code>s1</code> is less than <code>s2</code> with respect to the order.</p>
+<p>Viper’s standard library provides definitions of well-founded orders for most types built into Viper. They are automatically imported upon use of a <code>decreases</code> statement. Alternatively, they can also be imported from the <code>decreases</code> folder. The following table lists all provided orders; we write <code>s1 &lt;_ s2</code> if <code>s1</code> is less than <code>s2</code> with respect to the order.</p>
 <div class="table-wrapper">
 <table>
 <thead>
@@ -211,9 +209,7 @@ function factorial(n:Int) : Int
 </div>
 <p>All definitions are straightforward, except the last one, which is concerned with using predicate instances as termination measures. Due to the least fixed-point interpretation of predicates, any predicate instance has a finite depth, i.e., can be unfolded only a finite number of times. This implies that a predicate instance <code>p1</code>, which is nested inside a predicate instance <code>p2</code>, has a smaller (and non-negative) depth than <code>p2</code>.</p>
 <p>Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance <code>list(this)</code>, is used as the termination measure. This works because the recursive call is nested under the unfolding of <code>list(this)</code>, and takes the smaller predicate instance <code>list(this.next)</code>.</p>
-<pre><code class="language-viper editable playground">import &lt;decreases/predicate_instance.vpr&gt;
-
-field next: Ref
+<pre><code class="language-viper editable playground">field next: Ref
 
 predicate list(this: Ref) {
   acc(this.next) &amp;&amp;
