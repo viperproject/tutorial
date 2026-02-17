@@ -42,5 +42,4 @@ function fun2(x: Int): Int
 At indirectly recursive calls, two decreases tuples are compared by lexicographical order of their longest commonly typed prefix (as does, e.g., Dafny). E.g., for the indirectly recursive call `fun2(y-1)` in function `fun1`, Viper verifies that `y-1 <_ y`, while for the recursive call `fun1(y, false)`, it verifies that `y <_ y || (y == y && false <_ b)`.
 
 > **Exercise**
-> * Comment the import of `bool.vpr`, and reverify the program. Can you explain the resulting verification error?
 > * In the above example, change the call `fun1(x-1, true)` to `fun1(x, true)` -- the program still verifies. That's because Viper appends a `Top` element (an internal value of any type, larger than any other value) to each tuple, a neat trick also implemented by, e.g., Dafny and F*. Can you explain how this helps with checking termination of the call `fun1(x, true)`?

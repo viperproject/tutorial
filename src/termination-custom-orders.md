@@ -41,6 +41,8 @@ v1 <_ v2 <==> decreasing(v1, v2) && bounded(v2)
 The necessary properties of `decreasing` and `bounded` for values of type `T` can be defined via axioms. For the `MyInt` type from before, suitable axioms would be:
 
 ```viper
+import <decreases/declaration.vpr>
+
 domain MyIntWellFoundedOrder {
   axiom {
     forall i1: MyInt, i2: MyInt :: {decreasing(i1, i2)}
@@ -55,7 +57,8 @@ domain MyIntWellFoundedOrder {
 
 > **Note**
 >
-> The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`. This is also what the predefined orders, e.g., `decreases/int.vpr`, do.
+> The functions `decreasing` and `bounded` must be declared by the Viper program to verify, which is easiest done by importing `decreases/declaration.vpr`, as shown in the example. This is also what the predefined orders do.
+> Viper uses a naming convention where the well-founded order for type `T` should be defined in a domain called `TWellFoundedOrder`; giving it a different name will result in a warning.
 
 > **Exercise**
 > * Change the `factorial` function in the program above such that parameter `m` is used as its termination measure. The termination check should then fail because no well-founded order for `MyInt` has been defined.
