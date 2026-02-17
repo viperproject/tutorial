@@ -133,7 +133,7 @@ function playground_text(playground, hidden = true) {
 
         result_block.innerText = 'Verifying...';
 
-        fetch_with_timeout('http://viper-server.inf.ethz.ch:3001/', {
+        fetch_with_timeout('https://viper-server.inf.ethz.ch:3001/', {
             headers: {
                 'Content-Type': 'application/json',
             },
