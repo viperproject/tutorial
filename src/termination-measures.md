@@ -11,8 +11,6 @@ Here, `<tuple>` denotes the termination measure: a tuple of comma-separated expr
 A common example for termination is the standard `factorial` function, which terminates because its argument decreases with respect to the usual well-founded order over non-negative numbers.
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 function factorial(n:Int) : Int
   requires 0 <= n
   decreases n
@@ -25,7 +23,7 @@ Viper successfully verifies that `factorial` terminates: at each recursive invoc
 
 ## Predefined Well-Founded Orders {#term_prov_wfo}
 
-Viper's standard library provides definitions of well-founded orders for most types built into Viper, all of which can be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
+Viper's standard library provides definitions of well-founded orders for most types built into Viper. They are automatically imported upon use of a `decreases` statement. Alternatively, they can also be imported from the `decreases` folder. The following table lists all provided orders; we write `s1 <_ s2` if `s1` is less than `s2` with respect to the order.
 
 | Built-In Type<br>(file name) | Provided Well-Founded Order |
 | ---- | ---- |
@@ -44,8 +42,6 @@ All definitions are straightforward, except the last one, which is concerned wit
 Viper uses this nesting depth to enable termination checks based on predicate instances, as illustrated by the next example, the recursive computation of the length of a linked list: intuitively, the remainder of the linked list, represented by predicate instance `list(this)`, is used as the termination measure. This works because the recursive call is nested under the unfolding of `list(this)`, and takes the smaller predicate instance `list(this.next)`.
 
 ```viper,editable,playground
-import <decreases/predicate_instance.vpr>
-
 field next: Ref
 
 predicate list(this: Ref) {

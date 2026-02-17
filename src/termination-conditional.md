@@ -18,8 +18,6 @@ Here, `<condition>` is a boolean expression under which the decreases clause is 
 The following example illustrates combined conditional termination clauses: function `sign` promises to decrease `x` if positive, and something (wildcard) if `x` is negative. In case `x` is zero, function `sign` does not (promise to) terminate.
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 function sign(x: Int): Int
   decreases x if 1 <= x
   decreases _ if x <= -1

@@ -15,8 +15,6 @@ Special cases, such as empty tuples, tuples of different length, and tuples of d
 A typical example of a function for which a tuple as termination measure is used, is the Ackermann function:
 
 ```viper,editable,playground
-import <decreases/int.vpr>
-
 function ack(m:Int, n:Int):Int
   decreases m, n
   requires m >= 0
