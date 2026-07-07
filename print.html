@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6a5c046b.js";
+            window.path_to_searchindex_js = "searchindex-82309f5c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -927,6 +927,33 @@ method good_triggers()
 <p>Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. <code>x.f</code>) and Viper’s built-in sequence and set operators. Note that the <em>types</em> of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.</p>
 <p>If no triggers are specified, Viper will infer them automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.</p>
 <p>For more details on triggers and the e-matching approach to quantifier instantiation, we recommend the <a href="https://dl.acm.org/citation.cfm?id=1670416">Programming with Triggers</a> paper.</p>
+<h2 id="triggers-on-existential-quantifiers"><a class="header" href="#triggers-on-existential-quantifiers">Triggers on existential quantifiers</a></h2>
+<p>Triggers can also be specified on <code>exists</code> quantifiers, where they play a dual role. When an existentially-quantified assertion is <em>assumed</em> (e.g., inhaled), the SMT solver can simply introduce a fresh witness value for the bound variable, and triggers are irrelevant. However, when an existentially-quantified assertion must be <em>proven</em> (e.g., asserted), the SMT solver has to find a witness among the expressions it currently knows about; in this situation, the triggers restrict which expressions will be considered as candidate witnesses, in exactly the same way as they restrict the instantiations of a <code>forall</code> quantifier that is assumed. Choosing triggers that are too restrictive can therefore cause the proof of an existential to fail even though a witness exists, as the following example shows:</p>
+<pre><code class="language-viper editable playground">function magic(i: Int): Int
+
+method existentials()
+{
+  assume magic(2) == 42
+
+  // To prove the existential below, the SMT solver considers those
+  // values i for which an expression matching the trigger magic(i)
+  // is present. The expression magic(2) matches, and i == 2 is
+  // indeed a witness, so the assertion verifies.
+  assert exists i: Int :: { magic(i) } magic(i) == 42
+}
+
+method existentials_restrictive()
+{
+  assume magic(2) == 42
+
+  // Here the trigger is too restrictive: no expression matching
+  // magic(magic(i)) is present, so no candidate witness is
+  // considered and the assertion fails, even though i == 2 is
+  // still a valid witness.
+  assert exists i: Int :: { magic(magic(i)) } magic(i) == 42
+}
+</code></pre>
+<p>As for <code>forall</code> quantifiers, Viper infers triggers for <code>exists</code> quantifiers automatically if none are specified, and unrestrictive triggers can cause matching loops. Recall also that, unlike <code>forall</code> quantifiers, <code>exists</code> quantifiers may not contain resource assertions such as accessibility predicates.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="quantified-permissions"><a class="header" href="#quantified-permissions">Quantified Permissions</a></h1>
 <p>Viper provides two main mechanisms for specifying permission to a (potentially unbounded) number of heap locations: recursive <a href="#predicates">predicates</a> and <em>quantified permissions</em>. While predicates can be a natural choice for modelling entire data structures which are traversed in an orderly top-down fashion, quantified permissions enable point-wise specifications, suitable for modelling heap structures which can be traversed in multiple directions, random-access data structures such as arrays, and unordered data structures such as general graphs.</p>
@@ -1133,6 +1160,7 @@ method appendit_wand(l1 : Ref, l2: Ref)
   }
 </code></pre>
 <p>The additional loop invariant includes an instance of a magic wand: <code>list(tmp) --* list(l1)</code>. Such a magic wand instance denotes a new kind of <em>resource</em> in Viper (in addition to field permissions and predicate instances); as such, it can be inhaled and exhaled just as other resource assertions. This particular magic wand instance can (when applied), be used up to exchange <em>any</em> <code>list(tmp)</code> predicate instance for a <code>list(l1)</code> predicate instance. In this example, the magic wand notionally represents the permissions to the prefix of the list between <code>l1</code> and <code>tmp</code>. These magic wand instances are created via <code>package</code> operations, which are explained below.</p>
+<p>Analogously to the <code>unfolding</code> expression for predicates, Viper also supports an <em>expression</em> form of applying a magic wand: <code>applying (A1 --* A2) in e</code> temporarily applies the held wand instance (only) for the evaluation of the expression <code>e</code>; see the <a href="#expressions-of-multiple-types">section on expressions</a> for details.</p>
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
@@ -1522,7 +1550,7 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 <p>negation <code>!e</code>: Negates the boolean expression <code>e</code>.</p>
 </li>
 <li>
-<p>integer or perm comparisons <code>e1 &lt; e2</code>, <code>e1 &lt;= e2</code>, <code>e1 &gt; e2</code>, <code>e1 &gt;= e2</code> require that the operands are either both of type <code>Int</code> or both of type <code>Perm</code>, and return a <code>Bool</code>.</p>
+<p>integer or perm comparisons <code>e1 &lt; e2</code>, <code>e1 &lt;= e2</code>, <code>e1 &gt; e2</code>, <code>e1 &gt;= e2</code> require that the operands are either both of type <code>Int</code> or both of type <code>Perm</code>, and return a <code>Bool</code>. Comparisons may also be <em>chained</em>: <code>e1 &lt; e2 &lt;= e3</code> is shorthand for <code>e1 &lt; e2 &amp;&amp; e2 &lt;= e3</code>, and analogously for longer chains and other combinations of comparison operators (e.g., <code>0 &lt;= i &lt; j &lt;= n</code>).</p>
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1661,6 +1689,12 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 </li>
 <li>
 <p>unfolding expressions <code>unfolding acc(P(...), p) in e</code>: Requires that the current method has at least the permission amount <code>p</code> of the predicate instance <code>P(...)</code>. Evaluates <code>e</code> in a context where (this amount of) the predicate instance has been temporarily unfolded (i.e., <code>P</code> is no longer available, but its contents are).</p>
+</li>
+<li>
+<p>applying expressions <code>applying (A1 --* A2) in e</code>: the <a href="#magic-wands">magic wand</a> analogue of an <code>unfolding</code> expression. Requires that the current method holds the magic wand instance <code>A1 --* A2</code> as well as the resources denoted by its left-hand side <code>A1</code>. Evaluates <code>e</code> in a context where the wand has been temporarily applied, i.e., in which the wand instance and <code>A1</code> have been exchanged for <code>A2</code>. The parentheses around the wand are required.</p>
+</li>
+<li>
+<p>asserting expressions <code>asserting (A) in e</code>: checks that the assertion <code>A</code> holds at the point where the expression is evaluated (and reports a verification error otherwise), and then evaluates to <code>e</code>. This is useful in positions where an <code>assert</code> statement cannot be written, e.g., to check an intermediate property within a function. The parentheses around <code>A</code> are required.</p>
 </li>
 <li>
 <p>old and labelled-old expressions <code>old(e)</code> and <code>old[l](e)</code>: Evaluates expression <code>e</code> in a different (older) version of the heap. In the first case, this is the heap at the start of the current method call; in the second, it is the heap at the position of the label <code>l</code>. For the second expression to be well-defined, the label <code>l</code> must be in the same method as the old-expression, and must have been encountered by the time the old-expression is evaluated; as a result, old-expressions cannot be used in functions, predicates or preconditions (they also cannot be used in postconditions but for a different reason: they would be meaningless for the caller). It is not supported to refer back to a label inside a loop body from outside of the loop body. Note that old expressions does not affect the value of variable references; <code>old(x.f)</code>, for example, evaluates to the value that the field <code>f</code> of the object that the variable <code>x</code> <em>currently</em> points to had at the beginning of the method.</p>

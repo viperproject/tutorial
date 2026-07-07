@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6a5c046b.js";
+            window.path_to_searchindex_js = "searchindex-82309f5c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -207,7 +207,7 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 <p>negation <code>!e</code>: Negates the boolean expression <code>e</code>.</p>
 </li>
 <li>
-<p>integer or perm comparisons <code>e1 &lt; e2</code>, <code>e1 &lt;= e2</code>, <code>e1 &gt; e2</code>, <code>e1 &gt;= e2</code> require that the operands are either both of type <code>Int</code> or both of type <code>Perm</code>, and return a <code>Bool</code>.</p>
+<p>integer or perm comparisons <code>e1 &lt; e2</code>, <code>e1 &lt;= e2</code>, <code>e1 &gt; e2</code>, <code>e1 &gt;= e2</code> require that the operands are either both of type <code>Int</code> or both of type <code>Perm</code>, and return a <code>Bool</code>. Comparisons may also be <em>chained</em>: <code>e1 &lt; e2 &lt;= e3</code> is shorthand for <code>e1 &lt; e2 &amp;&amp; e2 &lt;= e3</code>, and analogously for longer chains and other combinations of comparison operators (e.g., <code>0 &lt;= i &lt; j &lt;= n</code>).</p>
 </li>
 </ul>
 

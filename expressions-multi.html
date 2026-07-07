@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6a5c046b.js";
+            window.path_to_searchindex_js = "searchindex-82309f5c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -193,6 +193,12 @@
 </li>
 <li>
 <p>unfolding expressions <code>unfolding acc(P(...), p) in e</code>: Requires that the current method has at least the permission amount <code>p</code> of the predicate instance <code>P(...)</code>. Evaluates <code>e</code> in a context where (this amount of) the predicate instance has been temporarily unfolded (i.e., <code>P</code> is no longer available, but its contents are).</p>
+</li>
+<li>
+<p>applying expressions <code>applying (A1 --* A2) in e</code>: the <a href="./magic-wands.html">magic wand</a> analogue of an <code>unfolding</code> expression. Requires that the current method holds the magic wand instance <code>A1 --* A2</code> as well as the resources denoted by its left-hand side <code>A1</code>. Evaluates <code>e</code> in a context where the wand has been temporarily applied, i.e., in which the wand instance and <code>A1</code> have been exchanged for <code>A2</code>. The parentheses around the wand are required.</p>
+</li>
+<li>
+<p>asserting expressions <code>asserting (A) in e</code>: checks that the assertion <code>A</code> holds at the point where the expression is evaluated (and reports a verification error otherwise), and then evaluates to <code>e</code>. This is useful in positions where an <code>assert</code> statement cannot be written, e.g., to check an intermediate property within a function. The parentheses around <code>A</code> are required.</p>
 </li>
 <li>
 <p>old and labelled-old expressions <code>old(e)</code> and <code>old[l](e)</code>: Evaluates expression <code>e</code> in a different (older) version of the heap. In the first case, this is the heap at the start of the current method call; in the second, it is the heap at the position of the label <code>l</code>. For the second expression to be well-defined, the label <code>l</code> must be in the same method as the old-expression, and must have been encountered by the time the old-expression is evaluated; as a result, old-expressions cannot be used in functions, predicates or preconditions (they also cannot be used in postconditions but for a different reason: they would be meaningless for the caller). It is not supported to refer back to a label inside a loop body from outside of the loop body. Note that old expressions does not affect the value of variable references; <code>old(x.f)</code>, for example, evaluates to the value that the field <code>f</code> of the object that the variable <code>x</code> <em>currently</em> points to had at the beginning of the method.</p>

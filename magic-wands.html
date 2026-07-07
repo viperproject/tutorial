@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-6a5c046b.js";
+            window.path_to_searchindex_js = "searchindex-82309f5c.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -318,6 +318,7 @@ method appendit_wand(l1 : Ref, l2: Ref)
   }
 </code></pre>
 <p>The additional loop invariant includes an instance of a magic wand: <code>list(tmp) --* list(l1)</code>. Such a magic wand instance denotes a new kind of <em>resource</em> in Viper (in addition to field permissions and predicate instances); as such, it can be inhaled and exhaled just as other resource assertions. This particular magic wand instance can (when applied), be used up to exchange <em>any</em> <code>list(tmp)</code> predicate instance for a <code>list(l1)</code> predicate instance. In this example, the magic wand notionally represents the permissions to the prefix of the list between <code>l1</code> and <code>tmp</code>. These magic wand instances are created via <code>package</code> operations, which are explained below.</p>
+<p>Analogously to the <code>unfolding</code> expression for predicates, Viper also supports an <em>expression</em> form of applying a magic wand: <code>applying (A1 --* A2) in e</code> temporarily applies the held wand instance (only) for the evaluation of the expression <code>e</code>; see the <a href="./expressions-multi.html">section on expressions</a> for details.</p>
 <blockquote>
 <p><strong>Exercise</strong></p>
 <ul>
