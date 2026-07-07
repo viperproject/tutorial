@@ -49,4 +49,5 @@
     - [Conditional termination](./termination-conditional.md)
     - [Abstract functions](./termination-abstract.md)
     - [Statement termination (experimental)](./termination-statement.md)
+- [Havocking heap locations](./quasihavoc.md)
 - [Further Information](./further-info.md)
