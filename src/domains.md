@@ -15,7 +15,7 @@ domain MyDomain {
 
 The functions declared in a domain are global: one can apply them in any other scope of the Viper program. Functions declared inside a domain are called *domain functions*; these are more restricted than the standard Viper functions described previously. In particular, domain functions cannot have preconditions; they can be applied in *any* state. They are also always abstract, i.e., cannot have a defined body. The typical way to attach any meaning to these otherwise-uninterpreted functions, is via domain axioms.
 
-Domain axioms are also global: they define properties of the program which are assumed to hold *in all states*. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via [perm expressions](./expressions-perm.md)). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are used only for readability of the code, but are currently not optional.
+Domain axioms are also global: they define properties of the program which are assumed to hold *in all states*. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via [perm expressions](./expressions-perm.md)). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are optional and are used only for readability of the code; for example, `axiom { bar(true) }` declares a valid, anonymous axiom.
 
 ```viper,editable,playground
 domain Neg {
