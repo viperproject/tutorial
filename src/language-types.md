@@ -3,7 +3,7 @@
 * `Ref` for references (to objects, except for the built-in `Ref` constant `null`)
 * `Bool` for Boolean values
 * `Int` for mathematical (unbounded) integers
-* `Rational` for mathematical (unbounded) rationals (this type is expected to be deprecated in the summer 2023 release)
+* `Rational` for mathematical (unbounded) rationals (this type is deprecated and will be removed in a future release; use `Perm` instead)
 * `Perm` for permission amounts (see the [section on permissions](./permissions.md) for details)
 * `Seq[T]` for immutable sequences with element type `T`
 * `Set[T]` for immutable sets with element type `T`
