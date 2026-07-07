@@ -16,8 +16,8 @@
         <link rel="icon" href="favicon-de23e50b.svg">
         <link rel="shortcut icon" href="favicon-8114d1fc.png">
         <link rel="stylesheet" href="css/variables-8adf115d.css">
-        <link rel="stylesheet" href="css/general-2459343d.css">
-        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/general-e96d0476.css">
+        <link rel="stylesheet" href="css/chrome-d279d366.css">
         <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
 
         <!-- Fonts -->
@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-4b97232e.js";
+            window.path_to_searchindex_js = "searchindex-6a5c046b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-4d4ff1ac.js"></script>
+        <script src="toc-71522d54.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -858,7 +858,7 @@ method removeFirst(this: Ref, last: Ref) returns (first: Int, rest: Ref)
 <p>Viper’s assertions can include <code>forall</code> and <code>exists</code> quantifiers, with the following syntax:</p>
 <pre><code class="language-viper">forall [vars] :: [triggers] A
 </code></pre>
-<pre><code class="language-viper">exists [vars] :: e
+<pre><code class="language-viper">exists [vars] :: [triggers] e
 </code></pre>
 <p>Here <code>[vars]</code> is a list of comma-separated declarations of variables which are being quantified over, <code>[triggers]</code> consists of a number of so-called <em>trigger expressions</em> in curly braces (explained next), and <code>A</code> (and <code>e</code>) is a Viper assertion (respectively, boolean expression) potentially including the quantified variables. Unlike existential quantifiers, <code>forall</code> quantifiers in Viper <em>may</em> contain resource assertions; this possibility is explained in the <a href="#quantified-permissions">section on quantified permissions</a>.</p>
 <p>Trigger expressions take a crucial role in guiding the SMT solver towards a quick solution, by restricting the instantiations of a quantified assertion. In particular, when a <code>forall</code>-quantified assertion is a hypothesis for a proof goal, the triggers inform the SMT solver to instantiate the quantifier only when it encounters expressions (which are not themselves under a quantifier) of forms matching the trigger. Let’s first illustrate with an example:</p>
@@ -926,7 +926,6 @@ method good_triggers()
 </ol>
 <p>Applications of both domain and top-level Viper functions can be used in trigger expressions, as can field dereference expressions (e.g. <code>x.f</code>) and Viper’s built-in sequence and set operators. Note that the <em>types</em> of trigger expressions are not restricted; in particular, there is no requirement that trigger expressions are boolean-typed.</p>
 <p>If no triggers are specified, Viper will infer them automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.</p>
-<p>The underlying tools currently have limited support for existential quantifications: the syntax for <code>exists</code> does not allow the specification of triggers (which play a dual role for existential quantifiers, in controlling the potential witnesses/instantiations considered when <em>proving</em> an existentially-quantified formula), so existential quantifications should be used sparingly due to the risk of matching loops. This limitation is planned to be lifted in the near future.</p>
 <p>For more details on triggers and the e-matching approach to quantifier instantiation, we recommend the <a href="https://dl.acm.org/citation.cfm?id=1670416">Programming with Triggers</a> paper.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="quantified-permissions"><a class="header" href="#quantified-permissions">Quantified Permissions</a></h1>
@@ -2446,7 +2445,7 @@ while (0 &lt; i)
 
         <script src="elasticlunr-ef4e11c1.min.js"></script>
         <script src="mark-09e88c2c.min.js"></script>
-        <script src="searcher-c2a407aa.js"></script>
+        <script src="searcher-09f2665d.js"></script>
 
         <script src="clipboard-1626706a.min.js"></script>
         <script src="highlight-71dbd8a4.js"></script>
