@@ -87,3 +87,35 @@ Applications of both domain and top-level Viper functions can be used in trigger
 If no triggers are specified, Viper will infer them automatically with a heuristics based on the body of the quantifier. In some unfortunate cases this automatic choice will not be good enough and can lead to either incompletenesses (necessary instantiations which are not made) or matching loops; it is recommended to always specify triggers on Viper quantifiers.
 
 For more details on triggers and the e-matching approach to quantifier instantiation, we recommend the [Programming with Triggers](https://dl.acm.org/citation.cfm?id=1670416) paper.
+
+## Triggers on existential quantifiers
+
+Triggers can also be specified on `exists` quantifiers, where they play a dual role. When an existentially-quantified assertion is *assumed* (e.g., inhaled), the SMT solver can simply introduce a fresh witness value for the bound variable, and triggers are irrelevant. However, when an existentially-quantified assertion must be *proven* (e.g., asserted), the SMT solver has to find a witness among the expressions it currently knows about; in this situation, the triggers restrict which expressions will be considered as candidate witnesses, in exactly the same way as they restrict the instantiations of a `forall` quantifier that is assumed. Choosing triggers that are too restrictive can therefore cause the proof of an existential to fail even though a witness exists, as the following example shows:
+
+```viper,editable,playground
+function magic(i: Int): Int
+
+method existentials()
+{
+  assume magic(2) == 42
+
+  // To prove the existential below, the SMT solver considers those
+  // values i for which an expression matching the trigger magic(i)
+  // is present. The expression magic(2) matches, and i == 2 is
+  // indeed a witness, so the assertion verifies.
+  assert exists i: Int :: { magic(i) } magic(i) == 42
+}
+
+method existentials_restrictive()
+{
+  assume magic(2) == 42
+
+  // Here the trigger is too restrictive: no expression matching
+  // magic(magic(i)) is present, so no candidate witness is
+  // considered and the assertion fails, even though i == 2 is
+  // still a valid witness.
+  assert exists i: Int :: { magic(magic(i)) } magic(i) == 42
+}
+```
+
+As for `forall` quantifiers, Viper infers triggers for `exists` quantifiers automatically if none are specified, and unrestrictive triggers can cause matching loops. Recall also that, unlike `forall` quantifiers, `exists` quantifiers may not contain resource assertions such as accessibility predicates.
