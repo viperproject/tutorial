@@ -26,4 +26,4 @@ Forperm expressions may not be used in functions or predicates.
 
 * negation `!e`: Negates the boolean expression `e`.
 
-* integer or perm comparisons `e1 < e2`, `e1 <= e2`, `e1 > e2`, `e1 >= e2` require that the operands are either both of type `Int` or both of type `Perm`, and return a `Bool`.
+* integer or perm comparisons `e1 < e2`, `e1 <= e2`, `e1 > e2`, `e1 >= e2` require that the operands are either both of type `Int` or both of type `Perm`, and return a `Bool`. Comparisons may also be *chained*: `e1 < e2 <= e3` is shorthand for `e1 < e2 && e2 <= e3`, and analogously for longer chains and other combinations of comparison operators (e.g., `0 <= i < j <= n`).
