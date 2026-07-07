@@ -4,7 +4,7 @@
 
 <img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;"/>
 
-The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
+The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends: Viper's Symbolic Execution (SE) backend and its Verification Condition Generation (VCG) backend. Both back-ends ultimately use the SMT solver
 [Z3](https://github.com/Z3Prover/z3) to discharge proof obligations. Front-end tools translate different source languages and verification
 approaches into the Viper language and thereby benefit from its tool support and automation.
 
