@@ -24,7 +24,7 @@ method bvTest()
 }
 ```
 
-Values of an interpreted domain type can be used like values of any other type: they can be stored in variables, fields and collections, passed to methods and functions, and compared with `==`. The interpretation strings themselves are *not* interpreted by Viper: they are passed to the backend verbatim, and it is the user's responsibility that they denote existing sorts and operations (with matching arities and types) in the backend's input language — mistakes will surface as errors from the backend rather than as Viper type errors.
+Values of an interpreted domain type can be used like values of any other type: they can be stored in variables, fields and collections, passed to methods and functions, and compared with `==`. The interpretation strings themselves are *not* interpreted by Viper: they are passed to the backend verbatim, and it is the user's responsibility to denote existing sorts and operations (with matching arities and types) in the backend's input language -- mistakes will surface as errors from the backend rather than as Viper type errors.
 
 Interpreted domains can be freely combined with the usual domain features: functions without an `interpretation` clause remain uninterpreted, and axioms can be written to relate interpreted and uninterpreted functions. As a second example, the following domain models IEEE 32-bit floating-point numbers, constructed from their bit-level representation:
 
