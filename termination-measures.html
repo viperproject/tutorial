@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -186,7 +186,7 @@
 { n == 0 ? 1 : n * factorial(n-1) }
 </code></pre>
 <p>Viper successfully verifies that <code>factorial</code> terminates: at each recursive invocation, it checks that 1. the termination measure <code>n</code> decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file <code>decreases/int.vpr</code>, which is part of Viper’s standard library.</p>
-<p><em>Hint</em>: If you run the Viper verifier Silicon (symbolic-execution-based) with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
+<p><em>Hint</em>: If you run Viper’s Symbolic Execution (SE) backend with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
 <h2 id="term_prov_wfo"><a class="header" href="#term_prov_wfo">Predefined Well-Founded Orders</a></h2>
 <p>Viper’s standard library provides definitions of well-founded orders for most types built into Viper. They are automatically imported upon use of a <code>decreases</code> statement. Alternatively, they can also be imported from the <code>decreases</code> folder. The following table lists all provided orders; we write <code>s1 &lt;_ s2</code> if <code>s1</code> is less than <code>s2</code> with respect to the order.</p>
 <div class="table-wrapper">
@@ -198,7 +198,7 @@
 <tr><td><code>Ref</code><br>(<code>ref.vpr</code>)</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 == null &amp;&amp; r2 != null</code></td></tr>
 <tr><td><code>Bool</code><br>(<code>bool.vpr</code>)</td><td><code>b1 &lt;_ b2 &lt;==&gt; b1 == false &amp;&amp; b2 == true</code></td></tr>
 <tr><td><code>Int</code><br>(<code>int.vpr</code>)</td><td><code>i1 &lt;_ i2 &lt;==&gt; i1 &lt; i2 &amp;&amp; 0 &lt;= i2</code></td></tr>
-<tr><td><code>Rational</code><br>(<code>rational.vpr</code>, rationals will be deprecated in the summer 2023 release):</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td></tr>
+<tr><td><code>Rational</code><br>(<code>rational.vpr</code>, the <code>Rational</code> type is deprecated; use <code>Perm</code> instead):</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td></tr>
 <tr><td><code>Perm</code><br>(<code>perm.vpr</code>)</td><td><code>p1 &lt;_ p2 &lt;==&gt; p1 &lt;= p2 - write &amp;&amp; none &lt;= p2</code></td></tr>
 <tr><td><code>Seq[T]</code><br>(<code>seq.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
 <tr><td><code>Set[T]</code><br>(<code>set.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
@@ -227,8 +227,8 @@ function length(this: Ref): Int
 <p><strong>Exercise</strong></p>
 <p>Change the body of <code>length</code> to just the recursive call <code>length(this)</code>. Which error message do you expect?</p>
 </blockquote>
-<p>Additionally, Viper’s ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
-<pre><code class="language-silver-runnable">adt List[T] {
+<p>Additionally, Viper’s ADT plugin automatically generates well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
+<pre><code class="language-viper editable playground">adt List[T] {
     Nil() 
     Cons(hd: T, tl: List[T])
 }

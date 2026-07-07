@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -192,9 +192,7 @@ method exclusivity(x: Ref, y: Ref) {
 </ul>
 </blockquote>
 <p>In Viper, accessibility predicates can be conjoined via <code>&amp;&amp;</code>; the resulting assertion requires the <em>sum</em> of the permissions required by its two conjuncts. Therefore, the two statements <code>inhale acc(x.f); inhale acc(y.f)</code> (semicolons are required in Viper only if statements are on the same line) are equivalent to the single statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code>. In both cases, the obtained permissions imply that <code>x</code> and <code>y</code> cannot be aliases.
-Intuitively, the statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code> can be understood as inhaling permission to <code>acc(x.f)</code>, and in <em>addition</em> to that, inhaling the permission to <code>acc(y.f)</code>. Technically, this conjunction between resource assertions is strongly related to the <em>separating conjunction</em> from <a href="https://link.springer.com/chapter/10.1007/3-540-44802-0_1">separation logic</a>; formal details of the connection (and how to encode standard separation logic into Viper) can be found in <a href="https://lmcs.episciences.org/802">this paper</a>.</p>
-<!--**TODO: maybe consider also a link to wikipedia (for separation logic and separating conjunction), as suggested in one of the feedback e-mails **.-->
-<!--**TODO: We could add a note here that briefly states that a conjunction between non-resource assertions, or a resource and a non-resource assertion, is the usual boolean conjunction. However, my feeling is that such a note will be more confusing then helpful.** -->
+Intuitively, the statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code> can be understood as inhaling permission to <code>acc(x.f)</code>, and in <em>addition</em> to that, inhaling the permission to <code>acc(y.f)</code>. Technically, this conjunction between resource assertions is strongly related to the <em>separating conjunction</em> from <a href="https://link.springer.com/chapter/10.1007/3-540-44802-0_1">separation logic</a> (see also the <a href="https://en.wikipedia.org/wiki/Separation_logic">Wikipedia article</a>); formal details of the connection (and how to encode standard separation logic into Viper) can be found in <a href="https://lmcs.episciences.org/802">this paper</a>.</p>
 <p>We can now see how exclusive permissions enable framing and modular verification, as illustrated by the next example below. Here, method <code>client</code> is able to frame the property <code>b.f == 3</code> across the call to <code>inc(a, 3)</code> because holding permission to both <code>a.f</code> and <code>b.f</code> implies that <code>a</code> and <code>b</code> cannot be aliases, and because method <code>inc</code>’s specification states that <code>inc</code> only requires the permission to <code>a.f</code>. Since permission to <code>b.f</code> is <em>retained</em>, the value of <code>b.f</code> can be framed across the method call. Informally, and thinking more operationally, the method would not be able to modify this field location, since it lacks the necessary permission to do so.</p>
 <pre><code class="language-viper editable playground">field f: Int
 

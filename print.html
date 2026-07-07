@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -178,7 +178,7 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
 <img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;" />
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
+<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends: Viper’s Symbolic Execution (SE) backend and its Verification Condition Generation (VCG) backend. Both back-ends ultimately use the SMT solver
 <a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
 approaches into the Viper language and thereby benefit from its tool support and automation.</p>
 <p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>
@@ -350,7 +350,7 @@ define link(x, y) {
 <li><code>Ref</code> for references (to objects, except for the built-in <code>Ref</code> constant <code>null</code>)</li>
 <li><code>Bool</code> for Boolean values</li>
 <li><code>Int</code> for mathematical (unbounded) integers</li>
-<li><code>Rational</code> for mathematical (unbounded) rationals (this type is expected to be deprecated in the summer 2023 release)</li>
+<li><code>Rational</code> for mathematical (unbounded) rationals (this type is deprecated and will be removed in a future release; use <code>Perm</code> instead)</li>
 <li><code>Perm</code> for permission amounts (see the <a href="#permissions">section on permissions</a> for details)</li>
 <li><code>Seq[T]</code> for immutable sequences with element type <code>T</code></li>
 <li><code>Set[T]</code> for immutable sets with element type <code>T</code></li>
@@ -511,9 +511,7 @@ method exclusivity(x: Ref, y: Ref) {
 </ul>
 </blockquote>
 <p>In Viper, accessibility predicates can be conjoined via <code>&amp;&amp;</code>; the resulting assertion requires the <em>sum</em> of the permissions required by its two conjuncts. Therefore, the two statements <code>inhale acc(x.f); inhale acc(y.f)</code> (semicolons are required in Viper only if statements are on the same line) are equivalent to the single statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code>. In both cases, the obtained permissions imply that <code>x</code> and <code>y</code> cannot be aliases.
-Intuitively, the statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code> can be understood as inhaling permission to <code>acc(x.f)</code>, and in <em>addition</em> to that, inhaling the permission to <code>acc(y.f)</code>. Technically, this conjunction between resource assertions is strongly related to the <em>separating conjunction</em> from <a href="https://link.springer.com/chapter/10.1007/3-540-44802-0_1">separation logic</a>; formal details of the connection (and how to encode standard separation logic into Viper) can be found in <a href="https://lmcs.episciences.org/802">this paper</a>.</p>
-<!--**TODO: maybe consider also a link to wikipedia (for separation logic and separating conjunction), as suggested in one of the feedback e-mails **.-->
-<!--**TODO: We could add a note here that briefly states that a conjunction between non-resource assertions, or a resource and a non-resource assertion, is the usual boolean conjunction. However, my feeling is that such a note will be more confusing then helpful.** -->
+Intuitively, the statement <code>inhale acc(x.f) &amp;&amp; acc(y.f)</code> can be understood as inhaling permission to <code>acc(x.f)</code>, and in <em>addition</em> to that, inhaling the permission to <code>acc(y.f)</code>. Technically, this conjunction between resource assertions is strongly related to the <em>separating conjunction</em> from <a href="https://link.springer.com/chapter/10.1007/3-540-44802-0_1">separation logic</a> (see also the <a href="https://en.wikipedia.org/wiki/Separation_logic">Wikipedia article</a>); formal details of the connection (and how to encode standard separation logic into Viper) can be found in <a href="https://lmcs.episciences.org/802">this paper</a>.</p>
 <p>We can now see how exclusive permissions enable framing and modular verification, as illustrated by the next example below. Here, method <code>client</code> is able to frame the property <code>b.f == 3</code> across the call to <code>inc(a, 3)</code> because holding permission to both <code>a.f</code> and <code>b.f</code> implies that <code>a</code> and <code>b</code> cannot be aliases, and because method <code>inc</code>’s specification states that <code>inc</code> only requires the permission to <code>a.f</code>. Since permission to <code>b.f</code> is <em>retained</em>, the value of <code>b.f</code> can be framed across the method call. Informally, and thinking more operationally, the method would not be able to modify this field location, since it lacks the necessary permission to do so.</p>
 <pre><code class="language-viper editable playground">field f: Int
 
@@ -621,6 +619,7 @@ method client(a: Ref, b: Ref) {
 <li>Can you find specifications for method <code>copyAndInc</code> that allow verifying both versions of method <code>client</code>: the original implementation (<code>copyAndInc(a, b); assert b.f == 3 &amp;&amp; a.f == 4</code>) and the new one (<code>copyAndInc(a, a); assert b.f == 3 &amp;&amp; a.f == 2</code>). That is, can you find specifications that work, regardless of whether or not the passed references are aliases?</li>
 </ul>
 </blockquote>
+<p>Note that permission amounts are interpreted differently in the preconditions of Viper <em>functions</em> (introduced <a href="#functions">later in this tutorial</a>): since functions cannot modify the heap, only the distinction between zero and positive permission amounts matters there, and concrete permission amounts are ignored; see the <a href="#functions">section on functions</a> for details.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="predicates"><a class="header" href="#predicates">Predicates</a></h1>
 <p>So far, we have only discussed the specification of programs with a statically-finite number of field locations; our specifications must enumerate all relevant locations in order to express the necessary permissions. However, realistic programs manipulate data structures of unbounded size. Viper supports two main features for specifying unbounded data structures on the heap: <em>predicates</em> and <a href="#quantified-permissions">quantified permissions</a>.</p>
@@ -664,7 +663,7 @@ method setTuple(this: Ref, l: Int, r: Int)
 </ul>
 </blockquote>
 <p>Formally, recursive predicate definitions are interpreted with respect to their least fixpoint interpretations; informally, this implies the built-in assumption that any given predicate instance has a finite (but potentially unbounded) number of predicate instances folded within it. Note that a predicate instance may represent a statically-unknown set of permissions. Holding a predicate instance in a Viper state can be thought of as indirectly holding all of these permissions (though unfolding the predicate will be necessary to make direct use of them).</p>
-<p>Analogously to field permissions, it is possible for a program state to hold <em>fractions</em> of predicate instances (unlike for field permissions, these can also be permission amounts <em>larger</em> than 1): this is denoted by accessibility predicates of the shape <code>acc(P(...), p)</code>. The simple syntax <code>P(...)</code> has the same meaning as <code>acc(P(...))</code>, which in turn has the same meaning as <code>acc(P(...), write)</code>. Folding or unfolding a fraction of a predicate effectively multiplies all permission amounts used for resources in the predicate body by the corresponding fraction. In the example below, one half of a <code>tuple</code> predicate is given to the method. Unfolding this half of the predicate yields half a permission for each of the fields <code>this.left</code> and <code>this.right</code>; which are sufficient permissions to read the fields.</p>
+<p>Analogously to field permissions, it is possible for a program state to hold <em>fractions</em> of predicate instances (unlike for field permissions, these can also be permission amounts <em>larger</em> than 1): this is denoted by accessibility predicates of the shape <code>acc(P(...), p)</code>. The simple syntax <code>P(...)</code> has the same meaning as <code>acc(P(...))</code>, which in turn has the same meaning as <code>acc(P(...), write)</code>. Folding or unfolding a fraction of a predicate effectively multiplies all permission amounts used for resources in the predicate body by the corresponding fraction. The permission amount in a <code>fold</code> or <code>unfold</code> statement (or an <code>unfolding</code> expression) must be known to be strictly positive; folding or unfolding <code>none</code> of a predicate results in a verification error. In the example below, one half of a <code>tuple</code> predicate is given to the method. Unfolding this half of the predicate yields half a permission for each of the fields <code>this.left</code> and <code>this.right</code>; which are sufficient permissions to read the fields.</p>
 <pre><code class="language-viper">method addTuple(this: Ref) returns (sum: Int)
   requires acc(tuple(this), 1/2)
   ensures acc(tuple(this), 1/2)
@@ -783,6 +782,7 @@ function listLength(l:Ref) : Int
   ensures  listLength(l) &lt;= result &amp;&amp; result &lt;= 2 * listLength(l)
 </code></pre>
 <p>Note that functions declared in <a href="#domains">Viper domains (i.e. <em>domain functions</em>)</a> are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the <a href="#domains">domains section</a> for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.</p>
+<p>Permission <em>amounts</em> in function preconditions are interpreted differently from those in method preconditions: since functions cannot modify the heap, all that matters is whether a function may <em>read</em> a location, i.e., whether it has a positive permission amount. Concrete permission amounts in function preconditions are therefore ignored (and Viper reports a warning if one is written): <code>acc(x.f, 1/2)</code>, <code>acc(x.f, wildcard)</code> and <code>acc(x.f)</code> all simply require <em>some</em> positive permission to <code>x.f</code>. Two consequences are worth pointing out. First, non-aliasing cannot be concluded from permission amounts in a function precondition; e.g., unlike in a method precondition, <code>acc(x.f) &amp;&amp; acc(y.f)</code> does <em>not</em> imply <code>x != y</code> inside the function. Second, inside a function, a predicate instance may be unfolded (via an <a href="#expressions-of-multiple-types"><code>unfolding</code> expression</a>) even if the precondition only provides a fraction of it. The previous behaviour, in which concrete permission amounts in function preconditions were taken into account, can be restored with the command-line option <code>--respectFunctionPrePermAmounts</code>.</p>
 <p>Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function.
 In order to enable function termination checks, which are <em>not</em> performed by default, users can specify termination measures, as discussed in <a href="#termination">the chapter on termination</a>.
 As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:</p>
@@ -1493,7 +1493,7 @@ follows:</p>
 </table>
 </div>
 <ul>
-<li><code>unfold</code> and <code>fold</code> are explained in the <a href="#predicates">section on predicates</a></li>
+<li><code>unfold</code> and <code>fold</code> are explained in the <a href="#predicates">section on predicates</a>; the permission amount <code>p</code> in <code>unfold acc(P(...),p)</code> and <code>fold acc(P(...),p)</code> must be strictly positive</li>
 <li><code>package</code> and <code>apply</code> are explained in the <a href="#magic-wands">section on magic wands</a></li>
 <li>Note that <code>unfolding</code> is an <a href="#expressions">expression</a>, not a statement</li>
 </ul>
@@ -1561,7 +1561,7 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 <p>Expressions of type <code>Perm</code> are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
 <ul>
 <li>
-<p>Fractional permission expressions <code>e1/e2</code>, where both <code>e1</code> and <code>e2</code> are integers, evaluate to a Perm value whose numerator is <code>e1</code> and whose denominator is <code>e2</code>. A well-definedness condition is that <code>e2</code> must not equal 0. <code>e1/e2</code> can also denote a permission amount divided by an integer if <code>e1</code> is an expression of type <code>Perm</code> and <code>e2</code> is an expression of type <code>Int</code>.</p>
+<p>Fractional permission expressions <code>e1/e2</code>, where both <code>e1</code> and <code>e2</code> are integers, evaluate to a Perm value whose numerator is <code>e1</code> and whose denominator is <code>e2</code>. A well-definedness condition is that <code>e2</code> must not equal 0. <code>e1/e2</code> can also denote a permission amount divided by an integer if <code>e1</code> is an expression of type <code>Perm</code> and <code>e2</code> is an expression of type <code>Int</code>, or the quotient of two permission amounts if both <code>e1</code> and <code>e2</code> are of type <code>Perm</code>. Note that for ambiguous cases like <code>1/2</code>, the division operator <code>/</code> defaults to <code>Perm</code>-typed division; <code>Int</code>-typed (truncating) division can be forced with the alternative syntax <code>e1 \ e2</code> (see the <a href="#integer-expressions">section on integer expressions</a>).</p>
 </li>
 <li>
 <p>The <code>Perm</code>-typed literals <code>none</code> and  <code>write</code> denote no permission and a full permission, corresponding to <code>0/1</code> and <code>1/1</code>, respectively.</p>
@@ -1573,7 +1573,7 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 <p><code>perm(e.f)</code>: Evaluates to the amount of permission the current method has to the specified location. Similarly, <code>perm(P(e1, ..., en))</code> returns the amount of permission held for the specified predicate instance. Similarly to <code>forperm</code>, the values of <code>perm</code> expressions take into account the side-effects of e.g. ongoing <code>exhale</code> operations. For example <code>exhale acc(x.f) &amp;&amp; perm(x.f) &gt; none</code> should always fail, while <code>exhale perm(x.f) &gt; none &amp;&amp; acc(x.f)</code> will succeed (if the full permission to <code>x.f</code> was held before the <code>exhale</code>).</p>
 </li>
 <li>
-<p>Permissions can be added (<code>e1 + e2</code>), subtracted (<code>e1 - e2</code>), multiplied (<code>e1 * e2</code>) or divided (<code>e1 / e2</code>). In the first two cases, <code>e1</code> and <code>e2</code> must both be <code>Perm</code>-typed. In the case of multiplication, either two <code>Perm</code>-typed expressions or one <code>Perm</code>-typed and one <code>Int</code>-typed are possible. For divisions, the first expression must be <code>Perm</code>-typed and the second of type <code>Int</code> (though of course ordinary fractions, where both expressions are <code>Int</code>-typed, also exist). The results in all cases will be <code>Perm</code>-typed expressions.</p>
+<p>Permissions can be added (<code>e1 + e2</code>), subtracted (<code>e1 - e2</code>), multiplied (<code>e1 * e2</code>) or divided (<code>e1 / e2</code>). In the first two cases, <code>e1</code> and <code>e2</code> must both be <code>Perm</code>-typed. In the case of multiplication, either two <code>Perm</code>-typed expressions or one <code>Perm</code>-typed and one <code>Int</code>-typed are possible. For divisions, either both expressions are <code>Perm</code>-typed, or the first is <code>Perm</code>-typed and the second of type <code>Int</code> (and of course ordinary fractions, where both expressions are <code>Int</code>-typed, also exist). The results in all cases will be <code>Perm</code>-typed expressions.</p>
 </li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
@@ -1751,7 +1751,7 @@ acc(x.f) &amp;&amp; forperm x: Ref [x.f] :: false // Would succeed because we do
 }
 </code></pre>
 <p>The functions declared in a domain are global: one can apply them in any other scope of the Viper program. Functions declared inside a domain are called <em>domain functions</em>; these are more restricted than the standard Viper functions described previously. In particular, domain functions cannot have preconditions; they can be applied in <em>any</em> state. They are also always abstract, i.e., cannot have a defined body. The typical way to attach any meaning to these otherwise-uninterpreted functions, is via domain axioms.</p>
-<p>Domain axioms are also global: they define properties of the program which are assumed to hold <em>in all states</em>. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via <a href="#perm-expressions">perm expressions</a>). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are used only for readability of the code, but are currently not optional.</p>
+<p>Domain axioms are also global: they define properties of the program which are assumed to hold <em>in all states</em>. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via <a href="#perm-expressions">perm expressions</a>). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are optional and are used only for readability of the code; for example, <code>axiom { bar(true) }</code> declares a valid, anonymous axiom.</p>
 <pre><code class="language-viper editable playground">domain Neg {
   function not(cond: Bool): Bool
 }
@@ -2088,7 +2088,7 @@ method client() {
 { n == 0 ? 1 : n * factorial(n-1) }
 </code></pre>
 <p>Viper successfully verifies that <code>factorial</code> terminates: at each recursive invocation, it checks that 1. the termination measure <code>n</code> decreases and 2. remains non-negative, i.e. cannot decrease infinitely often. The corresponding well-founded order over non-negative numbers is defined in the file <code>decreases/int.vpr</code>, which is part of Viper’s standard library.</p>
-<p><em>Hint</em>: If you run the Viper verifier Silicon (symbolic-execution-based) with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
+<p><em>Hint</em>: If you run Viper’s Symbolic Execution (SE) backend with <code>--printTranslatedProgram</code> then you can inspect the verification conditions generated for termination checks.</p>
 <h2 id="term_prov_wfo"><a class="header" href="#term_prov_wfo">Predefined Well-Founded Orders</a></h2>
 <p>Viper’s standard library provides definitions of well-founded orders for most types built into Viper. They are automatically imported upon use of a <code>decreases</code> statement. Alternatively, they can also be imported from the <code>decreases</code> folder. The following table lists all provided orders; we write <code>s1 &lt;_ s2</code> if <code>s1</code> is less than <code>s2</code> with respect to the order.</p>
 <div class="table-wrapper">
@@ -2100,7 +2100,7 @@ method client() {
 <tr><td><code>Ref</code><br>(<code>ref.vpr</code>)</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 == null &amp;&amp; r2 != null</code></td></tr>
 <tr><td><code>Bool</code><br>(<code>bool.vpr</code>)</td><td><code>b1 &lt;_ b2 &lt;==&gt; b1 == false &amp;&amp; b2 == true</code></td></tr>
 <tr><td><code>Int</code><br>(<code>int.vpr</code>)</td><td><code>i1 &lt;_ i2 &lt;==&gt; i1 &lt; i2 &amp;&amp; 0 &lt;= i2</code></td></tr>
-<tr><td><code>Rational</code><br>(<code>rational.vpr</code>, rationals will be deprecated in the summer 2023 release):</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td></tr>
+<tr><td><code>Rational</code><br>(<code>rational.vpr</code>, the <code>Rational</code> type is deprecated; use <code>Perm</code> instead):</td><td><code>r1 &lt;_ r2 &lt;==&gt; r1 &lt;= r2 - 1/1 &amp;&amp; 0/1 &lt;= r2</code></td></tr>
 <tr><td><code>Perm</code><br>(<code>perm.vpr</code>)</td><td><code>p1 &lt;_ p2 &lt;==&gt; p1 &lt;= p2 - write &amp;&amp; none &lt;= p2</code></td></tr>
 <tr><td><code>Seq[T]</code><br>(<code>seq.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
 <tr><td><code>Set[T]</code><br>(<code>set.vpr</code>)</td><td><code>s1 &lt;_ s2 &lt;==&gt; |s1| &lt; |s2|</code></td></tr>
@@ -2129,8 +2129,8 @@ function length(this: Ref): Int
 <p><strong>Exercise</strong></p>
 <p>Change the body of <code>length</code> to just the recursive call <code>length(this)</code>. Which error message do you expect?</p>
 </blockquote>
-<p>Additionally, Viper’s ADT plugin automatically generated well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
-<pre><code class="language-silver-runnable">adt List[T] {
+<p>Additionally, Viper’s ADT plugin automatically generates well-founded orders for any ADT defined in the program. Thus, ADT values can also be used as termination measures:</p>
+<pre><code class="language-viper editable playground">adt List[T] {
     Nil() 
     Cons(hd: T, tl: List[T])
 }

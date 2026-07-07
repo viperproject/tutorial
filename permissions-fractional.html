@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -245,6 +245,7 @@ method client(a: Ref, b: Ref) {
 <li>Can you find specifications for method <code>copyAndInc</code> that allow verifying both versions of method <code>client</code>: the original implementation (<code>copyAndInc(a, b); assert b.f == 3 &amp;&amp; a.f == 4</code>) and the new one (<code>copyAndInc(a, a); assert b.f == 3 &amp;&amp; a.f == 2</code>). That is, can you find specifications that work, regardless of whether or not the passed references are aliases?</li>
 </ul>
 </blockquote>
+<p>Note that permission amounts are interpreted differently in the preconditions of Viper <em>functions</em> (introduced <a href="./functions.html">later in this tutorial</a>): since functions cannot modify the heap, only the distinction between zero and positive permission amounts matters there, and concrete permission amounts are ignored; see the <a href="./functions.html">section on functions</a> for details.</p>
 
                     </main>
 

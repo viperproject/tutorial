@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -186,7 +186,7 @@
 }
 </code></pre>
 <p>The functions declared in a domain are global: one can apply them in any other scope of the Viper program. Functions declared inside a domain are called <em>domain functions</em>; these are more restricted than the standard Viper functions described previously. In particular, domain functions cannot have preconditions; they can be applied in <em>any</em> state. They are also always abstract, i.e., cannot have a defined body. The typical way to attach any meaning to these otherwise-uninterpreted functions, is via domain axioms.</p>
-<p>Domain axioms are also global: they define properties of the program which are assumed to hold <em>in all states</em>. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via <a href="./expressions-perm.html">perm expressions</a>). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are used only for readability of the code, but are currently not optional.</p>
+<p>Domain axioms are also global: they define properties of the program which are assumed to hold <em>in all states</em>. Since there is no restriction on the states to which an axiom applies, it must be well-defined in all states; for this reason, domain axioms cannot refer to the values of heap locations, nor to permission amounts (e.g., via <a href="./expressions-perm.html">perm expressions</a>). In practice, domain axioms are standard (often quantified) first-order logic assertions. Axiom names are optional and are used only for readability of the code; for example, <code>axiom { bar(true) }</code> declares a valid, anonymous axiom.</p>
 <pre><code class="language-viper editable playground">domain Neg {
   function not(cond: Bool): Bool
 }

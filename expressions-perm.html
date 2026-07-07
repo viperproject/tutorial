@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -178,7 +178,7 @@
 <p>Expressions of type <code>Perm</code> are real numbers and are usually used to represent permission amounts (though they can be used for other purposes).</p>
 <ul>
 <li>
-<p>Fractional permission expressions <code>e1/e2</code>, where both <code>e1</code> and <code>e2</code> are integers, evaluate to a Perm value whose numerator is <code>e1</code> and whose denominator is <code>e2</code>. A well-definedness condition is that <code>e2</code> must not equal 0. <code>e1/e2</code> can also denote a permission amount divided by an integer if <code>e1</code> is an expression of type <code>Perm</code> and <code>e2</code> is an expression of type <code>Int</code>.</p>
+<p>Fractional permission expressions <code>e1/e2</code>, where both <code>e1</code> and <code>e2</code> are integers, evaluate to a Perm value whose numerator is <code>e1</code> and whose denominator is <code>e2</code>. A well-definedness condition is that <code>e2</code> must not equal 0. <code>e1/e2</code> can also denote a permission amount divided by an integer if <code>e1</code> is an expression of type <code>Perm</code> and <code>e2</code> is an expression of type <code>Int</code>, or the quotient of two permission amounts if both <code>e1</code> and <code>e2</code> are of type <code>Perm</code>. Note that for ambiguous cases like <code>1/2</code>, the division operator <code>/</code> defaults to <code>Perm</code>-typed division; <code>Int</code>-typed (truncating) division can be forced with the alternative syntax <code>e1 \ e2</code> (see the <a href="./expressions-integer.html">section on integer expressions</a>).</p>
 </li>
 <li>
 <p>The <code>Perm</code>-typed literals <code>none</code> and  <code>write</code> denote no permission and a full permission, corresponding to <code>0/1</code> and <code>1/1</code>, respectively.</p>
@@ -190,7 +190,7 @@
 <p><code>perm(e.f)</code>: Evaluates to the amount of permission the current method has to the specified location. Similarly, <code>perm(P(e1, ..., en))</code> returns the amount of permission held for the specified predicate instance. Similarly to <code>forperm</code>, the values of <code>perm</code> expressions take into account the side-effects of e.g. ongoing <code>exhale</code> operations. For example <code>exhale acc(x.f) &amp;&amp; perm(x.f) &gt; none</code> should always fail, while <code>exhale perm(x.f) &gt; none &amp;&amp; acc(x.f)</code> will succeed (if the full permission to <code>x.f</code> was held before the <code>exhale</code>).</p>
 </li>
 <li>
-<p>Permissions can be added (<code>e1 + e2</code>), subtracted (<code>e1 - e2</code>), multiplied (<code>e1 * e2</code>) or divided (<code>e1 / e2</code>). In the first two cases, <code>e1</code> and <code>e2</code> must both be <code>Perm</code>-typed. In the case of multiplication, either two <code>Perm</code>-typed expressions or one <code>Perm</code>-typed and one <code>Int</code>-typed are possible. For divisions, the first expression must be <code>Perm</code>-typed and the second of type <code>Int</code> (though of course ordinary fractions, where both expressions are <code>Int</code>-typed, also exist). The results in all cases will be <code>Perm</code>-typed expressions.</p>
+<p>Permissions can be added (<code>e1 + e2</code>), subtracted (<code>e1 - e2</code>), multiplied (<code>e1 * e2</code>) or divided (<code>e1 / e2</code>). In the first two cases, <code>e1</code> and <code>e2</code> must both be <code>Perm</code>-typed. In the case of multiplication, either two <code>Perm</code>-typed expressions or one <code>Perm</code>-typed and one <code>Int</code>-typed are possible. For divisions, either both expressions are <code>Perm</code>-typed, or the first is <code>Perm</code>-typed and the second of type <code>Int</code> (and of course ordinary fractions, where both expressions are <code>Int</code>-typed, also exist). The results in all cases will be <code>Perm</code>-typed expressions.</p>
 </li>
 </ul>
 

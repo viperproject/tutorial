@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -210,6 +210,7 @@ function listLength(l:Ref) : Int
   ensures  listLength(l) &lt;= result &amp;&amp; result &lt;= 2 * listLength(l)
 </code></pre>
 <p>Note that functions declared in <a href="./domains.html">Viper domains (i.e. <em>domain functions</em>)</a> are considered by Viper to be abstract state-independent total functions. As such, they can neither have a body nor be equipped with any pre-/postconditions; see the <a href="./domains.html">domains section</a> for more details. In contrast, top-level functions can be state-dependent; the ability for function preconditions to include permissions allows them to depend on not only the values of their parameters, but also on heap locations to which their preconditions require permissions.</p>
+<p>Permission <em>amounts</em> in function preconditions are interpreted differently from those in method preconditions: since functions cannot modify the heap, all that matters is whether a function may <em>read</em> a location, i.e., whether it has a positive permission amount. Concrete permission amounts in function preconditions are therefore ignored (and Viper reports a warning if one is written): <code>acc(x.f, 1/2)</code>, <code>acc(x.f, wildcard)</code> and <code>acc(x.f)</code> all simply require <em>some</em> positive permission to <code>x.f</code>. Two consequences are worth pointing out. First, non-aliasing cannot be concluded from permission amounts in a function precondition; e.g., unlike in a method precondition, <code>acc(x.f) &amp;&amp; acc(y.f)</code> does <em>not</em> imply <code>x != y</code> inside the function. Second, inside a function, a predicate instance may be unfolded (via an <a href="./expressions-multi.html"><code>unfolding</code> expression</a>) even if the precondition only provides a fraction of it. The previous behaviour, in which concrete permission amounts in function preconditions were taken into account, can be restored with the command-line option <code>--respectFunctionPrePermAmounts</code>.</p>
 <p>Viper checks that the function body and any postconditions are framed by the preconditions; that is, the preconditions must require all permissions that are needed to evaluate the function body and the postconditions. Moreover, Viper verifies that the postconditions can be proven to hold for the result of the function.
 In order to enable function termination checks, which are <em>not</em> performed by default, users can specify termination measures, as discussed in <a href="./termination.html">the chapter on termination</a>.
 As the checking of a recursive function definition is essentially a proof by induction on the unrolling of the definition, not checking termination can lead to unsound behaviour. The following example yields such an inconsistency by means of a non-terminating function:</p>

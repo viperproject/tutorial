@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -177,7 +177,7 @@
                         <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><a href="http://viper.ethz.ch/">Viper</a> is a verification infrastructure that simplifies the development of program verifiers and facilitates rapid prototyping of verification techniques and tools. In contrast to similar infrastructures such as <a href="http://research.microsoft.com/en-us/projects/boogie/">Boogie</a> and <a href="http://why3.lri.fr/">Why3</a>, Viper has strong support for permission logics such as separation logic and implicit dynamic frames. It supports permissions natively and uses them to express ownership of heap locations, which is useful to reason about heap-manipulating programs and thread interactions in concurrent software.</p>
 <img src="https://www.ethz.ch/content/dam/ethz/special-interest/infk/chair-program-method/pm/images/Research/viper_architecture.png" alt="The Viper verification infrastructure" style="width: 100%;" />
-<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends, one based on symbolic execution and one based on verification condition generation. Both back-ends ultimately use the SMT solver
+<p>The Viper infrastructure, shown above, provides an intermediate language as well as two verification back-ends: Viper’s Symbolic Execution (SE) backend and its Verification Condition Generation (VCG) backend. Both back-ends ultimately use the SMT solver
 <a href="https://github.com/Z3Prover/z3">Z3</a> to discharge proof obligations. Front-end tools translate different source languages and verification
 approaches into the Viper language and thereby benefit from its tool support and automation.</p>
 <p>The Viper intermediate language is a simple sequential, object-based, imperative programming language. Even though it has been designed as an intermediate language, the Viper language supports both high-level features that are convenient to express verification problems manually as well as powerful low-level features that are useful to encode source languages and verification techniques automatically.</p>

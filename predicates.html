@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-82309f5c.js";
+            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-71522d54.js"></script>
@@ -216,7 +216,7 @@ method setTuple(this: Ref, l: Int, r: Int)
 </ul>
 </blockquote>
 <p>Formally, recursive predicate definitions are interpreted with respect to their least fixpoint interpretations; informally, this implies the built-in assumption that any given predicate instance has a finite (but potentially unbounded) number of predicate instances folded within it. Note that a predicate instance may represent a statically-unknown set of permissions. Holding a predicate instance in a Viper state can be thought of as indirectly holding all of these permissions (though unfolding the predicate will be necessary to make direct use of them).</p>
-<p>Analogously to field permissions, it is possible for a program state to hold <em>fractions</em> of predicate instances (unlike for field permissions, these can also be permission amounts <em>larger</em> than 1): this is denoted by accessibility predicates of the shape <code>acc(P(...), p)</code>. The simple syntax <code>P(...)</code> has the same meaning as <code>acc(P(...))</code>, which in turn has the same meaning as <code>acc(P(...), write)</code>. Folding or unfolding a fraction of a predicate effectively multiplies all permission amounts used for resources in the predicate body by the corresponding fraction. In the example below, one half of a <code>tuple</code> predicate is given to the method. Unfolding this half of the predicate yields half a permission for each of the fields <code>this.left</code> and <code>this.right</code>; which are sufficient permissions to read the fields.</p>
+<p>Analogously to field permissions, it is possible for a program state to hold <em>fractions</em> of predicate instances (unlike for field permissions, these can also be permission amounts <em>larger</em> than 1): this is denoted by accessibility predicates of the shape <code>acc(P(...), p)</code>. The simple syntax <code>P(...)</code> has the same meaning as <code>acc(P(...))</code>, which in turn has the same meaning as <code>acc(P(...), write)</code>. Folding or unfolding a fraction of a predicate effectively multiplies all permission amounts used for resources in the predicate body by the corresponding fraction. The permission amount in a <code>fold</code> or <code>unfold</code> statement (or an <code>unfolding</code> expression) must be known to be strictly positive; folding or unfolding <code>none</code> of a predicate results in a verification error. In the example below, one half of a <code>tuple</code> predicate is given to the method. Unfolding this half of the predicate yields half a permission for each of the fields <code>this.left</code> and <code>this.right</code>; which are sufficient permissions to read the fields.</p>
 <pre><code class="language-viper">method addTuple(this: Ref) returns (sum: Int)
   requires acc(tuple(this), 1/2)
   ensures acc(tuple(this), 1/2)
