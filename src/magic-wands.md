@@ -157,6 +157,8 @@ method appendit_wand(l1 : Ref, l2: Ref)
 
 The additional loop invariant includes an instance of a magic wand: `list(tmp) --* list(l1)`. Such a magic wand instance denotes a new kind of *resource* in Viper (in addition to field permissions and predicate instances); as such, it can be inhaled and exhaled just as other resource assertions. This particular magic wand instance can (when applied), be used up to exchange *any* `list(tmp)` predicate instance for a `list(l1)` predicate instance. In this example, the magic wand notionally represents the permissions to the prefix of the list between `l1` and `tmp`. These magic wand instances are created via `package` operations, which are explained below.
 
+Analogously to the `unfolding` expression for predicates, Viper also supports an *expression* form of applying a magic wand: `applying (A1 --* A2) in e` temporarily applies the held wand instance (only) for the evaluation of the expression `e`; see the [section on expressions](./expressions-multi.md) for details.
+
 > **Exercise**
 > * Run the example code above. The check of the postcondition should succeed, in contrast to the previous example.
 > * Try changing the loop invariant by adding the additional conjunct `&& elems(tmp) == old(elems(l1))[index..]` at the end. Re-run the example - the behaviour should be unchanged. This conjunct expresses that the elements from `tmp` onwards have not been modified so far.
