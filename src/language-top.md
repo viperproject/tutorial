@@ -9,6 +9,7 @@ field next: Ref
 
 * Declared by keyword `field`
 * Every object has all fields (there are no classes in Viper)
+* Several fields may be declared at once, e.g., `field val: Int, next: Ref`
 * See the [section on permissions](./permissions.md) for examples
 
 ## Methods
@@ -28,6 +29,7 @@ method QSort(xs: Seq[Ref]) returns (ys: Seq[Ref])
   * Hence calls _cannot_ be used in specifications
 * Modular verification of methods and method calls
   * The body may include some number of _statements_ (including recursive calls)
+  * The body is optional: a method without a body is _abstract_. Since verification is modular, calls to abstract methods are verified against their specification as usual; abstract methods are useful, e.g., to model the behaviour of library code
   * The body is invisible at call site (changing the body does not affect client code)
   * The precondition is checked before the method call (more precisely, it is [_exhaled_](./permissions-inhale-exhale.md))
   * The postcondition is assumed after the method call (more precisely, it is [_inhaled_](./permissions-inhale-exhale.md))
@@ -90,6 +92,21 @@ domain Pair[A, B] {
   * Domain axioms consist of name (following the `axiom` keyword), and a definition enclosed within braces (which is a boolean expression which may not read the program state in any way)
 * Useful for specifying custom mathematical theories
 * See the [section on domains](./domains.md) for details
+
+## Algebraic data types {#intro-adts}
+
+```viper
+adt List[T] {
+  Nil()
+  Cons(value: T, tail: List[T])
+}
+```
+
+* Declared by keyword `adt` (provided by a plugin that is enabled by default)
+* Have a name, which is introduced as an additional _type_ in the Viper program, and may have type parameters (e.g. `T` above)
+* The body declares the _constructors_ of the datatype (e.g. `Nil` and `Cons` above)
+* Viper automatically generates _destructors_ (e.g. `xs.value`, `xs.tail`) and _discriminators_ (e.g. `xs.isNil`, `xs.isCons`)
+* See the [section on the ADT plugin](./domains-adt.md) for details
 
 ## Macros
 

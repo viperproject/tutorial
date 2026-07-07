@@ -21,3 +21,9 @@ to all (possibly none) fields listed comma-separated within the parentheses. As 
 *all* fields declared in the Viper program. Note that neither method calls nor
 object creation are expressions. Hence, they must not occur as receivers, method
 arguments, etc.; instead of nesting these constructs, one typically assigns their results first to local variables, and then uses these.
+
+Viper additionally supports some more flexible forms of declarations and assignments:
+
+* Local variable declarations may declare several variables at once, e.g., `var a: Ref, b: Ref, c: Int`.
+* Local variable declarations may include an initial assignment, e.g., `var x: Int := 5`; the right-hand side may also be a method call or object creation, e.g., `var y: Ref := new(*)`.
+* Heap locations and newly-declared local variables may occur on the left-hand sides of method calls and object creations, e.g., `x.f := new(...)` and `a, x.f := m(...)`.
