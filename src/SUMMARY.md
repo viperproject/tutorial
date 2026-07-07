@@ -38,6 +38,7 @@
 - [Domains](./domains.md)
     - [Declaring new types](./domains-new-types.md)
     - [Axiomatising custom theories](./domains-axiomatising.md)
+    - [Interpreted domains](./domains-interpretations.md)
     - [Encoding an array datatype](./domains-array.md)
     - [ADT plugin](./domains-adt.md)
 - [Termination](./termination.md)
