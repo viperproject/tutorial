@@ -2,7 +2,9 @@
 
 The domains presented so far introduce *uninterpreted* types and functions, whose meaning is given entirely by user-written axioms. Sometimes, however, the theory one wants to model is already built into the tools underlying Viper's verification backends: for example, SMT solvers natively support fixed-size bitvectors and IEEE floating-point numbers. For such cases, Viper allows attaching *interpretations* to a domain and its functions, mapping the domain type directly onto a sort of the backend's input language, and the domain's functions onto operations of that sort.
 
-An interpreted domain is declared by following the domain name with an `interpretation` clause that specifies, per backend, the name of the backend sort the domain type stands for. Similarly, a domain function may be followed by an `interpretation` clause specifying the backend operation it stands for. The following example declares a type of 32-bit bitvectors, along with several operations on them; the `SMTLIB` interpretations are used by Viper's Symbolic Execution (SE) backend, whose proof obligations are expressed in SMT-LIB, and the `Boogie` interpretations by the Verification Condition Generation (VCG) backend, which encodes Viper programs into the Boogie language.
+An interpreted domain is declared by following the domain name with an `interpretation` clause. This clause is a key-value map that specifies, for each backend, the name of the backend sort the domain type stands for: the value for the `SMTLIB` key is used by Viper's Symbolic Execution (SE) backend, whose proof obligations are expressed in SMT-LIB, and the value for the `Boogie` key by the Verification Condition Generation (VCG) backend, which encodes Viper programs into the Boogie language. Individual keys may be omitted (the clause cannot, however, be abbreviated to a single string), but using an interpreted domain that lacks the key for the backend the program is verified with results in an error.
+
+The `interpretation` clause on an individual domain *function* has a different form: it is always a single string, namely, the SMT-LIB name of the operation the function stands for; this name is used by both backends. The following example declares a type of 32-bit bitvectors, along with several operations on them:
 
 ```viper,editable,playground
 domain BV32 interpretation (SMTLIB: "(_ BitVec 32)", Boogie: "bv32") {
@@ -33,7 +35,7 @@ domain BV32 interpretation (SMTLIB: "(_ BitVec 32)", Boogie: "bv32") {
   function toBV32(i: Int): BV32 interpretation "(_ int2bv 32)"
 }
 
-domain Float32 interpretation (SMTLIB: "(_ FloatingPoint 8 24)", Boogie: "float24e8") {
+domain Float32 interpretation (SMTLIB: "Float32", Boogie: "float24e8") {
   function toFloat(bv: BV32): Float32 interpretation "(_ to_fp 8 24)"
   function fadd(a: Float32, b: Float32): Float32 interpretation "fp.add RNE"
   function fgt(a: Float32, b: Float32): Bool interpretation "fp.gt"
