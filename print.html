@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-f2acacd7.js";
+            window.path_to_searchindex_js = "searchindex-6dd93a97.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-71522d54.js"></script>
+        <script src="toc-17fc5b34.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -373,6 +373,54 @@ define link(x, y) {
 <li>Transitive imports are supported and resolved via depth-first traversal of the import graph</li>
 <li>The depth-first traversal mechanism enforces that each Viper file is imported at most once,
 including in the cases of multiple (indirect) imports of the same file or of recursive imports.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="annotations"><a class="header" href="#annotations">Annotations</a></h1>
+<p>Viper declarations, statements and expressions may be prefixed with <em>annotations</em> of the form</p>
+<pre><code class="language-viper">@key("value1", "value2")
+</code></pre>
+<p>An annotation consists of a key and a possibly-empty list of string values, and attaches extra information to the annotated program element. Any number of annotations may be written on the same element. Annotations do not change the meaning of a program: keys that are unknown to Viper are simply ignored (which allows, e.g., front-ends to attach their own tool-specific metadata to Viper programs), and the annotations known to Viper only influence <em>how</em> a program is verified, not what it means.</p>
+<h2 id="opaque-functions"><a class="header" href="#opaque-functions">Opaque functions</a></h2>
+<p>By default, the body of a <a href="#functions">function</a> is available to the verifier at every application of the function. For functions with complex bodies, this can be a performance problem (the SMT solver has to consider many facts that may be irrelevant to the proof at hand), and it can also be at odds with information hiding. Annotating a function with <code>@opaque()</code> hides its body: at applications of the function, the verifier only uses its specification, as if the function were <a href="#functions">abstract</a>. The function’s body is still verified against its specification as usual.</p>
+<p>To make the definition of an opaque function available at a <em>specific</em> application, that application can be prefixed with the <code>@reveal()</code> annotation. Revealing an application does not recursively reveal further applications: in the example below, revealing <code>fac(3)</code> makes the fact <code>fac(3) == 3 * fac(2)</code> available, but the value of <code>fac(2)</code> remains hidden until that application is revealed as well.</p>
+<pre><code class="language-viper editable playground">@opaque()
+function fac(i: Int): Int
+{
+  i &lt;= 1 ? 1 : i * fac(i - 1)
+}
+
+method opaqueClient()
+{
+  var x: Int := fac(3)
+  // The definition of fac is hidden, so the following assertion
+  // fails, even though it is true.
+  assert x == 6
+}
+
+method revealClient()
+{
+  var x: Int := @reveal() fac(3)
+  assert x == 3 * fac(2)
+  assert x == 3 * @reveal() fac(2)
+  assert x == 3 * 2 * @reveal() fac(1)
+  assert x == 6
+}
+</code></pre>
+<blockquote>
+<p><strong>Exercise</strong></p>
+<ul>
+<li>Remove the <code>@opaque()</code> annotation (and the <code>@reveal()</code> annotations). Both methods now verify.</li>
+<li>Restore the annotations. Then remove only the <code>@reveal()</code> on <code>fac(1)</code> in <code>revealClient</code>. Which assertions fail, and why?</li>
+</ul>
+</blockquote>
+<h2 id="backend-specific-annotations"><a class="header" href="#backend-specific-annotations">Backend-specific annotations</a></h2>
+<p>Various other annotations serve as hints to a specific verification backend; backends that do not understand an annotation simply ignore it. In particular, Viper’s Symbolic Execution (SE) backend supports several annotations that mirror its command-line options, but apply to a single method only, including:</p>
+<ul>
+<li><code>@exhaleMode("n")</code> on a method: overrides the exhale mode used to verify this method (corresponding to the <code>--exhaleMode</code> command-line option).</li>
+<li><code>@moreJoins("n")</code> on a method: joins verification paths after branches instead of exploring them separately (corresponding to <code>--moreJoins</code>), which can speed up verification of methods with many branches.</li>
+<li><code>@stateConsolidationMode("n")</code> on a method: selects the state consolidation mode used for this method (corresponding to <code>--stateConsolidationMode</code>).</li>
+<li><code>@proverConfigArgs("key=value")</code> on a method: passes additional configuration options to the SMT solver while verifying this method (corresponding to <code>--proverConfigArgs</code>).</li>
+<li><code>@weight("n")</code> on a quantifier: sets the weight of the quantifier in the SMT encoding, which influences how eagerly the SMT solver instantiates it (higher weights mean fewer instantiations).</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="permissions"><a class="header" href="#permissions">Permissions</a></h1>
