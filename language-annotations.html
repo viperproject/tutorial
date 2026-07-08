@@ -35,7 +35,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-be5a2f8a.js";
+            window.path_to_searchindex_js = "searchindex-95ff81dd.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-e79f5d1b.js"></script>
@@ -184,6 +184,7 @@
 <p>To make the definition of an opaque function available at a <em>specific</em> application, that application can be prefixed with the <code>@reveal()</code> annotation. Revealing an application does not recursively reveal further applications: in the example below, revealing <code>fac(3)</code> makes the fact <code>fac(3) == 3 * fac(2)</code> available, but the value of <code>fac(2)</code> remains hidden until that application is revealed as well.</p>
 <pre><code class="language-viper editable playground">@opaque()
 function fac(i: Int): Int
+  ensures result &gt;= 1
 {
   i &lt;= 1 ? 1 : i * fac(i - 1)
 }
@@ -191,9 +192,11 @@ function fac(i: Int): Int
 method opaqueClient()
 {
   var x: Int := fac(3)
+  // The postcondition of fac is known, so the following assertion succeeds.
+  assert x &gt;= 1
   // The definition of fac is hidden, so the following assertion
   // fails, even though it is true.
-  assert x == 6
+  assert x == 3 * fac(2)
 }
 
 method revealClient()
