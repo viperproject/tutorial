@@ -17,6 +17,7 @@ To make the definition of an opaque function available at a *specific* applicati
 ```viper,editable,playground
 @opaque()
 function fac(i: Int): Int
+  ensures result >= 1
 {
   i <= 1 ? 1 : i * fac(i - 1)
 }
@@ -24,9 +25,11 @@ function fac(i: Int): Int
 method opaqueClient()
 {
   var x: Int := fac(3)
+  // The postcondition of fac is known, so the following assertion succeeds.
+  assert x >= 1
   // The definition of fac is hidden, so the following assertion
   // fails, even though it is true.
-  assert x == 6
+  assert x == 3 * fac(2)
 }
 
 method revealClient()
