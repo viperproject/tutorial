@@ -45,7 +45,7 @@ method revealClient()
 
 ## Backend-specific annotations
 
-The remaining annotations known to Viper are hints to a specific verification backend; backends that do not understand them ignore them. In particular, Viper's Symbolic Execution (SE) backend supports several annotations that mirror its command-line options, but apply to a single method only, including:
+Various other annotations serve as hints to a specific verification backend; backends that do not understand an annotation simply ignore it. In particular, Viper's Symbolic Execution (SE) backend supports several annotations that mirror its command-line options, but apply to a single method only, including:
 
 * `@exhaleMode("n")` on a method: overrides the exhale mode used to verify this method (corresponding to the `--exhaleMode` command-line option).
 * `@moreJoins("n")` on a method: joins verification paths after branches instead of exploring them separately (corresponding to `--moreJoins`), which can speed up verification of methods with many branches.
