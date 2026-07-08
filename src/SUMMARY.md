@@ -6,6 +6,7 @@
     - [Top-level declarations](./language-top.md)
     - [Built-in types](./language-types.md)
     - [Imports](./language-imports.md)
+    - [Annotations](./language-annotations.md)
 - [Permissions](./permissions.md)
     - [Viper's program state](./permissions-state.md)
     - [Inhaling and exhaling](./permissions-inhale-exhale.md)
