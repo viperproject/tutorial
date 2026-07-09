@@ -87,3 +87,57 @@ follows:
 3. Exhale the loop invariant.
 
 Analogous to functions, Viper does also *not* check loop (or method) termination per default, see the [chapter on termination](./termination.md) for more details. Alternatively, custom termination checks can be encoded through suitable assertions (see the *labelled old expressions* described in the [section on expressions](./expressions-multi.md)).
+
+## Labels and gotos
+
+In addition to the structured control flow constructs shown above, Viper supports labels and unconditional jumps:
+
+```viper
+label l
+goto l
+```
+
+A `label` statement declares a program point with the given name. Labels serve two purposes: they can be the target of `goto` statements, and they can be referred to in [labelled old expressions](./expressions-multi.md) `old[l](e)`. A `goto` statement transfers control to the given label. Since Viper is primarily an intermediate language, gotos are mainly intended for encoding the unstructured control flow of front-end languages (for example, `break` and `continue` statements, or early returns); Viper programs must not use gotos to create *irreducible* control flow (e.g., jumps from outside a loop into the middle of the loop body).
+
+A `goto` that jumps out of a `while` loop exits the loop *without* checking the loop invariant; permissions held before the loop that were not transferred into it via the invariant become available again after the jump. Loops can also be created by jumping *backwards* to a label. To support invariants for such loops, `label` declarations may be directly followed by `invariant` clauses; a label's stated invariant is used only if the label is in fact a loop head. Both features are illustrated in the following example:
+
+```viper,editable,playground
+method firstPositive(xs: Seq[Int]) returns (idx: Int)
+  ensures idx >= 0 ==> idx < |xs| && xs[idx] > 0
+{
+  idx := -1
+  var i: Int := 0
+  while (i < |xs|)
+    invariant 0 <= i && i <= |xs|
+    invariant idx == -1
+  {
+    if (xs[i] > 0) {
+      idx := i
+      // exits the loop; the invariant idx == -1 does not hold here,
+      // but invariants are not checked when jumping out of a loop
+      goto done
+    }
+    i := i + 1
+  }
+  label done
+}
+
+method countdown(n: Int)
+  requires 0 <= n
+{
+  var i: Int := n
+  // this label is the head of a loop created by the backward goto
+  // below, so its invariant is used to verify the loop
+  label head
+    invariant 0 <= i
+  if (i > 0) {
+    i := i - 1
+    goto head
+  }
+  assert i == 0
+}
+```
+
+> **Exercise**
+> * In `countdown`, remove the `invariant` clause on the label `head`. Which assertion fails, and why?
+> * In `firstPositive`, remove the `goto done` statement (so that the loop always runs to completion). The invariant `idx == -1` now fails to verify — why was it not checked before, when the `goto` statement was still present?
