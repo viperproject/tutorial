@@ -52,6 +52,7 @@ Various other annotations serve as hints to a specific verification backend; bac
 
 * `@exhaleMode("n")` on a method: overrides the exhale mode used to verify this method (corresponding to the `--exhaleMode` command-line option).
 * `@moreJoins("n")` on a method: joins verification paths after branches instead of exploring them separately (corresponding to `--moreJoins`), which can speed up verification of methods with many branches.
-* `@stateConsolidationMode("n")` on a method: selects the state consolidation mode used for this method (corresponding to `--stateConsolidationMode`).
+* `@prover("name")` on a method: restricts the prover(s) used to verify this method (corresponding to the `--prover` command-line option).
 * `@proverConfigArgs("key=value")` on a method: passes additional configuration options to the SMT solver while verifying this method (corresponding to `--proverConfigArgs`).
+* `@stateConsolidationMode("n")` on a method: selects the state consolidation mode used for this method (corresponding to `--stateConsolidationMode`).
 * `@weight("n")` on a quantifier: sets the weight of the quantifier in the SMT encoding, which influences how eagerly the SMT solver instantiates it (higher weights mean fewer instantiations).
