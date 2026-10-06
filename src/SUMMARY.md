@@ -51,4 +51,5 @@
     - [Conditional termination](./termination-conditional.md)
     - [Abstract functions](./termination-abstract.md)
     - [Statement termination (experimental)](./termination-statement.md)
+- [Command-Line Options](./command-line.md)
 - [Further Information](./further-info.md)
